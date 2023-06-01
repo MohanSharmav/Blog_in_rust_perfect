@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>update POST Form</title>
+</head>
+<body>
+<p>
+    {{to_be_updated_post}}
+</p>
+<form action="http://localhost:8080/category/{{to_be_updated_post}}" method="post">
+    <input type="text" name="name"  value="{{to_be_updated_post}}"  placeholder="name"><br>
+    <input type="submit" value="Submit">
+</form>
+</body>
+</html>

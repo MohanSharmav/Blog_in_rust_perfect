@@ -1,0 +1,35 @@
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Titljjjjje</title>
+</head>
+<body>
+<a href="/login">Login</a>     <a href="/register">Register</a>
+
+<ul class="listing category">
+    {{#each o}}
+        <a href="/categories/{{this}}"><li>{{this}}</li></a> <a href="/delete_category/{{this}}">Delete</a>
+    {{/each}}
+</ul>
+
+<ul class="people_list">
+    {{#each p}}
+        <li><a href="{{this}}"> {{this}}</li></a>
+    {{/each}}
+</ul>
+
+
+{{q.[1].title}}
+<p>
+
+    {{#each q}}
+    <a href="/posts/{{this.title}}">
+        {{#each this}}  " "
+             {{ this }}
+      {{/each}}<br>
+    {{/each}}</a>
+</p>
+</ul>
+</body>
+</html>
