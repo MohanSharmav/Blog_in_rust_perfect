@@ -15,10 +15,10 @@ pub struct categories {
 #[derive(Deserialize)]
 #[derive(Debug, Clone, PartialEq,Serialize,sqlx::FromRow)]
 pub struct posts{
+    pub(crate) id: i32,
     pub(crate) title: String,
     pub(crate) description: String,
-    // pub(crate) id: i32,
-    // pub(crate) category_id: i32,
+    pub(crate) category_id: i32,
 
 }
 
@@ -111,7 +111,7 @@ pub async fn select_posts()->Result<Vec<posts>,Error>
         .await.expect("Unable to connect to Postgres");
 
 
-    let mut postsing = sqlx::query_as::<_, posts>("select title, description from posts")
+    let mut postsing = sqlx::query_as::<_, posts>("select id, title, description, category_id from posts")
         .fetch_all(&pool)
         .await
         .unwrap();
