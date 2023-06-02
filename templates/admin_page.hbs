@@ -77,8 +77,12 @@ div.content {
     MAIN PAGE
 <p class="listing category">
     {{#each o}}
-        <a href="/categories/{{this.id}}"><strong>{{this.name}}</strong></a>  &nbsp;&nbsp;&nbsp;   <a href="/delete_category/{{this}}">Delete</a></p>
+        <a href="/categories/{{this.id}}"><strong>{{this.name}}</strong></a>  &nbsp;&nbsp;&nbsp;   <a href="/delete_category/{{this.id}}">Delete</a></p>
     {{/each}}
+    </p>
+    <p>
+        <a href="/posts/new">Create new post</a> &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        <a href="/category/new">Create new category</a>
     </p>
         <div class="row">
             <div class="col-12">

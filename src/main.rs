@@ -17,7 +17,7 @@ use model::database::get_all_categories;
 use warp::{get, Rejection, Reply, service};
 use crate::controller::authentication::login::{ check_user, get_data_from_login_page, get_login_page, logout};
 // use crate::controller::authentication::Auth::{index, login, logout};
-use crate::controller::category_controller::{specific_category_controller, delete_category, get_new_category, receive_new_category, get_all_categories_controller};
+use crate::controller::category_controller::{specific_category_controller, delete_category, get_new_category, receive_new_category, get_all_categories_controller, page_to_update_category, receive_updated_category};
 use crate::controller::pagination_controller::{pagination_display, perfect_pagination_logic};
 use crate::controller::posts_controller::{delete_post, get_new_post, page_to_update_post, receive_new_posts, receive_updated_post};
 use crate::controller::single_post_controller::get_single_post;
@@ -73,11 +73,13 @@ async fn main() -> Result<()>{
               .service(web::resource("/posts/new").to(get_new_post))
               .service(web::resource("/new_post").route(web::post().to(receive_new_posts)))
               .service(web::resource("/posts/{title}").to(get_single_post))
-              .service(web::resource("/posts/{title}/edit").route(web::get().to(page_to_update_post)))
 
               // Todo change delete_post to the delete method
               .service(web::resource("/delete_post/{title}").route(web::get().to(delete_post)))
-              .service(web::resource("/posts/{title}").route(web::post().to(receive_updated_post)))
+
+
+              .service(web::resource("/posts/{title}/edit").route(web::get().to(page_to_update_post)))
+              .service(web::resource("/posts/{title}/edit_complete").route(web::post().to(receive_updated_post)))
               // .service(web::resource("/posts/{title}").route(web::delete().to(receive_updated_post)))
 
 
@@ -88,12 +90,14 @@ async fn main() -> Result<()>{
               .service(web::resource("/category").route(web::get().to(get_all_categories_controller)))
               .service(web::resource("/categories/{name}").to(specific_category_controller))
               .service(web::resource("/category/new").to(get_new_category))
-              .service(web::resource("/category").route(web::post().to(receive_new_category)))
+              .service(web::resource("/category_received").route(web::post().to(receive_new_category)))
               // Todo change delete_post to the delete method and url to --> /category/{name}
               .service(web::resource("/delete_category/{name}").route(web::get().to(delete_category)))
+
               .service(web::resource("/posts/{title}").route(web::post().to(receive_updated_post)))
-              .service(web::resource("/category/{title}/edit").route(web::get().to(page_to_update_post)))
-              .service(web::resource("/category/{title}"))
+
+              .service(web::resource("/category/{title}/edit").route(web::get().to(page_to_update_category)))
+              .service(web::resource("/category/{title}").route(web::post().to(receive_updated_category)))
 
               // Authentication
               //

@@ -53,7 +53,7 @@ println!(" inn database--------   - --{}", category_id);
     Ok(category_posts)
 }
 
-pub async fn create_new_category_database(name: &String) -> Result<(), Error>
+pub async fn create_new_category_database(name: &String, id: &i32) -> Result<(), Error>
 {
     dotenv::dotenv().expect("Unable to load environment variables from .env file");
 
@@ -64,7 +64,8 @@ pub async fn create_new_category_database(name: &String) -> Result<(), Error>
         .connect(&db_url)
         .await.expect("Unable to connect to Postgres");
 
-    sqlx::query("insert into categories(name) values ($1) ")
+    sqlx::query("insert into categories(id,name) values ($1,$2) ")
+        .bind(id)
         .bind(name)
         .execute(&pool)
         .await
@@ -97,13 +98,14 @@ pub async fn delete_category_database(to_delete_category: &String) -> Result<(),
 // delete from categories where name=$1"#
 // )
    // sqlx::query::join(delete_from_posts_table,delete_from_category_table)
-    sqlx::query("delete from posts where name=$1")
+ let   to_delete_category:i32= to_delete_category.parse::<i32>().unwrap();
+    sqlx::query("delete from posts where category_id=$1")
         .bind(to_delete_category)
         .execute(&pool)
         .await
         .expect("Unable to delete post");
 
-    sqlx::query("delete from categories where name=$1")
+    sqlx::query("delete from categories where id=$1")
         .bind(to_delete_category)
         .execute(&pool)
         .await
@@ -116,7 +118,7 @@ pub async fn delete_category_database(to_delete_category: &String) -> Result<(),
 }
 
 
-pub async fn update_category_database(name: &String, current_category_name: &String) ->Result<(),Error>{
+pub async fn update_category_database(name: &String, category_id: &String) ->Result<(),Error>{
     dotenv::dotenv().expect("Unable to load environment variables from .env file");
 
     let db_url = std::env::var("DATABASE_URL").expect("Unable to read DATABASE_URL env var");
@@ -128,9 +130,10 @@ pub async fn update_category_database(name: &String, current_category_name: &Str
     // UPDATE Customers
     // SET ContactName = 'Alfred Schmidt', City= 'Frankfurt'
     // WHERE CustomerID = 1;
-    sqlx::query("update posts and set name=$1 where title=$2")
+    let category_id=category_id.parse::<i32>().unwrap();
+    sqlx::query("update categories set name=$1 where id=$2")
         .bind(name)
-        .bind(current_category_name)
+        .bind(category_id)
         .execute(&pool)
         .await
         .expect("Unable toasdasd");

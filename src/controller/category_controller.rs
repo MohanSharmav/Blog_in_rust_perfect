@@ -87,9 +87,10 @@ pub async fn receive_new_category(form: web::Form<categories>) -> HttpResponse
 
 println!("🔥🔥🔥🔥🔥🔥🔥🔥");
     let name=&form.name;
+    let id=&form.id;
     println!("------------------->{}", name);
 
-    create_new_category_database(name).await.expect("TODO: panic message");
+    create_new_category_database(name,id).await.expect("TODO: panic message");
     let success_message="the categories created successfully";
     let html = handlebars.render("message_display", &json!({"message":success_message})).unwrap() ;
 
@@ -99,12 +100,11 @@ println!("🔥🔥🔥🔥🔥🔥🔥🔥");
 
 }
 
-pub async fn delete_category(id: web::Path<categories>) -> HttpResponse
+pub async fn delete_category(id: web::Path<String>) -> HttpResponse
 {
 
     println!("ad🥳s🥳🥳🥳🥳🥳🥳🥳🥳🥳");
-    let to_delete_category=&id.name;
-
+    let to_delete_category=&id.into_inner();
     println!("------->{}", to_delete_category);
 
     delete_category_database(to_delete_category).await.expect(" panic message");
@@ -123,7 +123,7 @@ pub async fn delete_category(id: web::Path<categories>) -> HttpResponse
 
 
 
-pub async fn  page_to_update_post(to_be_updated_category: web::Path<String> )->HttpResponse{
+pub async fn  page_to_update_category(to_be_updated_category: web::Path<String> )->HttpResponse{
 
     let mut handlebars= handlebars::Handlebars::new();
     let index_template = fs::read_to_string("templates/update_category.hbs").unwrap();
@@ -141,7 +141,7 @@ pub async fn  page_to_update_post(to_be_updated_category: web::Path<String> )->H
 
 }
 
-pub async fn receive_updated_post(form: web::Form<categories> , current_category_name: web::Path<String>) ->HttpResponse
+pub async fn receive_updated_category(form: web::Form<categories> , current_category_name: web::Path<String>) ->HttpResponse
 {
     println!("-------------------------------------------------------------🇧🇾---");
 
@@ -156,7 +156,7 @@ pub async fn receive_updated_post(form: web::Form<categories> , current_category
     let current_post_name=&current_category_name.into_inner();
 
     let name=&form.name;
-
+let id=&form.id;
     println!("🔥{:?}",current_post_name);
     println!("😇 new name is {:?}",name);
     // let to_be_updated_post= update_post_helper;

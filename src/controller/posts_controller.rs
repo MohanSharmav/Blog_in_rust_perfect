@@ -30,12 +30,13 @@ pub async fn receive_new_posts(form: web::Form<posts>) -> HttpResponse
     handlebars
         .register_template_string("message_display", &index_template).expect("TODO: panic message");
 
-
+let id=&form.id;
     let title=&form.title;
     let description=&form.description;
     // let name=&form.name;
+    let category_id=&form.category_id;
 
-    create_new_post_database(title, description).await;
+    create_new_post_database(id,title, description,category_id).await;
     let success_message="the post created successfully";
     let html = handlebars.render("message_display", &json!({"message":success_message})).unwrap() ;
 
@@ -106,16 +107,16 @@ println!("-------------------------------------------------------------🇧🇾-
     let current_post_name=&current_post_name.into_inner();
    // println!("---------------------{:?}",current_post_name);
  // let current_post_name="as";
+    let id= &form.id;
     let title=&form.title;
-    println!("----{:?}",&title);
+let category_id= &form.category_id;
 
-    println!("🔥{:?}",current_post_name);
     let description=&form.description;
     // let name=&form.name;
     // let to_be_updated_post= update_post_helper;
 // println!("------------------------------>{}", title);
 
-    update_post_database(&title, &description).await.expect("TODO: panic message");
+    update_post_database(&title, &description,&id,&category_id).await.expect("TODO: panic message");
     let success_message="the post created successfully";
     let html = handlebars.render("message_display", &json!({"message":success_message})).unwrap() ;
 
