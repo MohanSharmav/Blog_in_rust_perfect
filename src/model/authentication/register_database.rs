@@ -1,10 +1,10 @@
 use sqlx::Error;
 use sqlx::postgres::PgPoolOptions;
 
-pub async fn register_new_user_database(user: &String, password: &String) -> Result<(),Error>
+pub async fn register_new_user_database(user: &String, password: String) -> Result<(),Error>
 {
     dotenv::dotenv().expect("Unable to load environment variables from .env file");
-
+println!("🪼{:?}--------------",password);
     let db_url = std::env::var("DATABASE_URL").expect("Unable to read DATABASE_URL env var");
 
     let mut pool = PgPoolOptions::new()
@@ -19,6 +19,6 @@ pub async fn register_new_user_database(user: &String, password: &String) -> Res
 
     println!("successfully logged in");
     let user=user.to_string();
-    let password = password.to_string();
+ //   let password =password.clone();
     Ok(())
 }

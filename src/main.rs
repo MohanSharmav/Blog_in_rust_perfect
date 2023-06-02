@@ -15,7 +15,7 @@ use warp::reply::with_status;
 use controller::home_page::get_all_posts;
 use model::database::get_all_categories;
 use warp::{get, Rejection, Reply, service};
-use crate::controller::authentication::login::{check_user, get_data_from_login_page, get_login_page, logout};
+use crate::controller::authentication::login::{check_Encryption, check_user, get_data_from_login_page, get_login_page, logout};
 // use crate::controller::authentication::Auth::{index, login, logout};
 use crate::controller::category_controller::{specific_category_controller, delete_category, get_new_category, receive_new_category, get_all_categories_controller};
 use crate::controller::pagination_controller::{pagination_display, perfect_pagination_logic};
@@ -47,6 +47,7 @@ pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
 async fn main() -> Result<()>{
      let secret_key = Key::generate();
 
+check_Encryption();
 
 //.wrap(IdentityMiddleware::default())
      #[cfg(feature = "cors_for_local_development")]

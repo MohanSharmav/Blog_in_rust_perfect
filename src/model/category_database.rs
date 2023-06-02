@@ -16,7 +16,7 @@ use sqlx::Row;
             .connect(&db_url)
             .await.expect("Unable to connect to Postgres");
 
-        let  all_categories = sqlx::query_as::<_, categories>("select name from categories")
+        let  all_categories = sqlx::query_as::<_, categories>("select name,id from categories")
 
       //  let  rows = sqlx::query_as::<_,categories>("SELECT * FROM categories")
             .fetch_all(&pool)
@@ -44,12 +44,11 @@ println!(" inn database--------   - --{}", category_id);
         .await.expect("Unable to connect to Postgres");
 
 
-    let mut category_posts = sqlx::query_as::<_, posts>("select title, description from posts where category_id=$1")
-         .bind(category_id )
+    let mut category_posts = sqlx::query_as::<_, posts>("select id,title, description,category_id from posts where category_id=$1")
+         .bind(category_id)
         .fetch_all(&pool)
         .await.expect("Unable to get");
 
-    println!(" 😋  😋  😋 {:?}",category_posts);
 
     Ok(category_posts)
 }

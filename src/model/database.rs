@@ -9,7 +9,9 @@ use sqlx::FromRow;
 #[derive(Deserialize)]
 #[derive(Debug, Clone, PartialEq,Serialize,sqlx::FromRow)]
 pub struct categories {
+     pub(crate) id:i32,
     pub(crate) name: String,
+
 }
 
 #[derive(Deserialize)]

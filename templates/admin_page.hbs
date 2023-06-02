@@ -77,7 +77,8 @@ div.content {
     MAIN PAGE
 <p class="listing category">
     {{#each o}}
-        <a href="/categories/{{this}}"><strong>{{this}}</strong></a>   &nbsp;&nbsp;&nbsp;   <a href="/delete_category/{{this}}">Delete</a></p>
+        xxx{{o}}xxx
+        <a href="/categories/1"><strong>{{this}}</strong></a>  &nbsp;&nbsp;&nbsp;   <a href="/delete_category/{{this}}">Delete</a></p>
     {{/each}}
     </p>
         <div class="row">
@@ -94,12 +95,13 @@ div.content {
 
                     {{#each  tiger}}
 
-                       <td> <a href="/posts/{{this.title}}"> {{this.title}}</td>
+                       <td> <a href="/posts/{{this.id}}"> {{this.title}}</td>
 
-                    <td> <a href="/posts/{{this.title}}"> {{this.description}}</td>
-                       <td> <a href="/delete_post/{{this.title}}"> Delete  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     </a>
-                       <a href="/posts/{{this.title}}/edit"> update </a>
+                    <td> <a href="/posts/{{this.id}}"> {{this.description}}</td>
+                       <td> <a href="/delete_post/{{this.id}}"> Delete  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     </a>
+                       <a href="/posts/{{this.id}}/edit"> update </a>
                        </td>
+                           <td {{this.id}}>{{this.id}}</td>
                     </a>
                     </tr>
                    {{/each}}

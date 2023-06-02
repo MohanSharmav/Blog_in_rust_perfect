@@ -1,5 +1,6 @@
 use std::fmt::Error;
 use std::fs;
+use std::ptr::hash;
 use actix_web::{HttpResponse, web};
 use serde::Deserialize;
 use serde_json::json;
@@ -13,7 +14,7 @@ use actix_web::{
     middleware, App, HttpMessage as _, HttpRequest, HttpServer, Responder,
 };
 use actix_web::web::Redirect;
-use crate::model::authentication::login_database::login_database;
+// use crate::model::authentication::login_database::login_database;
 
 
 //extra
@@ -24,12 +25,11 @@ use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 use argonautica::{Hasher, Verifier};
 use hmac::{Hmac, Mac};
 use jwt::{SignWithKey, VerifyWithKey};
+use magic_crypt::{MagicCryptTrait, new_magic_crypt};
+use secrecy::{ExposeSecret, Secret, SecretVec};
 use sha2::Sha256;
+use crate::model::authentication::login_database::login_database;
 
-
-
-
-// use actix_session::storage::RedisSessionStore;
 
 
 #[derive(Debug, Clone, PartialEq,Deserialize)]
@@ -53,112 +53,30 @@ pub async fn get_login_page() -> HttpResponse {
         .body(html)
 }
 
-pub async fn get_data_from_login_page(form: web::Form<user>, req: HttpRequest,user: Option<Identity>) -> Redirect
-{
-println!("🦋");
-    check_user(user).await;
 
- let user = &form.username;
+ pub async fn get_data_from_login_page(form: web::Form<user>, req: HttpRequest,user: Option<Identity>) -> Redirect
+ {
+     let username = &form.username;
     let password=&form.password.to_string();
-// let passwording=
-    println!("{}", user);
 
-    let mut handlebars= handlebars::Handlebars::new();
-    let index_template = fs::read_to_string("templates/message_display.hbs").unwrap();
-    handlebars
-        .register_template_string("message_display", &index_template).expect("TODO: panic message");
+     let mcrypt = new_magic_crypt!("magickey", 256); //Creates an instance of the magic crypt library/crate.
+     let encrypted_password = mcrypt.encrypt_str_to_base64( password);
 
 
+     let mut result=login_database(username,encrypted_password).await;
+     println!("result is--------------------------------{:?}",result);
+let result = result.0 as i64;
+let x=1 as i64;
 
-    //
-    // let stored_password = match password {
-    //     None => {
-    //         let error_message = String::from("Invalid username or password");
-    //         return HttpResponse::BadRequest().body(error_message);
-    //     },
-    //     Some(password) => password,
-    // };
-    //
-    // let stored_hash = PasswordHash::new("asd-asd").unwrap();
-    // let pw_valid = Argon2::default()
-    //     .verify_password(password.as_bytes(), &stored_hash)
-    //     .is_ok();
-    //
-    // println!("{:?}",pw_valid);
-    //
-// Todo get the password from register page and send it to database use this
-    let hash_secret = "123";
-    let mut hasher = Hasher::default();
-    let hash = hasher
-        .with_password(password)
-        .with_secret_key(hash_secret)
-        .hash()
-        .unwrap();
-
-println!("🐰🐰🐰🐰🐰{:?}",hash);
-
-
-        // let stored_hash = PasswordHash::new(password).unwrap();
-    // let pw_valid = Argon2::default()
-    //     .verify_password(password.as_bytes(), &stored_hash)
-    //     .is_ok();
-// Todo use this code to get the password from login page and check it with database ... use username to get the password from database
-let mut verifier=Verifier::default();
-    let is_valid=verifier
-        .with_hash(hash)
-        .with_password(password)
-        .with_secret_key(hash_secret)
-        .verify()
-        .unwrap() ;
-
-
-if is_valid{
-    println!("🕸️🕸️🕸️🕸️🕸️🕸️🕸️🕸️🕸️pass")
-}else {
-    println!("fail")
-}
-
-
-
-let x=login_database(user, password).await;
-
-
-
-
-
-if(x==1) {
-
-    Identity::login(&req.extensions(), user.to_string()).unwrap();
-
-   // web::Redirect::to("/users?page=1")
-
+     if(result==x) {
+    Identity::login(&req.extensions(), username.to_string()).unwrap();
     web::Redirect::to("/admin?page=1&limit=2")
 
-    // let success_message="user successfully authenticated";
-    // let html = handlebars.render("message_display", &json!({"message":success_message})).unwrap() ;
-    //
-    //
-    // HttpResponse::Ok()
-    //     .content_type("text/html; charset=utf-8")
-    //     .body(html)
 }else{
 
     web::Redirect::to("/login")
-
-    // let success_message="user successfully authenticated";
-    // let html = handlebars.render("message_display", &json!({"message":success_message})).unwrap() ;
-    //
-    //
-    // HttpResponse::Ok()
-    //     .content_type("text/html; charset=utf-8")
-    //     .body(html)
-     // HttpResponse::BadRequest().body("Invalid email or password")
-
-}
-
-}
-
-
+ }
+ }
 
 pub async fn logout(id: Identity) -> impl Responder {
     id.logout();
@@ -176,4 +94,15 @@ pub async fn check_user(user: Option<Identity>) -> impl Responder {
         web::Redirect::to("/")
 
     }
+}
+
+
+// test
+pub fn check_Encryption()  {
+    let str="england cricket";
+    let mcrypt = new_magic_crypt!("magickey", 256); //Creates an instance of the magic crypt library/crate.
+    let encrypted_string = mcrypt.encrypt_str_to_base64( str); //Encrypts the string and saves it to the 'encrypted_string' variable.
+    println!("🐯🐯🐯🐯🐯Encrypted String: {}", encrypted_string); //Pr
+    let decrypted_string = mcrypt.decrypt_base64_to_string(&encrypted_string).unwrap(); //Decrypts the string so we can read it.
+    println!("Decrypted String: {}", decrypted_string); //P
 }

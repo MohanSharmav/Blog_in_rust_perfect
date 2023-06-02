@@ -5,7 +5,8 @@ use crate::model::Single_posts_database::query_single_post;
 
 pub async fn get_single_post(path: web::Path<String>) -> HttpResponse
 {
-    let mut titles=path.into_inner();
+   // let mut titles=path.into_inner();
+    let titles = path.parse::<i32>().unwrap();
 
 // query_single_post(titles.clone()).await.expect("TODO: panic message");
 println!("asdsadadsdadadadadadadadadadadadadadad");
