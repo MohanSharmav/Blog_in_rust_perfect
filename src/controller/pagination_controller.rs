@@ -5,6 +5,7 @@ use sqlx::postgres::PgPoolOptions;
 use sqlx::{Error, Row};
 use warp::path;
 use crate::controller::pagination_logic::select_specific_pages_post;
+use crate::model::category_database::get_all_categories_database;
 use crate::model::database::{posts, select_posts, get_all_categories};
 use crate::model::pagination_database::{ pagination_logic, PaginationParams};
 use crate::model::Single_posts_database::query_single_post;
@@ -105,7 +106,7 @@ pub async fn pagination_display( params: web::Query<PaginationParams> ) ->HttpRe
     let current_page=&params.page;
      let exact_posts_only=select_specific_pages_post(current_page).await.expect("Aasd");
 
-    let all_category= get_all_categories().await.expect("adssad");
+    let all_category= get_all_categories_database().await.expect("adssad");
 
 //    println!("s😊😊😊😊😊😊{:?}", pagination_count);
 println!("🐍{:?}",exact_posts_only);

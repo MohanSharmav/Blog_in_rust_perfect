@@ -95,14 +95,14 @@ pub async fn check_user(user: Option<Identity>) -> impl Responder {
 
     }
 }
-
-
-// test
-pub fn check_Encryption()  {
-    let str="england cricket";
-    let mcrypt = new_magic_crypt!("magickey", 256); //Creates an instance of the magic crypt library/crate.
-    let encrypted_string = mcrypt.encrypt_str_to_base64( str); //Encrypts the string and saves it to the 'encrypted_string' variable.
-    println!("🐯🐯🐯🐯🐯Encrypted String: {}", encrypted_string); //Pr
-    let decrypted_string = mcrypt.decrypt_base64_to_string(&encrypted_string).unwrap(); //Decrypts the string so we can read it.
-    println!("Decrypted String: {}", decrypted_string); //P
-}
+//
+//
+// // test
+// pub fn check_Encryption()  {
+//     let str="england cricket";
+//     let mcrypt = new_magic_crypt!("magickey", 256); //Creates an instance of the magic crypt library/crate.
+//     let encrypted_string = mcrypt.encrypt_str_to_base64( str); //Encrypts the string and saves it to the 'encrypted_string' variable.
+//     println!("🐯🐯🐯🐯🐯Encrypted String: {}", encrypted_string); //Pr
+//     let decrypted_string = mcrypt.decrypt_base64_to_string(&encrypted_string).unwrap(); //Decrypts the string so we can read it.
+//     println!("Decrypted String: {}", decrypted_string); //P
+// }
