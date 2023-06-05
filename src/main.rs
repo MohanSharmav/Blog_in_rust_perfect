@@ -34,6 +34,7 @@ use actix_session::config::PersistentSession;
 use actix_session::storage::CookieSessionStore;
 use actix_session::SessionMiddleware;
 use crate::controller::authentication::register::{get_data_from_register_page, get_register_page};
+use crate::controller::common_controller::common_page_controller;
 
 
 // async fn index(req: HttpRequest)->Responder<Body=()> {
@@ -67,6 +68,8 @@ async fn main() -> Result<()>{
               .service(web::resource("/post_specific/{title}").to(get_single_post))
               .service(web::resource("/users").to(pagination_display))
 
+
+              .service(web::resource("/c").to(common_page_controller))
 
 //posts
               .service(web::resource("/posts").to(pagination_display))
@@ -114,6 +117,7 @@ async fn main() -> Result<()>{
 
               .service(web::resource("/check").to(check_user))
           //
+           //   .service(web::resource("/new_check").to())
 //      let secret_key = Key::generate();
 //
 //   //   let secret_key = Secret::new("my-secret");

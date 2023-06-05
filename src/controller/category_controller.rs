@@ -166,6 +166,7 @@ let id=&form.id;
     let success_message="the post created successfully";
     let html = handlebars.render("message_display", &json!({"message":success_message})).unwrap() ;
 
+
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(html)
