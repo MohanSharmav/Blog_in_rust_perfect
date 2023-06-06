@@ -139,3 +139,31 @@ pub async fn update_category_database(name: &String, category_id: &String) ->Res
         .expect("Unable toasdasd");
     Ok(())
 }
+
+
+
+pub async fn category_pagination_controller_database_function(category_id: &String) ->Result<Vec<posts>,Error>
+{
+
+    println!(" inn database--------   - --{}", category_id);
+    let category_id = category_id.parse::<i32>().unwrap();
+
+    // let category_id = category_id as i32;
+    dotenv::dotenv().expect("Unable to load environment variables from .env file");
+
+    let db_url = std::env::var("DATABASE_URL").expect("Unable to read DATABASE_URL env var");
+
+    let mut pool = PgPoolOptions::new()
+        .max_connections(100)
+        .connect(&db_url)
+        .await.expect("Unable to connect to Postgres");
+
+
+    let mut category_posts = sqlx::query_as::<_, posts>("select id,title, description,category_id from posts where category_id=$1")
+        .bind(category_id)
+        .fetch_all(&pool)
+        .await.expect("Unable to get");
+
+
+    Ok(category_posts)
+}

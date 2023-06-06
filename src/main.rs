@@ -17,7 +17,7 @@ use model::database::get_all_categories;
 use warp::{get, Rejection, Reply, service};
 use crate::controller::authentication::login::{ check_user, get_data_from_login_page, get_login_page, logout};
 // use crate::controller::authentication::Auth::{index, login, logout};
-use crate::controller::category_controller::{specific_category_controller, delete_category, get_new_category, receive_new_category, get_all_categories_controller, page_to_update_category, receive_updated_category};
+use crate::controller::category_controller::{specific_category_controller, delete_category, get_new_category, receive_new_category, get_all_categories_controller, page_to_update_category, receive_updated_category, get_category_with_pagination};
 use crate::controller::pagination_controller::{pagination_display, perfect_pagination_logic};
 use crate::controller::posts_controller::{delete_post, get_new_post, page_to_update_post, receive_new_posts, receive_updated_post};
 use crate::controller::single_post_controller::get_single_post;
@@ -64,12 +64,12 @@ async fn main() -> Result<()>{
               .session_lifecycle(PersistentSession::default().session_ttl(COOKIE_DURATION))
               .build()
           )
-              .service(web::resource("/").to(get_all_posts))
+             // .service(web::resource("/").to(get_all_posts))
               .service(web::resource("/post_specific/{title}").to(get_single_post))
               .service(web::resource("/users").to(pagination_display))
 
 
-              .service(web::resource("/c").to(common_page_controller))
+              .service(web::resource("/").to(common_page_controller))
 
 //posts
               .service(web::resource("/posts").to(pagination_display))
@@ -91,7 +91,8 @@ async fn main() -> Result<()>{
 //  .service(web::resource("/ca").route(web::get().to(get_all_categories_controller())))
               //   .service(web::resource("/c").route(web::get().to(get_all_categories_controller)))
               .service(web::resource("/category").route(web::get().to(get_all_categories_controller)))
-              .service(web::resource("/categories/{name}").to(specific_category_controller))
+           //   .service(web::resource("/categories/{name}").to(specific_category_controller))
+              .service(web::resource("/categories/{name}").to(get_category_with_pagination))
               .service(web::resource("/category/new").to(get_new_category))
               .service(web::resource("/category_received").route(web::post().to(receive_new_category)))
               // Todo change delete_post to the delete method and url to --> /category/{name}

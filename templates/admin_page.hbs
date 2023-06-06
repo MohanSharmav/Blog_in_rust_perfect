@@ -77,7 +77,7 @@ div.content {
     MAIN PAGE
 <p class="listing category">
     {{#each o}}
-        <a href="/categories/{{this.id}}"><strong>{{this.name}}</strong></a>  &nbsp;&nbsp;&nbsp;   <a href="/delete_category/{{this.id}}">Delete</a>    <a href="/category/{{this.id}}/edit">Update </a></p>
+        <a href="/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>  &nbsp;&nbsp;&nbsp;   <a href="/delete_category/{{this.id}}">Delete</a>    <a href="/category/{{this.id}}/edit">Update </a></p>
     {{/each}}
     </p>
     <p>

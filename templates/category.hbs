@@ -6,14 +6,17 @@
 </head>
 <body>
 <p>
-
     {{#each p}}
     <a href="/posts/{{this.title}}">
-        {{#each this}}  " "
-            {{ this }}
+        {{#each this}}
+            {{ this }}&nbsp;
         {{/each}}<br>
     {{/each}}</a>
 </p>
+
+{{#each pages_count }}
+    <p class="page-item"><a class="page-link" href="?page={{this}}">{{this}}</a></p>
+{{/each}}
 
 </p>
 </body>

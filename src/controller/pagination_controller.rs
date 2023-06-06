@@ -153,3 +153,34 @@ let mut counting_final:i64= 0;
     }
 counting_final
 }
+
+
+pub async fn category_pagination_logic(category_input: &String) -> i64 {
+    dotenv::dotenv().expect("Unable to load environment variables from .env file");
+
+    let db_url = std::env::var("DATABASE_URL").expect("Unable to read DATABASE_URL env var");
+
+    let mut pool = PgPoolOptions::new()
+        .max_connections(100)
+        .connect(&db_url)
+        .await.expect("Unable to connect to Postgres");
+
+  let  category_input= category_input.to_string();
+//let category_id= category_input.parse() as i32;;
+let category_id= category_input.parse::<i32>().unwrap();
+
+    let rows = sqlx::query("SELECT COUNT(*) FROM posts where category_id=$1")
+        .bind(&category_id)
+        .fetch_all(&pool)
+        .await
+        .unwrap();
+
+
+    let mut counting_final:i64= 0;
+    for row in rows{
+        let title:i64 = row.try_get("count").unwrap();;
+        counting_final=counting_final+title;
+        println!("{:?}", title);
+    }
+    counting_final
+}

@@ -2,8 +2,11 @@ use std::fmt::Error;
 use std::fs;
 use actix_web::{HttpResponse, web};
 use serde_json::json;
-use crate::model::category_database::{category_controller_database_function, create_new_category_database, delete_category_database, get_all_categories_database, update_category_database};
+use crate::controller::pagination_controller::{category_pagination_logic, perfect_pagination_logic};
+use crate::controller::pagination_logic::select_specific_category_post;
+use crate::model::category_database::{category_controller_database_function, category_pagination_controller_database_function, create_new_category_database, delete_category_database, get_all_categories_database, update_category_database};
 use crate::model::database::categories;
+use crate::model::pagination_database::PaginationParams;
 
 pub async fn get_all_categories_controller()->HttpResponse {
     // println!("Checking categories");
@@ -171,4 +174,50 @@ let id=&form.id;
         .content_type("text/html; charset=utf-8")
         .body(html)
 
+}
+
+
+pub async fn get_category_with_pagination(path: web::Path<String>,params: web::Query<PaginationParams>) -> HttpResponse
+{
+println!("🐒{:?}",&params.page);
+    let mut category_input: String = path.into_inner();
+    let mut total_posts_length:f64= category_pagination_logic(&category_input).await as f64;
+
+
+    let  posts_per_page=total_posts_length/3.0;
+
+
+    let posts_per_page=posts_per_page.round();
+    let posts_per_page=posts_per_page as i64;
+    let mut pages_count=Vec::new();
+    for i in 0..posts_per_page{
+        pages_count.push(i+1 as i64);
+    }
+
+    println!("pagesss count{:?}------------", pages_count);
+
+
+
+
+    let mut handlebars= handlebars::Handlebars::new();
+    let index_template = fs::read_to_string("templates/category.hbs").unwrap();
+    handlebars
+        .register_template_string("category", &index_template).expect("TODO: panic message");
+
+
+    let current_page=&params.page;
+
+    let exact=select_specific_category_post(current_page,&category_input).await.expect("Aasd");
+
+
+
+
+    let category_postinng=category_pagination_controller_database_function(&category_input).await.expect("TODO: panic message");
+
+    println!(" 😋  😋  😋 {:?}",category_postinng);
+    let html = handlebars.render("category", &json!({"p":&category_postinng,"pages_count":&pages_count})).unwrap() ;
+
+    HttpResponse::Ok()
+        .content_type("text/html; charset=utf-8")
+        .body(html)
 }
