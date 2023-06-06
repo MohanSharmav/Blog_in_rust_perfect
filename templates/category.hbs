@@ -1,21 +1,134 @@
 
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Titljjjjje</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+
+
+body {
+  margin: 0;
+  font-family: "Lato", sans-serif;
+}
+
+.sidebar {
+  margin: 0;
+  padding: 0;
+  width: 200px;
+  background-color: #f1f1f1;
+  position: fixed;
+  height: 100%;
+  overflow: auto;
+}
+
+.sidebar a {
+  display: block;
+  color: black;
+  padding: 16px;
+  text-decoration: none;
+}
+
+.sidebar a.active {
+  background-color: #04AA6D;
+  color: white;
+}
+
+.sidebar a:hover:not(.active) {
+  background-color: #555;
+  color: white;
+}
+
+div.content {
+  margin-left: 200px;
+  padding: 1px 16px;
+  height: 1000px;
+}
+
+@media screen and (max-width: 700px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+  .sidebar a {float: left;}
+  div.content {margin-left: 0;}
+}
+
+@media screen and (max-width: 400px) {
+  .sidebar a {
+    text-align: center;
+    float: none;
+  }
+}
+</style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </head>
 <body>
+
+<div class="sidebar">
+    <a class="active" href="/?page=1">Home</a>
+
+</div>
+
+<div class="content">
+    <a href="/login">Login</a>     <a href="/register">Register</a>
+<p class="listing category">
+    {{#each o}}
+        <a href="/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a> </p>
+    {{/each}}
+    </p>
+
+    <div class="row">
+        <div class="col-12">
+            <table class="table table">
+                <thead>
+                <tr>
+                    <th scope="col">Title</th>
+                    <th scope="col" >Description</th>
+
+                </tr>
+                </thead>
+                <tbody>
+                {{#each  tiger}}
+
+                    <td> <a href="/posts/{{this.id}}"> {{this.title}}</td>
+
+                    <td> <a href="/posts/{{this.id}}"> {{this.description}}</td>
+
+                    </a>
+                    </tr>
+                {{/each}}
+
+                </tbody>
+            </table>
+
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    {{#each pages_count }}
+                        <li class="page-item"><a class="page-link" href="?page={{this}}">{{this}}</a></li>
+                    {{/each}}
+                </ul>
+            </nav>
+
+        </div>
+    </div>
+</div>
+
+</p>
 <p>
     {{#each p}}
     <a href="/posts/{{this.title}}">
         {{#each this}}
-            {{ this }}&nbsp;
+            {{ this}}    &nbsp;
         {{/each}}<br>
     {{/each}}</a>
 </p>
 
 {{#each pages_count }}
-    <p class="page-item"><a class="page-link" href="?page={{this}}">{{this}}</a></p>
+        <p class="page-item"><a class="page-link" href="?page={{this}}">{{this}}</a></p>
 {{/each}}
 
 </p>

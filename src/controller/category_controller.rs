@@ -215,7 +215,7 @@ println!("🐒{:?}",&params.page);
     let category_postinng=category_pagination_controller_database_function(&category_input).await.expect("TODO: panic message");
 
     println!(" 😋  😋  😋 {:?}",category_postinng);
-    let html = handlebars.render("category", &json!({"p":&category_postinng,"pages_count":&pages_count})).unwrap() ;
+    let html = handlebars.render("category", &json!({"tiger":&category_postinng,"pages_count":&pages_count})).unwrap() ;
 
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
