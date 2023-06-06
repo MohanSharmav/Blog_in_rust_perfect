@@ -74,7 +74,10 @@ div.content {
 
 <div class="content">
     <a href="/login">Login</a>     <a href="/register">Register</a>
+    <p>&nbsp;</p><br>
+
 <p class="listing category">
+    Categories are:<br>
     {{#each o}}
         <a href="/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a> </p>
     {{/each}}

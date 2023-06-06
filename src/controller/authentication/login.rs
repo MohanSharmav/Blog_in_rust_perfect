@@ -83,7 +83,7 @@ pub async fn logout(id: Identity) -> impl Responder {
 
 
     //web::Redirect::to("/").using_status_code(StatusCode::FOUND)
-    web::Redirect::to("/")
+    web::Redirect::to("/?page=1")
 }
 
 
