@@ -64,6 +64,14 @@ div.content {
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript">
+function get_value()
+ {
+alert(this.value());
+}
+
+</script>
 </head>
 <body>
 
@@ -76,8 +84,17 @@ div.content {
     <a href="/login">Login</a>     <a href="/register">Register</a>
     <p>&nbsp;</p><br>
 
+    <select onchange="get_value(this)" name="category" id="category">
+        {{#each o}}
+        <option value="{{this}}">{{this.name}}</option>
+
+            {{/each}}
+    </select>
+
 <p class="listing category">
     Categories are:<br>
+
+
     {{#each o}}
         <a href="/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a> </p>
     {{/each}}
