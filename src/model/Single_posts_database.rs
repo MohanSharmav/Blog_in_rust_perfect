@@ -37,3 +37,22 @@ println!("{:?}",single_post);
 //println!("siiii  i i i ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ {:?}",sii.get(1));
     Ok(single_post)
 }
+pub async fn query_single_post_in_struct(titles: i32) ->Result<Vec<posts>,Error>
+{
+
+    dotenv::dotenv().expect("Unable to load environment variables from .env file");
+
+    let db_url = std::env::var("DATABASE_URL").expect("Unable to read DATABASE_URL env var");
+
+    let mut pool = PgPoolOptions::new()
+        .max_connections(100)
+        .connect(&db_url)
+        .await.expect("Unable to connect to Postgres");
+
+    let mut single_post = sqlx::query_as::<_, posts>("select id, title, description, category_id from posts  WHERE id=$1")
+        .bind(titles)
+        .fetch_all(&pool)
+        .await.expect("Unable to");
+
+    Ok(single_post)
+}
