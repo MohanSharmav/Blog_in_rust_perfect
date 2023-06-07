@@ -1,85 +1,64 @@
-use std::error::Error;
+use crate::model::database::Posts;
 use sqlx::postgres::PgPoolOptions;
-use crate::model::database::posts;
 
-//new function for selecting specific post with pointers
-pub async fn select_specific_pages_post(start_page: &Option<i32>) ->Result<Vec<posts>,sqlx::Error>
-{
-    let mut start_page= start_page.unwrap();
+pub async fn select_specific_pages_post(
+    start_page: &Option<i32>,
+) -> Result<Vec<Posts>, sqlx::Error> {
+    let start_page = start_page.unwrap();
 
-// //    let end_posts_count ;
-//     let end_posts_count = start_page+3;
-//     if(start_page==1)
-//     {
-//         let end_posts_count = 3;
-//     }
-//         println!("⭐️{}---{}",start_page,end_posts_count);
-//
-//
-    println!("🐒{:?}",start_page);
-    println!("🦄{:?}",start_page+2);
-   let mut new_start_page = start_page;
-    if(start_page>1)
-    {
-        new_start_page+=2
+    let mut new_start_page = start_page;
+
+    if start_page > 1 {
+        new_start_page += 2
     }
-    println!("🦆🦆🦆{:?}",&new_start_page);
     dotenv::dotenv().expect("Unable to load environment variables from .env file");
 
     let db_url = std::env::var("DATABASE_URL").expect("Unable to read DATABASE_URL env var");
-    // println!("{}{}", start_page,start_page*3);
 
-    let mut pool = PgPoolOptions::new()
+    let pool = PgPoolOptions::new()
         .max_connections(100)
         .connect(&db_url)
-        .await.expect("Unable to connect to Postgres");
+        .await
+        .expect("Unable to connect to Postgres");
 
-    let mut perfect_posts = sqlx::query_as::<_, posts>("select * from posts limit  $1 offset $2")
-        // .bind(start_page)
-        // .bind(start_page+2)
-        .bind(new_start_page+3)
+    let perfect_posts = sqlx::query_as::<_, Posts>("select * from posts limit  $1 offset $2")
+        .bind(new_start_page + 3)
         .bind(new_start_page)
         .fetch_all(&pool)
         .await
         .unwrap();
 
-    println!("🐶{:?}",perfect_posts);
     Ok(perfect_posts)
 }
 
-pub async fn select_specific_category_post(start_page: &Option<i32>, category_input: &String) ->Result<Vec<posts>,sqlx::Error>
-{
-    let mut start_page= start_page.unwrap();
-    let category_id= category_input.parse::<i32>().unwrap();
-
-    println!("🐒{:?}",start_page);
-    println!("🦄{:?}",start_page+2);
+pub async fn select_specific_category_post(
+    start_page: &Option<i32>,
+    category_input: &str,
+) -> Result<Vec<Posts>, sqlx::Error> {
+    let mut start_page = start_page.unwrap();
+    let category_id = category_input.parse::<i32>().unwrap();
     let mut new_start_page = start_page;
-    if(start_page>1)
-    {
-        new_start_page+=2
+    if start_page > 1 {
+        new_start_page += 2
     }
-    println!("🦆🦆🦆{:?}",&new_start_page);
     dotenv::dotenv().expect("Unable to load environment variables from .env file");
 
     let db_url = std::env::var("DATABASE_URL").expect("Unable to read DATABASE_URL env var");
-    // println!("{}{}", start_page,start_page*3);
 
-    let mut pool = PgPoolOptions::new()
+    let pool = PgPoolOptions::new()
         .max_connections(100)
         .connect(&db_url)
-        .await.expect("Unable to connect to Postgres");
-
-    let mut perfect_posts = sqlx::query_as::<_, posts>("select * from posts where category_id=$3 limit  $1 offset $2")
-        // .bind(start_page)
-        // .bind(start_page+2)
-        .bind(new_start_page+3)
-        .bind(new_start_page)
-        .bind(category_id)
-        .fetch_all(&pool)
         .await
-        .unwrap();
+        .expect("Unable to connect to Postgres");
 
-    println!("🐶{:?}",perfect_posts);
+    let perfect_posts =
+        sqlx::query_as::<_, Posts>("select * from posts where category_id=$3 limit  $1 offset $2")
+            .bind(new_start_page + 3)
+            .bind(new_start_page)
+            .bind(category_id)
+            .fetch_all(&pool)
+            .await
+            .unwrap();
+
     Ok(perfect_posts)
 }
