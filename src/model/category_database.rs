@@ -92,7 +92,7 @@ pub async fn update_category_database(name: &String, category_id: &str) -> Resul
 }
 
 pub async fn category_pagination_controller_database_function(
-    category_id: &String,
+    category_id: &str,
 ) -> Result<Vec<Posts>, Error> {
     let category_id = category_id.parse::<i32>().unwrap();
     dotenv::dotenv().expect("Unable to load environment variables from .env file");

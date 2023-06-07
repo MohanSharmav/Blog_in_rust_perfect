@@ -35,7 +35,7 @@ pub async fn select_specific_category_post(
     start_page: &Option<i32>,
     category_input: &str,
 ) -> Result<Vec<Posts>, sqlx::Error> {
-    let mut start_page = start_page.unwrap();
+    let  start_page = start_page.unwrap();
     let category_id = category_input.parse::<i32>().unwrap();
     let mut new_start_page = start_page;
     if start_page > 1 {
