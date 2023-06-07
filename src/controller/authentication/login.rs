@@ -16,7 +16,6 @@ pub struct User {
     pub(crate) password: String,
 }
 pub async fn get_login_page() -> HttpResponse {
-    println!("Welcome to login page");
     let mut handlebars = handlebars::Handlebars::new();
     let index_template = fs::read_to_string("templates/login.hbs").unwrap();
     handlebars

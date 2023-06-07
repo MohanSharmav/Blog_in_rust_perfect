@@ -69,7 +69,6 @@ pub async fn perfect_pagination_logic() -> i64 {
     for row in rows {
         let title: i64 = row.try_get("count").unwrap();
         counting_final += title;
-        println!("{:?}", title);
     }
     counting_final
 }
@@ -98,7 +97,6 @@ pub async fn category_pagination_logic(category_input: &String) -> i64 {
     for row in rows {
         let title: i64 = row.try_get("count").unwrap();
         counting_final += title;
-        println!("{:?}", title);
     }
     counting_final
 }

@@ -66,9 +66,9 @@ div.content {
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
     <script type="text/javascript">
-function get_value()
- {
-alert(this.value());
+function get_value() {
+  var x = document.getElementById("cat").value;
+  alert(x);
 }
 
 </script>
@@ -84,12 +84,12 @@ alert(this.value());
     <a href="/login">Login</a>     <a href="/register">Register</a>
     <p>&nbsp;</p><br>
 
-    <select onchange="get_value(this)" name="category" id="category">
+    <select name="category" id="category" onchange="get_value()">
         {{#each o}}
-        <option value="{{this}}">{{this.name}}</option>
-
-            {{/each}}
+            <option id="cat" value="{{this}}">{{this.name}}</option>
+        {{/each}}
     </select>
+
 
 <p class="listing category">
     Categories are:<br>

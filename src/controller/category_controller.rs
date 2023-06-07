@@ -54,7 +54,6 @@ pub async fn receive_new_category(form: web::Form<Categories>) -> HttpResponse {
 
     let name = &form.name;
     let id = &form.id;
-    println!("------------------->{}", name);
 
     create_new_category_database(name, id)
         .await
