@@ -1,27 +1,62 @@
+use std::arch::aarch64::vabaq_s8;
+use std::env::VarError;
+use std::{fmt, io};
+use std::error::Error;
+use std::fmt::{Debug, Display, Formatter};
+use actix_web::body::BoxBody;
+use anyhow::anyhow;
 use crate::model::database::{Categories, Posts};
 use sqlx::postgres::PgPoolOptions;
-use sqlx::Error;
+// use sqlx::{Database, Error};
+use sqlx::{Database};
 
-pub async fn get_all_categories_database() -> Result<Vec<Categories>, Error> {
-    dotenv::dotenv().expect("Unable to load environment variables from .env file");
+use crate::model::pagination_database::MyError;
+use actix_web::{error, HttpResponse, Responder, ResponseError};
+use actix_web::error::InternalError;
+use actix_web::http::{header, StatusCode};
+use actix_web::web::BytesMut;
+use askama::{helpers, mime};
 
-    let db_url = std::env::var("DATABASE_URL").expect("Unable to read DATABASE_URL env var");
+use actix_http::Response;
+use actix_web::http::header::ContentType;
+use sqlx::error::DatabaseError;
+
+// struct ResponseError(anyhow::Error);
+//
+// impl From<anyhow::Error> for ResponseError {
+//     fn from(error: anyhow::Error) -> Self {
+//         Self(error)
+//     }
+// }
+// impl anyhow::Error for actix_web::Error {
+//     fn error_response(&self) -> HttpResponse {
+//     HttpResponse::build(self.status_code())
+//         .insert_header(ContentType::html())
+//         .body(self.to_string())
+// }
+//}
+pub async fn get_all_categories_database() ->Result<Vec<Categories>,anyhow::Error> {
+    dotenv::dotenv()?;
+
+    let db_url = std::env::var("DATABASE_URL")?;
 
     let pool = PgPoolOptions::new()
         .max_connections(100)
         .connect(&db_url)
-        .await
-        .expect("Unable to connect to Postgres");
+        .await?;
 
     let all_categories = sqlx::query_as::<_, Categories>("select name,id from categories")
         .fetch_all(&pool)
-        .await
-        .expect("Unable to");
+        .await?;
 
+//     match all_categories{
+// Ok(all_categories) => Ok(all_categories),
+//     Err(e) =>Err(sqlx_core::error)
+//     }
     Ok(all_categories)
 }
 
-pub async fn create_new_category_database(name: &String, id: &i32) -> Result<(), Error> {
+pub async fn create_new_category_database(name: &String, id: &i32) -> Result<(), anyhow::Error> {
     dotenv::dotenv().expect("Unable to load environment variables from .env file");
 
     let db_url = std::env::var("DATABASE_URL").expect("Unable to read DATABASE_URL env var");
@@ -42,7 +77,7 @@ pub async fn create_new_category_database(name: &String, id: &i32) -> Result<(),
     Ok(())
 }
 
-pub async fn delete_category_database(to_delete_category: &str) -> Result<(), Error> {
+pub async fn delete_category_database(to_delete_category: &str) -> Result<(),  anyhow::Error> {
     dotenv::dotenv().expect("Unable to load environment variables from .env file");
 
     let db_url = std::env::var("DATABASE_URL").expect("Unable to read DATABASE_URL env var");
@@ -71,7 +106,7 @@ pub async fn delete_category_database(to_delete_category: &str) -> Result<(), Er
     Ok(())
 }
 
-pub async fn update_category_database(name: &String, category_id: &str) -> Result<(), Error> {
+pub async fn update_category_database(name: &String, category_id: &str) -> Result<(),  anyhow::Error> {
     dotenv::dotenv().expect("Unable to load environment variables from .env file");
 
     let db_url = std::env::var("DATABASE_URL").expect("Unable to read DATABASE_URL env var");
@@ -93,7 +128,7 @@ pub async fn update_category_database(name: &String, category_id: &str) -> Resul
 
 pub async fn category_pagination_controller_database_function(
     category_id: &str,
-) -> Result<Vec<Posts>, Error> {
+) -> Result<Vec<Posts>,  anyhow::Error> {
     let category_id = category_id.parse::<i32>().unwrap();
     dotenv::dotenv().expect("Unable to load environment variables from .env file");
 

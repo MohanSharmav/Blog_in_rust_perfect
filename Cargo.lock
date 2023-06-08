@@ -844,6 +844,7 @@ version = "0.1.0"
 dependencies = [
  "actix",
  "actix-files",
+ "actix-http",
  "actix-identity",
  "actix-session",
  "actix-web",
@@ -864,6 +865,7 @@ dependencies = [
  "serde_json",
  "sha2 0.10.6",
  "sqlx",
+ "thiserror",
  "tokio",
  "warp",
 ]

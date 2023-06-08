@@ -9,8 +9,9 @@ use crate::model::pagination_database::PaginationParams;
 use actix_web::{web, HttpResponse};
 use serde_json::json;
 use std::fs;
+use actix_web::error::InternalError;
 
-pub async fn get_all_categories_controller() -> HttpResponse {
+pub async fn get_all_categories_controller() -> Result<HttpResponse,actix_web::Error> {
     let mut handlebars = handlebars::Handlebars::new();
     let index_template = fs::read_to_string("templates/all_categories.hbs").unwrap();
     handlebars
@@ -19,15 +20,16 @@ pub async fn get_all_categories_controller() -> HttpResponse {
 
     let all_categories = get_all_categories_database()
         .await
-        .expect("TODO: panic message");
+        .map_err(|o|{actix_web::error::ErrorInternalServerError(o)})?;
 
     let html = handlebars
         .render("all_categories", &json!({ "z": &all_categories }))
-        .unwrap();
+        .map_err(|o|{actix_web::error::ErrorInternalServerError(o)})?;
 
-    HttpResponse::Ok()
+  Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
-        .body(html)
+        .body(html))
+
 }
 
 pub async fn get_new_category() -> HttpResponse {
