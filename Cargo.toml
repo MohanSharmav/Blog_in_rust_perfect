@@ -36,7 +36,7 @@ actix-http = "3.3.1"
 magic-crypt ="3.1.9"
 
 cargo-watch = "8.4.0"
-
+typeof = "1.0.0"
 thiserror = "1.0.40"
 
 

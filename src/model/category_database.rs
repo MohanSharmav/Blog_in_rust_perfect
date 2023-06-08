@@ -56,11 +56,12 @@ impl Display for myownError {
     }
 }
 
-
+//
 impl  DatabaseError for myownError {
     fn message(&self) -> &str {
         todo!()
     }
+
 
     fn as_error(&self) -> &(dyn Error + Send + Sync + 'static) {
         println!("ADS");
@@ -77,7 +78,7 @@ impl  DatabaseError for myownError {
 
 pub async fn get_all_categories_database() ->Result<Vec<Categories>,sqlx::Error> {
     dotenv::dotenv()
-       // .map_err(|o|myownError)?;
+       // .map_err(|o|myownError)?; --> for enum
         .map_err(|o|myownError::info)?;
     let db_url = std::env::var("DATABASE_URL")?;
 
