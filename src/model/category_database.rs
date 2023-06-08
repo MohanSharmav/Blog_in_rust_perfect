@@ -19,6 +19,7 @@ use askama::{helpers, mime};
 
 use actix_http::Response;
 use actix_web::http::header::ContentType;
+use dotenv::dotenv;
 use sqlx::error::DatabaseError;
 
 // struct ResponseError(anyhow::Error);
@@ -34,10 +35,50 @@ use sqlx::error::DatabaseError;
 //         .insert_header(ContentType::html())
 //         .body(self.to_string())
 // }
-//}
-pub async fn get_all_categories_database() ->Result<Vec<Categories>,anyhow::Error> {
-    dotenv::dotenv()?;
+// //}
 
+//struct  myownError ;
+enum myownError {
+    info,
+}
+
+impl Error for myownError {}
+
+impl Debug for myownError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        todo!()
+    }
+}
+
+impl Display for myownError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        todo!()
+    }
+}
+
+
+impl  DatabaseError for myownError {
+    fn message(&self) -> &str {
+        todo!()
+    }
+
+    fn as_error(&self) -> &(dyn Error + Send + Sync + 'static) {
+        println!("ADS");
+    }
+
+    fn as_error_mut(&mut self) -> &mut (dyn Error + Send + Sync + 'static) {
+        todo!()
+    }
+
+    fn into_error(self: Box<Self>) -> Box<dyn Error + Send + Sync + 'static> {
+        todo!()
+    }
+}
+
+pub async fn get_all_categories_database() ->Result<Vec<Categories>,sqlx::Error> {
+    dotenv::dotenv()
+       // .map_err(|o|myownError)?;
+        .map_err(|o|myownError::info)?;
     let db_url = std::env::var("DATABASE_URL")?;
 
     let pool = PgPoolOptions::new()
