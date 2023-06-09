@@ -1,27 +1,8 @@
-use std::arch::aarch64::vabaq_s8;
-use std::env::VarError;
-use std::{fmt, io};
-use std::error::Error;
-use std::fmt::{Debug, Display, Formatter};
-use actix::fut::err;
-use actix_web::body::BoxBody;
-use anyhow::anyhow;
 use crate::model::database::{Categories, Posts};
 use sqlx::postgres::PgPoolOptions;
 // use sqlx::{Database, Error};
-use sqlx::{Database};
 
-use crate::model::pagination_database::MyError;
-use actix_web::{error, HttpResponse, Responder, ResponseError};
-use actix_web::error::InternalError;
-use actix_web::http::{header, StatusCode};
-use actix_web::web::BytesMut;
-use askama::{helpers, mime};
 
-use actix_http::Response;
-use actix_web::http::header::ContentType;
-use dotenv::dotenv;
-use sqlx::error::DatabaseError;
 
 // struct ResponseError(anyhow::Error);
 //

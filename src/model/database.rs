@@ -1,7 +1,6 @@
 use serde::Deserialize;
 use serde::Serialize;
 use sqlx::postgres::PgPoolOptions;
-use sqlx::Error;
 
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
 pub struct Categories {
@@ -25,22 +24,19 @@ pub struct UpdatePost {
     pub(crate) name: String,
 }
 
-pub async fn select_posts() -> Result<Vec<Posts>, Error> {
+pub async fn select_posts() -> Result<Vec<Posts>, anyhow::Error> {
     dotenv::dotenv().expect("Unable to load environment variables from .env file");
-
-    let db_url = std::env::var("DATABASE_URL").expect("Unable to read DATABASE_URL env var");
+    let db_url = std::env::var("DATABASE_URL")?;
 
     let pool = PgPoolOptions::new()
         .max_connections(100)
         .connect(&db_url)
-        .await
-        .expect("Unable to connect to Postgres");
+        .await?;
 
     let postsing =
         sqlx::query_as::<_, Posts>("select id, title, description, category_id from posts")
             .fetch_all(&pool)
-            .await
-            .unwrap();
+            .await?;
 
     Ok(postsing)
 }
