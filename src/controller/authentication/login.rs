@@ -42,11 +42,20 @@ pub async fn get_data_from_login_page(
     let mcrypt = new_magic_crypt!("magickey", 256); //Creates an instance of the magic crypt library/crate.
     let encrypted_password = mcrypt.encrypt_str_to_base64(password);
 
-    let result = login_database(username, encrypted_password).await;
-//     let a: Option<Vec<i64>> = Some(LoginCheck[0]);
-let b=result.unwrap_or_default() as i64;
-//    let c=result.unwrap_or_default().f.cloned().unwrap_or_default() as i64;
+    let mut result = login_database(username, encrypted_password).await;
+   let g=0_i64 ;
+    for i in result.iter_mut() {
+println!("{:?}",i);
+        let g=i ;
+    }
+    //
 
+//     let a: Option<Vec<i64>> = Some(LoginCheck[0]);
+// let b=result.unwrap_or_default() as i64;
+//    let c=result.unwrap_or_default().f.cloned().unwrap_or_default() as i64;
+// for i in result{
+//     println!("{:?}",i as i64);
+// }
     // let y=result.into() as i64;
     // let result = result.0;
      // let result = result::<i32>().unwrap();;
@@ -59,9 +68,9 @@ let b=result.unwrap_or_default() as i64;
     //     Err(err) => (1_i64,)
     // };
 
-    let x = 1  as i64;
-
-    if b == x {
+//     let x = 1  as i64;
+// let b=1 as i64;
+    if g == x {
         Identity::login(&req.extensions(), username.to_string()).unwrap();
         web::Redirect::to("/admin?page=1&limit=2")
     } else {

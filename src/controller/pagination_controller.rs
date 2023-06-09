@@ -1,3 +1,4 @@
+use std::fmt::{Error, write};
 use crate::controller::pagination_logic::select_specific_pages_post;
 use crate::model::category_database::get_all_categories_database;
 use crate::model::pagination_database::{pagination_logic, PaginationParams};
@@ -7,11 +8,9 @@ use sqlx::postgres::PgPoolOptions;
 use sqlx::Row;
 use std::fs;
 
-pub async fn pagination_display(params: web::Query<PaginationParams>) -> HttpResponse {
-    let total_posts_length: f64 = perfect_pagination_logic().await as f64;
-
-    let posts_per_page = total_posts_length / 3.0;
-
+pub async fn pagination_display(params: web::Query<PaginationParams>) -> Result<HttpResponse,actix_web::Error> {
+    let total_posts_length: i64 = perfect_pagination_logic().await .unwrap_or_else(std::fmt::Error)?;
+    let posts_per_page = total_posts_length / 3;
     let posts_per_page = posts_per_page.round();
     let posts_per_page = posts_per_page as i64;
     let mut pages_count = Vec::new();
@@ -20,39 +19,57 @@ pub async fn pagination_display(params: web::Query<PaginationParams>) -> HttpRes
     }
 
     let mut handlebars = handlebars::Handlebars::new();
-    let index_template = fs::read_to_string("templates/pagination_page.hbs").unwrap();
+    let index_template = fs::read_to_string("templates/pagination_page.hbs")
+        .map_err( actix_web::error::ErrorInternalServerError)?;
+
     handlebars
         .register_template_string("pagination_page", &index_template)
-        .expect("TODO: panic message");
+        .map_err( actix_web::error::ErrorInternalServerError)?;
 
-    let paginators = pagination_logic(params.clone()).await.expect("Aasd");
+    let paginators = pagination_logic(params.clone()).await
+        .map_err( actix_web::error::ErrorInternalServerError)?;
 
     let _current_page = &params.page;
     let exact_posts_only = select_specific_pages_post(_current_page)
         .await
-        .expect("Aasd");
+        .map_err( actix_web::error::ErrorInternalServerError)?;
 
-    let all_category = get_all_categories_database().await.expect("adssad");
+    let all_category = get_all_categories_database().await
+        .map_err( actix_web::error::ErrorInternalServerError)?;
 
-    let _html = handlebars.render("pagination_page", &json!({"a":&paginators,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category})).unwrap() ;
+    let _html = handlebars.render("pagination_page", &json!({"a":&paginators,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category}))
+        .map_err( actix_web::error::ErrorInternalServerError)?;
+
 
     let mut handlebarss = handlebars::Handlebars::new();
-    let index_templates = fs::read_to_string("templates/admin_page.hbs").unwrap();
+    let index_templates = fs::read_to_string("templates/admin_page.hbs")
+        .map_err( actix_web::error::ErrorInternalServerError)?;
+
     handlebarss
         .register_template_string("admin_page", &index_templates)
-        .expect("TODO: panic message");
+        .map_err( actix_web::error::ErrorInternalServerError)?;
 
-    let htmls = handlebarss.render("admin_page", &json!({"a":&paginators,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category})).unwrap() ;
+    let htmls = handlebarss.render("admin_page", &json!({"a":&paginators,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category}))
+        .map_err( actix_web::error::ErrorInternalServerError)?;
 
-    HttpResponse::Ok()
+    Ok( HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
-        .body(htmls)
+        .body(htmls))
 }
+// TODO:
+// error[E0605]: non-primitive cast: `Result<i64, actix_web::Error>` as `f64`
+// --> src/controller/common_controller.rs:10:35
+// |
+// 10 | ... = perfect_pagination_logic().await as f64;
+// |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ an `as` expression can only be used to convert between primitive types or to coerce to a specific trait object
 
-pub async fn perfect_pagination_logic() -> i64 {
-    dotenv::dotenv().expect("Unable to load environment variables from .env file");
+pub async fn perfect_pagination_logic() -> Result<i64, actix_web::error::Error> {
+    dotenv::dotenv()
+        .map_err( actix_web::error::ErrorInternalServerError)?;
 
-    let db_url = std::env::var("DATABASE_URL").expect("Unable to read DATABASE_URL env var");
+    let db_url = std::env::var("DATABASE_URL")
+        .map_err( actix_web::error::ErrorInternalServerError)?;
+
 
     let pool = PgPoolOptions::new()
         .max_connections(100)
@@ -70,7 +87,7 @@ pub async fn perfect_pagination_logic() -> i64 {
         let title: i64 = row.try_get("count").unwrap();
         counting_final += title;
     }
-    counting_final
+   Ok(counting_final)
 }
 
 pub async fn category_pagination_logic(category_input: &String) -> i64 {
