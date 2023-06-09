@@ -1,22 +1,37 @@
-use sqlx::postgres::PgPoolOptions;
+use sqlx::{FromRow, Row,Error};
+use sqlx::postgres::{PgPoolOptions, PgRow};
+use serde::Deserialize;
 
-pub async fn login_database(users: &String, password: String) -> (i64,) {
-    dotenv::dotenv().expect("Unable to load environment variables from .env file");
+#[derive(Deserialize, Debug, Clone, PartialEq)]
+pub struct LoginCheck {
+    value:i64
+}
 
-    let db_url = std::env::var("DATABASE_URL").expect("Unable to read DATABASE_URL env var");
+impl<'r> FromRow<'r, PgRow> for LoginCheck {
+    fn from_row(row: &'r PgRow) -> Result<Self,Error> {
+        let name = row.try_get("count")?;
+        Ok(LoginCheck{ value:name })
+    }
+}
 
+pub async fn login_database(users: &String, password: String) -> Result<LoginCheck,anyhow::Error > {
+    dotenv::dotenv()?;
+    let db_url = std::env::var("DATABASE_URL")?;
     let pool = PgPoolOptions::new()
         .max_connections(100)
         .connect(&db_url)
-        .await
-        .expect("Unable to connect to Postgres");
+        .await?;
 
-    let v: (i64,) = sqlx::query_as("select count(1) from users where name=$1 AND password=$2")
+    let v = sqlx::query_as::<_,LoginCheck>("select count(1) from users where name=$1 AND password=$2")
         .bind(users)
         .bind(password)
         .fetch_one(&pool)
-        .await
-        .expect("unable to fetch the user");
+        .await?;
 
-    v
+//     for row in v {
+//         let title: i64 = row.try_get("count").unwrap();
+//         counting_final += title;
+//     }
+// type(row);
+    Ok(v)
 }

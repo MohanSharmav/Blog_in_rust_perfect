@@ -28,7 +28,7 @@ pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
 
 #[tokio::main]
-async fn main() -> Result<(),anyhow::Error> {
+async fn main() -> Result<(), anyhow::Error> {
     let secret_key = Key::generate();
     #[cfg(feature = "cors_for_local_development")]
     let cookie_secure = false;

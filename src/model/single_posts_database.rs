@@ -1,6 +1,6 @@
 use crate::model::database::Posts;
 use sqlx::postgres::PgPoolOptions;
-use sqlx::{ Row};
+use sqlx::Row;
 
 pub async fn query_single_post(titles: i32) -> Result<Vec<String>, anyhow::Error> {
     dotenv::dotenv()?;

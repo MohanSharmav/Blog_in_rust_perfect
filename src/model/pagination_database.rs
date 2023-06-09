@@ -26,7 +26,6 @@ impl std::fmt::Display for MyError {
     }
 }
 
-
 pub fn paginate<T>(items: Vec<T>, page: i32, per_page: i32) -> Vec<T> {
     let start_index = (page - 1) * per_page;
     let _end_index = start_index + per_page;
@@ -37,7 +36,9 @@ pub fn paginate<T>(items: Vec<T>, page: i32, per_page: i32) -> Vec<T> {
         .collect()
 }
 
-pub async fn pagination_logic(params: web::Query<PaginationParams>) -> Result<Vec<Posts>, anyhow::Error> {
+pub async fn pagination_logic(
+    params: web::Query<PaginationParams>,
+) -> Result<Vec<Posts>, anyhow::Error> {
     let page = params.page.unwrap_or(1);
     let per_page = params.per_page.unwrap_or(3);
     let posts_pagination: Vec<Posts> = select_posts().await?;
