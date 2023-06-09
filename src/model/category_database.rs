@@ -3,6 +3,7 @@ use std::env::VarError;
 use std::{fmt, io};
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
+use actix::fut::err;
 use actix_web::body::BoxBody;
 use anyhow::anyhow;
 use crate::model::database::{Categories, Posts};
@@ -37,50 +38,56 @@ use sqlx::error::DatabaseError;
 // }
 // //}
 
-//struct  myownError ;
-enum myownError {
-    info,
-}
-
-impl Error for myownError {}
-
-impl Debug for myownError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        todo!()
-    }
-}
-
-impl Display for myownError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        todo!()
-    }
-}
-
+// //struct  myownError ;
+// enum myownError {
+//     info,
+// }
 //
-impl  DatabaseError for myownError {
-    fn message(&self) -> &str {
-        todo!()
-    }
+// impl Error for myownError {}
+//
+// impl Debug for myownError {
+//     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+//         todo!()
+//     }
+// }
+//
+// impl Display for myownError {
+//     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+//         todo!()
+//     }
+// }
+//
+//
+// //
+// impl  DatabaseError for myownError {
+//     fn message(&self) -> &str {
+//         todo!()
+//     }
+//
+//     fn as_error(&self) -> &(dyn Error + Send + Sync + 'static) {
+//         println!("ADS");
+//         let x=1;
+//         Box::leak(Box::new(err(x))) as &(dyn Error + Send + Sync + 'static)
+//
+//     }
+//
+//     fn as_error_mut(&mut self) -> &mut (dyn Error + Send + Sync + 'static) {
+//         todo!()
+//     }
+//
+//     fn into_error(self: Box<Self>) -> Box<dyn Error + Send + Sync + 'static> {
+//         todo!()
+//     }
+//
+// }
 
 
-    fn as_error(&self) -> &(dyn Error + Send + Sync + 'static) {
-        println!("ADS");
-    }
-
-    fn as_error_mut(&mut self) -> &mut (dyn Error + Send + Sync + 'static) {
-        todo!()
-    }
-
-    fn into_error(self: Box<Self>) -> Box<dyn Error + Send + Sync + 'static> {
-        todo!()
-    }
-}
-
-pub async fn get_all_categories_database() ->Result<Vec<Categories>,sqlx::Error> {
-    dotenv::dotenv()
-       // .map_err(|o|myownError)?; --> for enum
-        .map_err(|o|myownError::info)?;
+pub async fn get_all_categories_database() ->Result<Vec<Categories>,anyhow::Error> {
+    dotenv::dotenv()?;
+       // // .map_err(|o|myownError)?; --> for struct
+       //  .map_err(|o|myownError::info)?;-->for enum
     let db_url = std::env::var("DATABASE_URL")?;
+        // .map_err(|e| myownError::info)?;
 
     let pool = PgPoolOptions::new()
         .max_connections(100)
