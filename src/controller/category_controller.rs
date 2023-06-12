@@ -170,6 +170,8 @@ pub async fn get_category_with_pagination(
         pages_count.push(i + 1_i64);
     }
 
+
+
     let mut handlebars = handlebars::Handlebars::new();
     let index_template = fs::read_to_string("templates/category.hbs")
         .map_err(actix_web::error::ErrorInternalServerError)?;

@@ -23,6 +23,7 @@ use actix_identity::IdentityMiddleware;
 use actix_session::config::PersistentSession;
 use actix_session::storage::CookieSessionStore;
 use actix_session::SessionMiddleware;
+use crate::model::database::get_database_connection;
 
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
@@ -34,8 +35,9 @@ async fn main() -> Result<(), anyhow::Error> {
     let cookie_secure = false;
     #[cfg(not(feature = "cors_for_local_development"))]
     let cookie_secure = true;
-    HttpServer::new(move || {
+    HttpServer::new( move || {
         App::new()
+            .app_data(get_database_connection())
             .wrap(IdentityMiddleware::default())
             .wrap(
                 SessionMiddleware::builder(CookieSessionStore::default(), secret_key.clone())

@@ -1,5 +1,6 @@
 use serde::Deserialize;
 use serde::Serialize;
+use sqlx::{Pool, Postgres};
 use sqlx::postgres::PgPoolOptions;
 
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
@@ -39,4 +40,15 @@ pub async fn select_posts() -> Result<Vec<Posts>, anyhow::Error> {
             .await?;
 
     Ok(postsing)
+}
+
+pub async fn get_database_connection() -> Result<Pool<Postgres>,anyhow::Error> {
+    dotenv::dotenv()?;
+    let db_url = std::env::var("DATABASE_URL")?;
+
+    let pool = PgPoolOptions::new()
+        .max_connections(100)
+        .connect(&db_url)
+        .await?;
+    Ok(pool)
 }
