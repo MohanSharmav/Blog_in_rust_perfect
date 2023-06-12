@@ -111,9 +111,9 @@ pub async fn category_pagination_logic(category_input: &String) -> Result<i64, a
 
     let mut counting_final: i64 = 0;
     for row in rows {
-        let title:i64 = row.try_get("count")?;
+        let title: i64 = row.try_get("count")?;
         //Todo
-       counting_final=title;
+        counting_final = title;
     }
     Ok(counting_final)
 }

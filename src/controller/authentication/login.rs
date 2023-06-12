@@ -47,37 +47,9 @@ pub async fn get_data_from_login_page(
     let result = login_database(username, encrypted_password)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    //    let g=0}",i);
-    //         let g=i ;
-    //     }_i64 ;
-    // //     for i in result.iter_mut() {
-    // // println!("{:?
-    //
-
-    //     let a: Option<Vec<i64>> = Some(LoginCheck[0]);
-    // let b=result.unwrap_or_default() as i64;
-    //    let c=result.unwrap_or_default().f.cloned().unwrap_or_default() as i64;
-    // for i in result{
-    //     println!("{:?}",i as i64);
-    // }
-    // let y=result.into() as i64;
-    // let result = result.0;
-    // let result = result::<i32>().unwrap();;
-    //let result_inter = result.iter();
-    // let result = result.iter(1)
-    // let result1= result as (i64);
-
-    // let result= match result {
-    //     Ok(result,) => result,
-    //     Err(err) => (1_i64,)
-    // };
-
-    let _x = 1 as i64;
-    // let b=1 as i64;
+    let _x = 1_i64;
     let y = LoginCheck { value: 1 };
-    // result == model::authentication::login_database::LoginCheck { value: 1 }
-    //{
+
     if result == y {
         Identity::login(&req.extensions(), username.to_string())
             .map_err(actix_web::error::ErrorInternalServerError)?;

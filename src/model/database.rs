@@ -25,7 +25,7 @@ pub struct UpdatePost {
 }
 
 pub async fn select_posts() -> Result<Vec<Posts>, anyhow::Error> {
-    dotenv::dotenv().expect("Unable to load environment variables from .env file");
+    dotenv::dotenv()?;
     let db_url = std::env::var("DATABASE_URL")?;
 
     let pool = PgPoolOptions::new()

@@ -106,11 +106,11 @@ pub async fn page_to_update_category(
 ) -> Result<HttpResponse, actix_web::Error> {
     let mut handlebars = handlebars::Handlebars::new();
     let index_template = fs::read_to_string("templates/update_category.hbs")
-        .map_err(|o| actix_web::error::ErrorInternalServerError(o))?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     handlebars
         .register_template_string("update_category", &index_template)
-        .map_err(|o| actix_web::error::ErrorInternalServerError(o))?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let to_be_updated_category = to_be_updated_category.clone();
 
@@ -119,7 +119,7 @@ pub async fn page_to_update_category(
             "update_category",
             &json!({ "to_be_updated_post": &to_be_updated_category }),
         )
-        .map_err(|o| actix_web::error::ErrorInternalServerError(o))?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")

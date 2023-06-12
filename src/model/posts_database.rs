@@ -2,13 +2,12 @@ use sqlx::postgres::PgPoolOptions;
 
 pub async fn delete_post_database(to_delete: String) -> Result<(), anyhow::Error> {
     dotenv::dotenv()?;
-    let db_url = std::env::var("DATABASE_URL").expect("Unable to read DATABASE_URL env var");
+    let db_url = std::env::var("DATABASE_URL")?;
     let pool = PgPoolOptions::new()
         .max_connections(100)
         .connect(&db_url)
         .await?;
-    let to_delete = to_delete
-        .parse::<i32>()?;
+    let to_delete = to_delete.parse::<i32>()?;
     sqlx::query("delete from posts where id=$1")
         .bind(to_delete)
         .execute(&pool)
