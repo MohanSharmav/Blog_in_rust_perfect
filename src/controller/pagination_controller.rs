@@ -1,4 +1,3 @@
-use std::fmt::{Error, write};
 use crate::controller::pagination_logic::select_specific_pages_post;
 use crate::model::category_database::get_all_categories_database;
 use crate::model::pagination_database::{pagination_logic, PaginationParams};
@@ -9,8 +8,8 @@ use sqlx::Row;
 use std::fs;
 
 pub async fn pagination_display(params: web::Query<PaginationParams>) -> Result<HttpResponse,actix_web::Error> {
-    let total_posts_length: i64 = perfect_pagination_logic().await .unwrap_or_else(std::fmt::Error)?;
-    let posts_per_page = total_posts_length / 3;
+    let total_posts_length: f64 = perfect_pagination_logic().await ? as f64;
+    let posts_per_page = total_posts_length / 3.0;
     let posts_per_page = posts_per_page.round();
     let posts_per_page = posts_per_page as i64;
     let mut pages_count = Vec::new();

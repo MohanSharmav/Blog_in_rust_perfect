@@ -35,19 +35,21 @@ pub async fn get_data_from_login_page(
     form: web::Form<User>,
     req: HttpRequest,
     _user: Option<Identity>,
-) -> Redirect {
+) -> Result<Redirect,actix_web::Error> {
     let username = &form.username;
     let password = &form.password.to_string();
 
     let mcrypt = new_magic_crypt!("magickey", 256); //Creates an instance of the magic crypt library/crate.
     let encrypted_password = mcrypt.encrypt_str_to_base64(password);
 
-    let mut result = login_database(username, encrypted_password).await;
-   let g=0_i64 ;
-    for i in result.iter_mut() {
-println!("{:?}",i);
-        let g=i ;
-    }
+    let  result = login_database(username, encrypted_password).await
+        .map_err( actix_web::error::ErrorInternalServerError)?;
+
+//    let g=0}",i);
+//         let g=i ;
+//     }_i64 ;
+// //     for i in result.iter_mut() {
+// // println!("{:?
     //
 
 //     let a: Option<Vec<i64>> = Some(LoginCheck[0]);
@@ -68,13 +70,16 @@ println!("{:?}",i);
     //     Err(err) => (1_i64,)
     // };
 
-//     let x = 1  as i64;
+    let _x = 1  as i64;
 // let b=1 as i64;
-    if g == x {
+    let y= LoginCheck{value:1};
+    // result == model::authentication::login_database::LoginCheck { value: 1 }
+    //{
+    if result == y {
         Identity::login(&req.extensions(), username.to_string()).unwrap();
-        web::Redirect::to("/admin?page=1&limit=2")
+       Ok(web::Redirect::to("/admin?page=1&limit=2"))
     } else {
-        web::Redirect::to("/login")
+        Ok(web::Redirect::to("/login"))
     }
 }
 

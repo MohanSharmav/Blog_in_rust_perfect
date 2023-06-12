@@ -7,7 +7,7 @@ use serde_json::json;
 use std::fs;
 
 pub async fn common_page_controller(params: web::Query<PaginationParams>) -> Result<HttpResponse,actix_web::Error> {
-    let total_posts_length: f64 = perfect_pagination_logic().await.unwrap_or_else(std::error) as f64;
+    let total_posts_length: f64 = perfect_pagination_logic().await? as f64;
     let posts_per_page = total_posts_length / 3.0;
     let posts_per_page = posts_per_page.round();
     let posts_per_page = posts_per_page as i64;

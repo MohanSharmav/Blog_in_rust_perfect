@@ -4,7 +4,7 @@ use serde::Deserialize;
 
 #[derive(Deserialize, Debug, Clone, PartialEq)]
 pub struct LoginCheck {
-    value:i64
+    pub(crate) value:i64
 }
 
 impl<'r> FromRow<'r, PgRow> for LoginCheck {
@@ -13,6 +13,7 @@ impl<'r> FromRow<'r, PgRow> for LoginCheck {
         Ok(LoginCheck{ value:name })
     }
 }
+
 
 pub async fn login_database(users: &String, password: String) -> Result<LoginCheck,anyhow::Error > {
     dotenv::dotenv()?;
