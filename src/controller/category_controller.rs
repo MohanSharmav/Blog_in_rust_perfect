@@ -14,15 +14,15 @@ use std::fs;
 pub async fn get_all_categories_controller() -> Result<HttpResponse, actix_web::Error> {
     let mut handlebars = handlebars::Handlebars::new();
     let index_template = fs::read_to_string("templates/all_categories.hbs")
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     handlebars
         .register_template_string("all_categories", &index_template)
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let all_categories = get_all_categories_database()
         .await
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
         .render("all_categories", &json!({ "z": &all_categories }))
@@ -40,11 +40,11 @@ pub async fn get_new_category() -> Result<HttpResponse, actix_web::Error> {
 
     handlebars
         .register_template_string("new_category", &index_template)
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
         .render("new_category", &json!({"o":"ax"}))
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
@@ -56,7 +56,7 @@ pub async fn receive_new_category(
 ) -> Result<HttpResponse, actix_web::Error> {
     let mut handlebars = handlebars::Handlebars::new();
     let index_template = fs::read_to_string("templates/message_display.hbs")
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     handlebars
         .register_template_string("message_display", &index_template)
@@ -66,12 +66,12 @@ pub async fn receive_new_category(
     let id = &form.id;
     create_new_category_database(name, id)
         .await
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let success_message = "the categories created successfully";
     let html = handlebars
         .render("message_display", &json!({ "message": success_message }))
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
@@ -82,18 +82,18 @@ pub async fn delete_category(id: web::Path<String>) -> Result<HttpResponse, acti
     let to_delete_category = &id.into_inner();
     delete_category_database(to_delete_category)
         .await
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let mut handlebars = handlebars::Handlebars::new();
     let index_template = fs::read_to_string("templates/message_display.hbs").unwrap();
     handlebars
         .register_template_string("message_display", &index_template)
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let success_message = "the category deleted successfully";
     let html = handlebars
         .render("message_display", &json!({ "message": success_message }))
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
@@ -131,21 +131,21 @@ pub async fn receive_updated_category(
 ) -> Result<HttpResponse, actix_web::Error> {
     let mut handlebars = handlebars::Handlebars::new();
     let index_template = fs::read_to_string("templates/message_display.hbs")
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
     handlebars
         .register_template_string("message_display", &index_template)
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let current_post_name = &current_category_name.into_inner();
     let name = &form.name;
     let _id = &form.id;
     update_category_database(name, current_post_name)
         .await
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
     let success_message = "the post created successfully";
     let html = handlebars
         .render("message_display", &json!({ "message": success_message }))
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
@@ -170,7 +170,7 @@ pub async fn get_category_with_pagination(
     let index_template = fs::read_to_string("templates/category.hbs").unwrap();
     handlebars
         .register_template_string("category", &index_template)
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let current_page = &params.page;
     let _exact = select_specific_category_post(current_page, &category_input)
@@ -179,14 +179,14 @@ pub async fn get_category_with_pagination(
 
     let category_postinng = category_pagination_controller_database_function(&category_input)
         .await
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
         .render(
             "category",
             &json!({"tiger":&category_postinng,"pages_count":&pages_count}),
         )
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")

@@ -15,18 +15,18 @@ pub struct User {
     pub(crate) username: String,
     pub(crate) password: String,
 }
-pub async fn get_login_page() -> Result<HttpResponse,actix_web::Error> {
+pub async fn get_login_page() -> Result<HttpResponse, actix_web::Error> {
     let mut handlebars = handlebars::Handlebars::new();
     let index_template = fs::read_to_string("templates/login.hbs")
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     handlebars
         .register_template_string("login", &index_template)
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
         .render("login", &json!({"yy":"uuihiuhuihiuhuih"}))
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
@@ -37,50 +37,51 @@ pub async fn get_data_from_login_page(
     form: web::Form<User>,
     req: HttpRequest,
     _user: Option<Identity>,
-) -> Result<Redirect,actix_web::Error> {
+) -> Result<Redirect, actix_web::Error> {
     let username = &form.username;
     let password = &form.password.to_string();
 
     let mcrypt = new_magic_crypt!("magickey", 256); //Creates an instance of the magic crypt library/crate.
     let encrypted_password = mcrypt.encrypt_str_to_base64(password);
 
-    let  result = login_database(username, encrypted_password).await
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+    let result = login_database(username, encrypted_password)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
-//    let g=0}",i);
-//         let g=i ;
-//     }_i64 ;
-// //     for i in result.iter_mut() {
-// // println!("{:?
+    //    let g=0}",i);
+    //         let g=i ;
+    //     }_i64 ;
+    // //     for i in result.iter_mut() {
+    // // println!("{:?
     //
 
-//     let a: Option<Vec<i64>> = Some(LoginCheck[0]);
-// let b=result.unwrap_or_default() as i64;
-//    let c=result.unwrap_or_default().f.cloned().unwrap_or_default() as i64;
-// for i in result{
-//     println!("{:?}",i as i64);
-// }
+    //     let a: Option<Vec<i64>> = Some(LoginCheck[0]);
+    // let b=result.unwrap_or_default() as i64;
+    //    let c=result.unwrap_or_default().f.cloned().unwrap_or_default() as i64;
+    // for i in result{
+    //     println!("{:?}",i as i64);
+    // }
     // let y=result.into() as i64;
     // let result = result.0;
-     // let result = result::<i32>().unwrap();;
+    // let result = result::<i32>().unwrap();;
     //let result_inter = result.iter();
-// let result = result.iter(1)
-// let result1= result as (i64);
+    // let result = result.iter(1)
+    // let result1= result as (i64);
 
     // let result= match result {
     //     Ok(result,) => result,
     //     Err(err) => (1_i64,)
     // };
 
-    let _x = 1  as i64;
-// let b=1 as i64;
-    let y= LoginCheck{value:1};
+    let _x = 1 as i64;
+    // let b=1 as i64;
+    let y = LoginCheck { value: 1 };
     // result == model::authentication::login_database::LoginCheck { value: 1 }
     //{
     if result == y {
         Identity::login(&req.extensions(), username.to_string())
-            .map_err( actix_web::error::ErrorInternalServerError)?;
-       Ok(web::Redirect::to("/admin?page=1&limit=2"))
+            .map_err(actix_web::error::ErrorInternalServerError)?;
+        Ok(web::Redirect::to("/admin?page=1&limit=2"))
     } else {
         Ok(web::Redirect::to("/login"))
     }

@@ -7,8 +7,10 @@ use sqlx::postgres::PgPoolOptions;
 use sqlx::Row;
 use std::fs;
 
-pub async fn pagination_display(params: web::Query<PaginationParams>) -> Result<HttpResponse,actix_web::Error> {
-    let total_posts_length: f64 = perfect_pagination_logic().await ? as f64;
+pub async fn pagination_display(
+    params: web::Query<PaginationParams>,
+) -> Result<HttpResponse, actix_web::Error> {
+    let total_posts_length: f64 = perfect_pagination_logic().await? as f64;
     let posts_per_page = total_posts_length / 3.0;
     let posts_per_page = posts_per_page.round();
     let posts_per_page = posts_per_page as i64;
@@ -19,39 +21,40 @@ pub async fn pagination_display(params: web::Query<PaginationParams>) -> Result<
 
     let mut handlebars = handlebars::Handlebars::new();
     let index_template = fs::read_to_string("templates/pagination_page.hbs")
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     handlebars
         .register_template_string("pagination_page", &index_template)
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let paginators = pagination_logic(params.clone()).await
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+    let paginators = pagination_logic(params.clone())
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let _current_page = &params.page;
     let exact_posts_only = select_specific_pages_post(_current_page)
         .await
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let all_category = get_all_categories_database().await
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+    let all_category = get_all_categories_database()
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let _html = handlebars.render("pagination_page", &json!({"a":&paginators,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category}))
         .map_err( actix_web::error::ErrorInternalServerError)?;
 
-
     let mut handlebarss = handlebars::Handlebars::new();
     let index_templates = fs::read_to_string("templates/admin_page.hbs")
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     handlebarss
         .register_template_string("admin_page", &index_templates)
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let htmls = handlebarss.render("admin_page", &json!({"a":&paginators,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category}))
         .map_err( actix_web::error::ErrorInternalServerError)?;
 
-    Ok( HttpResponse::Ok()
+    Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(htmls))
 }
@@ -63,12 +66,10 @@ pub async fn pagination_display(params: web::Query<PaginationParams>) -> Result<
 // |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ an `as` expression can only be used to convert between primitive types or to coerce to a specific trait object
 
 pub async fn perfect_pagination_logic() -> Result<i64, actix_web::error::Error> {
-    dotenv::dotenv()
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+    dotenv::dotenv().map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let db_url = std::env::var("DATABASE_URL")
-        .map_err( actix_web::error::ErrorInternalServerError)?;
-
+    let db_url =
+        std::env::var("DATABASE_URL").map_err(actix_web::error::ErrorInternalServerError)?;
 
     let pool = PgPoolOptions::new()
         .max_connections(100)
@@ -86,7 +87,7 @@ pub async fn perfect_pagination_logic() -> Result<i64, actix_web::error::Error> 
         let title: i64 = row.try_get("count").unwrap();
         counting_final += title;
     }
-   Ok(counting_final)
+    Ok(counting_final)
 }
 
 pub async fn category_pagination_logic(category_input: &String) -> i64 {
