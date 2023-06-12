@@ -28,7 +28,7 @@ pub async fn common_page_controller(
     let paginators = pagination_logic(params.clone())
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    let current_page = &params.page;
+    let current_page = params.page;
     let exact_posts_only = select_specific_pages_post(current_page)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;

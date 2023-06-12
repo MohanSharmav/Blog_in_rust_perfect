@@ -39,7 +39,7 @@ pub async fn delete_category_database(to_delete_category: &str) -> Result<(), an
         .max_connections(100)
         .connect(&db_url)
         .await?;
-    let to_delete_category: i32 = to_delete_category.parse::<i32>().unwrap();
+    let to_delete_category: i32 = to_delete_category.parse::<i32>()?;
     sqlx::query("delete from posts where category_id=$1")
         .bind(to_delete_category)
         .execute(&pool)
@@ -76,7 +76,7 @@ pub async fn update_category_database(
 pub async fn category_pagination_controller_database_function(
     category_id: &str,
 ) -> Result<Vec<Posts>, anyhow::Error> {
-    let category_id = category_id.parse::<i32>().unwrap();
+    let category_id = category_id.parse::<i32>()?;
     dotenv::dotenv()?;
     let db_url = std::env::var("DATABASE_URL")?;
     let pool = PgPoolOptions::new()

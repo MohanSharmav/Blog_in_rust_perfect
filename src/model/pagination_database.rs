@@ -1,12 +1,11 @@
 use crate::model::database::{select_posts, Posts};
-use actix_web::Error as ActixError;
-use actix_web::{web, Result};
+use actix_web::{Error as ActixError, web};
 use serde::Deserialize;
 
 #[derive(Deserialize, Copy, Clone)]
 pub struct PaginationParams {
-    pub(crate) page: Option<i32>,
-    per_page: Option<i32>,
+    pub(crate) page: i32,
+   pub per_page: i32
 }
 
 #[derive(Debug)]
@@ -39,8 +38,8 @@ pub fn paginate<T>(items: Vec<T>, page: i32, per_page: i32) -> Vec<T> {
 pub async fn pagination_logic(
     params: web::Query<PaginationParams>,
 ) -> Result<Vec<Posts>, anyhow::Error> {
-    let page = params.page.unwrap_or(1);
-    let per_page = params.per_page.unwrap_or(3);
+    let page = params.page;
+    let per_page = params.per_page;
     let posts_pagination: Vec<Posts> = select_posts().await?;
     let paginated_users = paginate(posts_pagination.clone(), page, per_page);
     let _posts_per_page_length = posts_pagination.len();

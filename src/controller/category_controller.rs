@@ -157,7 +157,8 @@ pub async fn get_category_with_pagination(
     params: web::Query<PaginationParams>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let category_input: String = path.into_inner();
-    let total_posts_length: f64 = category_pagination_logic(&category_input).await as f64;
+    let total_posts_length= category_pagination_logic(&category_input).await.map_err(actix_web::error::ErrorInternalServerError)?;
+    let total_posts_length=total_posts_length as f64;
     let posts_per_page = total_posts_length / 3.0;
     let posts_per_page = posts_per_page.round();
     let posts_per_page = posts_per_page as i64;
@@ -172,7 +173,8 @@ pub async fn get_category_with_pagination(
         .register_template_string("category", &index_template)
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let current_page = &params.page;
+    let current_page = params.page;
+
     let _exact = select_specific_category_post(current_page, &category_input)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
