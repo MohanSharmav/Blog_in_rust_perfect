@@ -15,20 +15,22 @@ pub struct User {
     pub(crate) username: String,
     pub(crate) password: String,
 }
-pub async fn get_login_page() -> HttpResponse {
+pub async fn get_login_page() -> Result<HttpResponse,actix_web::Error> {
     let mut handlebars = handlebars::Handlebars::new();
-    let index_template = fs::read_to_string("templates/login.hbs").unwrap();
+    let index_template = fs::read_to_string("templates/login.hbs")
+        .map_err( actix_web::error::ErrorInternalServerError)?;
+
     handlebars
         .register_template_string("login", &index_template)
-        .expect("TODO: panic message");
+        .map_err( actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
         .render("login", &json!({"yy":"uuihiuhuihiuhuih"}))
-        .unwrap();
+        .map_err( actix_web::error::ErrorInternalServerError)?;
 
-    HttpResponse::Ok()
+    Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
-        .body(html)
+        .body(html))
 }
 
 pub async fn get_data_from_login_page(
@@ -76,7 +78,8 @@ pub async fn get_data_from_login_page(
     // result == model::authentication::login_database::LoginCheck { value: 1 }
     //{
     if result == y {
-        Identity::login(&req.extensions(), username.to_string()).unwrap();
+        Identity::login(&req.extensions(), username.to_string())
+            .map_err( actix_web::error::ErrorInternalServerError)?;
        Ok(web::Redirect::to("/admin?page=1&limit=2"))
     } else {
         Ok(web::Redirect::to("/login"))
