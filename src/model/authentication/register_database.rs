@@ -1,7 +1,7 @@
 use sqlx::postgres::PgPoolOptions;
 
 pub async fn register_new_user_database(
-    user: &String,
+    user: &str,
     password: String,
 ) -> Result<(), anyhow::Error> {
     dotenv::dotenv()?;
