@@ -69,8 +69,7 @@ pub async fn perfect_pagination_logic() -> Result<i64, actix_web::error::Error> 
     dotenv::dotenv().map_err(actix_web::error::ErrorInternalServerError)?;
 
     let db_url =
-        std::env::var("DATABASE_URL")
-            .map_err(actix_web::error::ErrorInternalServerError)?;
+        std::env::var("DATABASE_URL").map_err(actix_web::error::ErrorInternalServerError)?;
 
     let pool = PgPoolOptions::new()
         .max_connections(100)
@@ -83,16 +82,17 @@ pub async fn perfect_pagination_logic() -> Result<i64, actix_web::error::Error> 
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-
     let mut counting_final: i64 = 0;
     for row in rows {
-        let title: i64 = row.try_get("count").unwrap();
+        let title: i64 = row
+            .try_get("count")
+            .map_err(actix_web::error::ErrorInternalServerError)?;
         counting_final += title;
     }
     Ok(counting_final)
 }
 
-pub async fn category_pagination_logic(category_input: &String) -> Result<i64,anyhow::Error> {
+pub async fn category_pagination_logic(category_input: &String) -> Result<i64, anyhow::Error> {
     dotenv::dotenv()?;
 
     let db_url = std::env::var("DATABASE_URL")?;
@@ -111,8 +111,9 @@ pub async fn category_pagination_logic(category_input: &String) -> Result<i64,an
 
     let mut counting_final: i64 = 0;
     for row in rows {
-        let title: i64 = row.try_get("count").unwrap();
-        counting_final += title;
+        let title:i64 = row.try_get("count")?;
+        //Todo
+       counting_final=title;
     }
     Ok(counting_final)
 }

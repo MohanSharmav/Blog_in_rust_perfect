@@ -1,9 +1,6 @@
 use sqlx::postgres::PgPoolOptions;
 
-pub async fn register_new_user_database(
-    user: &str,
-    password: String,
-) -> Result<(), anyhow::Error> {
+pub async fn register_new_user_database(user: &str, password: String) -> Result<(), anyhow::Error> {
     dotenv::dotenv()?;
     let db_url = std::env::var("DATABASE_URL")?;
     let pool = PgPoolOptions::new()

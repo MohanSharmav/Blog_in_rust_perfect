@@ -7,7 +7,8 @@ pub async fn delete_post_database(to_delete: String) -> Result<(), anyhow::Error
         .max_connections(100)
         .connect(&db_url)
         .await?;
-    let to_delete = to_delete.parse::<i32>().unwrap();
+    let to_delete = to_delete
+        .parse::<i32>()?;
     sqlx::query("delete from posts where id=$1")
         .bind(to_delete)
         .execute(&pool)

@@ -85,7 +85,8 @@ pub async fn delete_category(id: web::Path<String>) -> Result<HttpResponse, acti
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let mut handlebars = handlebars::Handlebars::new();
-    let index_template = fs::read_to_string("templates/message_display.hbs").unwrap();
+    let index_template = fs::read_to_string("templates/message_display.hbs")
+        .map_err(actix_web::error::ErrorInternalServerError)?;
     handlebars
         .register_template_string("message_display", &index_template)
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -157,8 +158,10 @@ pub async fn get_category_with_pagination(
     params: web::Query<PaginationParams>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let category_input: String = path.into_inner();
-    let total_posts_length= category_pagination_logic(&category_input).await.map_err(actix_web::error::ErrorInternalServerError)?;
-    let total_posts_length=total_posts_length as f64;
+    let total_posts_length = category_pagination_logic(&category_input)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+    let total_posts_length = total_posts_length as f64;
     let posts_per_page = total_posts_length / 3.0;
     let posts_per_page = posts_per_page.round();
     let posts_per_page = posts_per_page as i64;
@@ -168,7 +171,8 @@ pub async fn get_category_with_pagination(
     }
 
     let mut handlebars = handlebars::Handlebars::new();
-    let index_template = fs::read_to_string("templates/category.hbs").unwrap();
+    let index_template = fs::read_to_string("templates/category.hbs")
+        .map_err(actix_web::error::ErrorInternalServerError)?;
     handlebars
         .register_template_string("category", &index_template)
         .map_err(actix_web::error::ErrorInternalServerError)?;

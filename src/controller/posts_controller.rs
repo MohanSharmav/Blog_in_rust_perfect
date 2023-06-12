@@ -118,6 +118,7 @@ pub async fn receive_updated_post(
     update_post_database(title, description, &id, &category_id)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
+
     let success_message = "the post created successfully";
     let html = handlebars
         .render("message_display", &json!({ "message": success_message }))

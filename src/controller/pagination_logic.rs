@@ -1,9 +1,7 @@
 use crate::model::database::Posts;
 use sqlx::postgres::PgPoolOptions;
 
-pub async fn select_specific_pages_post(
-    start_page: i32,
-) -> Result<Vec<Posts>,anyhow::Error> {
+pub async fn select_specific_pages_post(start_page: i32) -> Result<Vec<Posts>, anyhow::Error> {
     let start_page = start_page;
 
     let mut new_start_page = start_page;
@@ -12,7 +10,6 @@ pub async fn select_specific_pages_post(
         new_start_page += 2
     }
     dotenv::dotenv()?;
-
 
     let db_url = std::env::var("DATABASE_URL")?;
 

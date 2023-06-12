@@ -1,11 +1,11 @@
 use crate::model::database::{select_posts, Posts};
-use actix_web::{Error as ActixError, web};
+use actix_web::{web, Error as ActixError};
 use serde::Deserialize;
 
 #[derive(Deserialize, Copy, Clone)]
 pub struct PaginationParams {
     pub(crate) page: i32,
-   pub per_page: i32
+    pub per_page: i32,
 }
 
 #[derive(Debug)]
