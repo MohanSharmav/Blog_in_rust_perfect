@@ -43,11 +43,12 @@ pub async fn select_posts() -> Result<Vec<Posts>, anyhow::Error> {
 }
 
 pub async fn get_database_connection() -> Result<PgPool, anyhow::Error> {
+    dotenv::dotenv()?;
     let db_url = std::env::var("DATABASE_URL")?;
 
     let pool = PgPoolOptions::new()
         .max_connections(100)
-        .connect(&*db_url)
+        .connect(&db_url)
         .await?;
-    Ok(pool)
+Ok(pool)
 }
