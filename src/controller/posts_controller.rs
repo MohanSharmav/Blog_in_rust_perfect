@@ -5,8 +5,9 @@ use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
 use serde_json::json;
 use std::fs;
+use sqlx::PgPool;
 
-pub async fn get_new_post() -> Result<HttpResponse, actix_web::Error> {
+pub async fn get_new_post(db: web::Data<PgPool>) -> Result<HttpResponse, actix_web::Error> {
     let mut handlebars = handlebars::Handlebars::new();
     let index_template = fs::read_to_string("templates/new_post.hbs")
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -14,7 +15,7 @@ pub async fn get_new_post() -> Result<HttpResponse, actix_web::Error> {
         .register_template_string("new_post", &index_template)
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let all_categories = get_all_categories_database()
+    let all_categories = get_all_categories_database(&db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

@@ -1,14 +1,17 @@
+use actix_web::web;
+use actix_web::web::Data;
+use sqlx::PgPool;
 use crate::model::database::{Categories, Posts};
 use sqlx::postgres::PgPoolOptions;
-pub async fn get_all_categories_database() -> Result<Vec<Categories>, anyhow::Error> {
-    dotenv::dotenv()?;
-    let db_url = std::env::var("DATABASE_URL")?;
-    let pool = PgPoolOptions::new()
-        .max_connections(100)
-        .connect(&db_url)
-        .await?;
+pub async fn get_all_categories_database(db: &sqlx::PgPool) -> Result<Vec<Categories>, anyhow::Error> {
+    // let db_url = std::env::var("DATABASE_URL")?;
+    // dotenv::dotenv()?;
+    // let pool = PgPoolOptions::new()
+    //     .max_connections(100)
+    //     .connect(&db_url)
+    //     .await?;
     let all_categories = sqlx::query_as::<_, Categories>("select name,id from categories")
-        .fetch_all(&pool)
+        .fetch_all(db)
         .await?;
 
     Ok(all_categories)

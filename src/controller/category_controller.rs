@@ -10,8 +10,9 @@ use actix_web::{web, HttpResponse};
 use anyhow::Result;
 use serde_json::json;
 use std::fs;
+use sqlx::PgPool;
 
-pub async fn get_all_categories_controller() -> Result<HttpResponse, actix_web::Error> {
+pub async fn get_all_categories_controller(db: web::Data<PgPool>) -> Result<HttpResponse, actix_web::Error> {
     let mut handlebars = handlebars::Handlebars::new();
     let index_template = fs::read_to_string("templates/all_categories.hbs")
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -20,7 +21,7 @@ pub async fn get_all_categories_controller() -> Result<HttpResponse, actix_web::
         .register_template_string("all_categories", &index_template)
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let all_categories = get_all_categories_database()
+    let all_categories = get_all_categories_database(&db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

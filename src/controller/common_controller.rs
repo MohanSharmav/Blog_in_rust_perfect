@@ -6,9 +6,11 @@ use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
 use serde_json::json;
 use std::fs;
+use sqlx::PgPool;
 
 pub async fn common_page_controller(
     params: web::Query<PaginationParams>,
+    db: web::Data<PgPool>
 ) -> Result<HttpResponse, actix_web::Error> {
     let total_posts_length: f64 = perfect_pagination_logic().await? as f64;
     let posts_per_page = total_posts_length / 3.0;
@@ -34,7 +36,7 @@ pub async fn common_page_controller(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let all_category = get_all_categories_database()
+    let all_category = get_all_categories_database(&db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

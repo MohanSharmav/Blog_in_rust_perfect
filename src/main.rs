@@ -35,10 +35,10 @@ async fn main() -> Result<(), anyhow::Error> {
     let cookie_secure = false;
     #[cfg(not(feature = "cors_for_local_development"))]
     let cookie_secure = true;
-
+let database_connection=get_database_connection().await?;
     HttpServer::new(move || {
         App::new()
-            .app_data(get_database_connection)
+            .app_data(database_connection.clone())
             .wrap(IdentityMiddleware::default())
             .wrap(
                 SessionMiddleware::builder(CookieSessionStore::default(), secret_key.clone())
