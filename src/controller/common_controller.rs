@@ -37,7 +37,6 @@ pub async fn common_page_controller(
     let all_category = get_all_categories_database()
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    let _html = handlebars.render("common", &json!({"a":&paginators,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category})).map_err( actix_web::error::ErrorInternalServerError)?;
 
     let mut handlebarss = handlebars::Handlebars::new();
     let index_templates = fs::read_to_string("templates/common.hbs")

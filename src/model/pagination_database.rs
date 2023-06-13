@@ -42,6 +42,5 @@ pub async fn pagination_logic(
     let per_page = params.per_page;
     let posts_pagination: Vec<Posts> = select_posts().await?;
     let paginated_users = paginate(posts_pagination.clone(), page, per_page);
-    let _posts_per_page_length = posts_pagination.len();
     Ok(paginated_users)
 }

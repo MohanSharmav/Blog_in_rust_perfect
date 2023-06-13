@@ -29,10 +29,5 @@ pub async fn login_database(users: &String, password: String) -> Result<LoginChe
             .fetch_one(&pool)
             .await?;
 
-    //     for row in v {
-    //         let title: i64 = row.try_get("count").unwrap();
-    //         counting_final += title;
-    //     }
-    // type(row);
     Ok(v)
 }

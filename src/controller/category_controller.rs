@@ -1,5 +1,4 @@
 use crate::controller::pagination_controller::category_pagination_logic;
-use crate::controller::pagination_logic::select_specific_category_post;
 use crate::model::category_database::{
     category_pagination_controller_database_function, create_new_category_database,
     delete_category_database, get_all_categories_database, update_category_database,
@@ -155,7 +154,7 @@ pub async fn receive_updated_category(
 
 pub async fn get_category_with_pagination(
     path: web::Path<String>,
-    params: web::Query<PaginationParams>,
+    _params: web::Query<PaginationParams>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let category_input: String = path.into_inner();
     let total_posts_length = category_pagination_logic(&category_input)
@@ -175,12 +174,6 @@ pub async fn get_category_with_pagination(
         .map_err(actix_web::error::ErrorInternalServerError)?;
     handlebars
         .register_template_string("category", &index_template)
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    let current_page = params.page;
-
-    let _exact = select_specific_category_post(current_page, &category_input)
-        .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let category_postinng = category_pagination_controller_database_function(&category_input)

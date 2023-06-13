@@ -21,6 +21,7 @@ pub async fn get_single_post(path: web::Path<String>) -> Result<HttpResponse, ac
     let single_post_struct = query_single_post_in_struct(titles)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
+
     let html = handlebars
         .render(
             "single",

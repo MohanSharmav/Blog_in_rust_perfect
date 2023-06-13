@@ -14,6 +14,5 @@ pub async fn register_new_user_database(user: &str, password: String) -> Result<
         .execute(&pool)
         .await?;
 
-    let _user = user.to_string();
     Ok(())
 }

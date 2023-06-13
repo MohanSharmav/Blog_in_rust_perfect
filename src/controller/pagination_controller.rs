@@ -41,9 +41,6 @@ pub async fn pagination_display(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let _html = handlebars.render("pagination_page", &json!({"a":&paginators,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category}))
-        .map_err( actix_web::error::ErrorInternalServerError)?;
-
     let mut handlebarss = handlebars::Handlebars::new();
     let index_templates = fs::read_to_string("templates/admin_page.hbs")
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -59,12 +56,6 @@ pub async fn pagination_display(
         .content_type(ContentType::html())
         .body(htmls))
 }
-// TODO:
-// error[E0605]: non-primitive cast: `Result<i64, actix_web::Error>` as `f64`
-// --> src/controller/common_controller.rs:10:35
-// |
-// 10 | ... = perfect_pagination_logic().await as f64;
-// |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ an `as` expression can only be used to convert between primitive types or to coerce to a specific trait object
 
 pub async fn perfect_pagination_logic() -> Result<i64, actix_web::error::Error> {
     dotenv::dotenv().map_err(actix_web::error::ErrorInternalServerError)?;

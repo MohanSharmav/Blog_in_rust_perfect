@@ -26,7 +26,7 @@ pub async fn get_new_post() -> Result<HttpResponse, actix_web::Error> {
         .content_type(ContentType::html())
         .body(html))
 }
-pub async fn receive_new_posts(form: web::Form<Posts>) -> Result<HttpResponse, actix_web::Error> {
+pub async fn receive_new_posts(_form: web::Form<Posts>) -> Result<HttpResponse, actix_web::Error> {
     let mut handlebars = handlebars::Handlebars::new();
     let index_template = fs::read_to_string("templates/message_display.hbs")
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -34,10 +34,6 @@ pub async fn receive_new_posts(form: web::Form<Posts>) -> Result<HttpResponse, a
         .register_template_string("message_display", &index_template)
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let _id = &form.id;
-    let _title = &form.title;
-    let _description = &form.description;
-    let _category_id = &form.category_id;
     let success_message = "the post created successfully";
     let html = handlebars
         .render("message_display", &json!({ "message": success_message }))
@@ -100,7 +96,7 @@ pub async fn update_post_helper(ids: &String) -> &String {
 }
 pub async fn receive_updated_post(
     form: web::Form<Posts>,
-    current_post_name: web::Path<String>,
+    _current_post_name: web::Path<String>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let mut handlebars = handlebars::Handlebars::new();
     let index_template = fs::read_to_string("templates/message_display.hbs")
@@ -110,7 +106,6 @@ pub async fn receive_updated_post(
         .register_template_string("message_display", &index_template)
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let _current_post_name = &current_post_name.into_inner();
     let id = &form.id;
     let title = &form.title;
     let category_id = &form.category_id;
