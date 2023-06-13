@@ -19,16 +19,16 @@ use actix_web::cookie::Key;
 
 use crate::controller::authentication::register::{get_data_from_register_page, get_register_page};
 use crate::controller::common_controller::common_page_controller;
+use crate::model::database::get_database_connection;
 use actix_identity::IdentityMiddleware;
 use actix_session::config::PersistentSession;
 use actix_session::storage::CookieSessionStore;
 use actix_session::SessionMiddleware;
-use crate::model::database::get_database_connection;
 
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
 
-#[tokio::main]
+#[actix_web::main]
 async fn main() -> Result<(), anyhow::Error> {
     let secret_key = Key::generate();
     #[cfg(feature = "cors_for_local_development")]
@@ -36,7 +36,7 @@ async fn main() -> Result<(), anyhow::Error> {
     #[cfg(not(feature = "cors_for_local_development"))]
     let cookie_secure = true;
 
-    HttpServer::new( move || {
+    HttpServer::new(move || {
         App::new()
             .app_data(get_database_connection)
             .wrap(IdentityMiddleware::default())
@@ -91,5 +91,6 @@ async fn main() -> Result<(), anyhow::Error> {
     .bind("127.0.0.1:8080")?
     .run()
     .await?;
+
     Ok(())
 }

@@ -1,10 +1,10 @@
 use crate::controller::authentication::login::User;
 use crate::model::authentication::register_database::register_new_user_database;
+use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
 use magic_crypt::{new_magic_crypt, MagicCryptTrait};
 use serde_json::json;
 use std::fs;
-use actix_web::http::header::ContentType;
 
 pub async fn get_register_page() -> Result<HttpResponse, actix_web::Error> {
     let mut handlebars = handlebars::Handlebars::new();
@@ -19,8 +19,7 @@ pub async fn get_register_page() -> Result<HttpResponse, actix_web::Error> {
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
-                .content_type(ContentType::html())
-
+        .content_type(ContentType::html())
         .body(html))
 }
 
@@ -30,8 +29,8 @@ pub async fn get_data_from_register_page(
     let user = &form.username;
     let password = &form.password;
 
-    let magic_key = std::env::var("MAGIC_KEY")
-        .map_err(actix_web::error::ErrorInternalServerError)?;
+    let magic_key =
+        std::env::var("MAGIC_KEY").map_err(actix_web::error::ErrorInternalServerError)?;
 
     let mcrypt = new_magic_crypt!(magic_key, 256);
 
@@ -55,7 +54,6 @@ pub async fn get_data_from_register_page(
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
-                .content_type(ContentType::html())
-
+        .content_type(ContentType::html())
         .body(html))
 }

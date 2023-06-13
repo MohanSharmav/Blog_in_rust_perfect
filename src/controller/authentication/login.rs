@@ -1,11 +1,11 @@
+use actix_identity::Identity;
+use actix_web::http::header::ContentType;
+use actix_web::web::Redirect;
 use actix_web::{web, HttpResponse};
+use actix_web::{HttpMessage as _, HttpRequest, Responder};
 use serde::Deserialize;
 use serde_json::json;
 use std::fs;
-use actix_web::http::header::ContentType;
-use actix_identity::Identity;
-use actix_web::web::Redirect;
-use actix_web::{HttpMessage as _, HttpRequest, Responder};
 
 use crate::model::authentication::login_database::{login_database, LoginCheck};
 use magic_crypt::{new_magic_crypt, MagicCryptTrait};
@@ -29,8 +29,7 @@ pub async fn get_login_page() -> Result<HttpResponse, actix_web::Error> {
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
-                .content_type(ContentType::html())
-
+        .content_type(ContentType::html())
         .body(html))
 }
 
@@ -42,9 +41,8 @@ pub async fn get_data_from_login_page(
     let username = &form.username;
     let password = &form.password.to_string();
 
-
-    let magic_key = std::env::var("MAGIC_KEY")
-        .map_err(actix_web::error::ErrorInternalServerError)?;
+    let magic_key =
+        std::env::var("MAGIC_KEY").map_err(actix_web::error::ErrorInternalServerError)?;
 
     let mcrypt = new_magic_crypt!(magic_key, 256); //Creates an instance of the magic crypt library/crate.
     let encrypted_password = mcrypt.encrypt_str_to_base64(password);
@@ -52,7 +50,6 @@ pub async fn get_data_from_login_page(
     let result = login_database(username, encrypted_password)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    let _x = 1_i64;
     let y = LoginCheck { value: 1 };
 
     if result == y {

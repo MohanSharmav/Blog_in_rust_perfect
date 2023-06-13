@@ -15,7 +15,6 @@ pub async fn query_single_post(titles: i32) -> Result<Vec<String>, anyhow::Error
         .bind(titles)
         .fetch_all(&pool)
         .await?;
-    let _x: i32 = 0;
     for row in rows {
         let title: String = row.get("title");
         let description: String = row.get("description");

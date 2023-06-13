@@ -6,11 +6,11 @@ use crate::model::category_database::{
 };
 use crate::model::database::Categories;
 use crate::model::pagination_database::PaginationParams;
+use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
 use anyhow::Result;
 use serde_json::json;
 use std::fs;
-use actix_web::http::header::ContentType;
 
 pub async fn get_all_categories_controller() -> Result<HttpResponse, actix_web::Error> {
     let mut handlebars = handlebars::Handlebars::new();
@@ -48,8 +48,7 @@ pub async fn get_new_category() -> Result<HttpResponse, actix_web::Error> {
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
-                .content_type(ContentType::html())
-
+        .content_type(ContentType::html())
         .body(html))
 }
 
@@ -76,8 +75,7 @@ pub async fn receive_new_category(
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
-                .content_type(ContentType::html())
-
+        .content_type(ContentType::html())
         .body(html))
 }
 
@@ -100,8 +98,7 @@ pub async fn delete_category(id: web::Path<String>) -> Result<HttpResponse, acti
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
-                .content_type(ContentType::html())
-
+        .content_type(ContentType::html())
         .body(html))
 }
 
@@ -126,8 +123,7 @@ pub async fn page_to_update_category(
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
-                .content_type(ContentType::html())
-
+        .content_type(ContentType::html())
         .body(html))
 }
 
@@ -144,7 +140,6 @@ pub async fn receive_updated_category(
 
     let current_post_name = &current_category_name.into_inner();
     let name = &form.name;
-    let _id = &form.id;
     update_category_database(name, current_post_name)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -154,8 +149,7 @@ pub async fn receive_updated_category(
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
-                .content_type(ContentType::html())
-
+        .content_type(ContentType::html())
         .body(html))
 }
 
@@ -175,8 +169,6 @@ pub async fn get_category_with_pagination(
     for i in 0..posts_per_page {
         pages_count.push(i + 1_i64);
     }
-
-
 
     let mut handlebars = handlebars::Handlebars::new();
     let index_template = fs::read_to_string("templates/category.hbs")
@@ -203,7 +195,6 @@ pub async fn get_category_with_pagination(
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
-                .content_type(ContentType::html())
-
+        .content_type(ContentType::html())
         .body(html))
 }

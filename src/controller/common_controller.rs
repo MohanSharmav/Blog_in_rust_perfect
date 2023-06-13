@@ -2,10 +2,10 @@ use crate::controller::pagination_controller::perfect_pagination_logic;
 use crate::controller::pagination_logic::select_specific_pages_post;
 use crate::model::category_database::get_all_categories_database;
 use crate::model::pagination_database::{pagination_logic, PaginationParams};
+use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
 use serde_json::json;
 use std::fs;
-use actix_web::http::header::ContentType;
 
 pub async fn common_page_controller(
     params: web::Query<PaginationParams>,
@@ -51,7 +51,6 @@ pub async fn common_page_controller(
         .map_err( actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
-                .content_type(ContentType::html())
-
+        .content_type(ContentType::html())
         .body(htmls))
 }
