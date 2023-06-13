@@ -7,7 +7,6 @@ pub async fn get_all_categories_database() -> Result<Vec<Categories>, anyhow::Er
         .max_connections(100)
         .connect(&db_url)
         .await?;
-
     let all_categories = sqlx::query_as::<_, Categories>("select name,id from categories")
         .fetch_all(&pool)
         .await?;

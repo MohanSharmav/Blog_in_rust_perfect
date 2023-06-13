@@ -4,6 +4,7 @@ use crate::model::posts_database::{delete_post_database, update_post_database};
 use actix_web::{web, HttpResponse};
 use serde_json::json;
 use std::fs;
+use actix_web::http::header::ContentType;
 
 pub async fn get_new_post() -> Result<HttpResponse, actix_web::Error> {
     let mut handlebars = handlebars::Handlebars::new();
@@ -22,7 +23,8 @@ pub async fn get_new_post() -> Result<HttpResponse, actix_web::Error> {
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
-        .content_type("text/html; charset=utf-8")
+                .content_type(ContentType::html())
+
         .body(html))
 }
 pub async fn receive_new_posts(form: web::Form<Posts>) -> Result<HttpResponse, actix_web::Error> {
@@ -43,7 +45,8 @@ pub async fn receive_new_posts(form: web::Form<Posts>) -> Result<HttpResponse, a
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
-        .content_type("text/html; charset=utf-8")
+                .content_type(ContentType::html())
+
         .body(html))
 }
 
@@ -66,7 +69,8 @@ pub async fn delete_post(to_delete: web::Path<String>) -> Result<HttpResponse, a
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
-        .content_type("text/html; charset=utf-8")
+                .content_type(ContentType::html())
+
         .body(html))
 }
 
@@ -90,7 +94,8 @@ pub async fn page_to_update_post(
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
     Ok(HttpResponse::Ok()
-        .content_type("text/html; charset=utf-8")
+                .content_type(ContentType::html())
+
         .body(html))
 }
 
@@ -125,6 +130,7 @@ pub async fn receive_updated_post(
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
-        .content_type("text/html; charset=utf-8")
+                .content_type(ContentType::html())
+
         .body(html))
 }

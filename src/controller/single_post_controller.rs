@@ -2,6 +2,7 @@ use crate::model::single_posts_database::{query_single_post, query_single_post_i
 use actix_web::{web, HttpResponse};
 use serde_json::json;
 use std::fs;
+use actix_web::http::header::ContentType;
 
 pub async fn get_single_post(path: web::Path<String>) -> Result<HttpResponse, actix_web::Error> {
     let titles = path.parse::<i32>().unwrap_or_default();
@@ -28,6 +29,7 @@ pub async fn get_single_post(path: web::Path<String>) -> Result<HttpResponse, ac
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
-        .content_type("text/html; charset=utf-8")
+                .content_type(ContentType::html())
+
         .body(html))
 }

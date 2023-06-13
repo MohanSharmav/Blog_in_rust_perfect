@@ -5,6 +5,7 @@ use crate::model::pagination_database::{pagination_logic, PaginationParams};
 use actix_web::{web, HttpResponse};
 use serde_json::json;
 use std::fs;
+use actix_web::http::header::ContentType;
 
 pub async fn common_page_controller(
     params: web::Query<PaginationParams>,
@@ -50,6 +51,7 @@ pub async fn common_page_controller(
         .map_err( actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
-        .content_type("text/html; charset=utf-8")
+                .content_type(ContentType::html())
+
         .body(htmls))
 }

@@ -6,6 +6,7 @@ use serde_json::json;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::Row;
 use std::fs;
+use actix_web::http::header::ContentType;
 
 pub async fn pagination_display(
     params: web::Query<PaginationParams>,
@@ -55,7 +56,8 @@ pub async fn pagination_display(
         .map_err( actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
-        .content_type("text/html; charset=utf-8")
+                .content_type(ContentType::html())
+
         .body(htmls))
 }
 // TODO:

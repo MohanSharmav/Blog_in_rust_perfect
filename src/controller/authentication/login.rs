@@ -2,7 +2,7 @@ use actix_web::{web, HttpResponse};
 use serde::Deserialize;
 use serde_json::json;
 use std::fs;
-
+use actix_web::http::header::ContentType;
 use actix_identity::Identity;
 use actix_web::web::Redirect;
 use actix_web::{HttpMessage as _, HttpRequest, Responder};
@@ -29,7 +29,8 @@ pub async fn get_login_page() -> Result<HttpResponse, actix_web::Error> {
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
-        .content_type("text/html; charset=utf-8")
+                .content_type(ContentType::html())
+
         .body(html))
 }
 
@@ -41,7 +42,11 @@ pub async fn get_data_from_login_page(
     let username = &form.username;
     let password = &form.password.to_string();
 
-    let mcrypt = new_magic_crypt!("magickey", 256); //Creates an instance of the magic crypt library/crate.
+
+    let magic_key = std::env::var("MAGIC_KEY")
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    let mcrypt = new_magic_crypt!(magic_key, 256); //Creates an instance of the magic crypt library/crate.
     let encrypted_password = mcrypt.encrypt_str_to_base64(password);
 
     let result = login_database(username, encrypted_password)

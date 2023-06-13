@@ -42,13 +42,13 @@ pub async fn select_posts() -> Result<Vec<Posts>, anyhow::Error> {
     Ok(postsing)
 }
 
-pub async fn get_database_connection() -> Result<Pool<Postgres>,anyhow::Error> {
+pub async unsafe fn get_database_connection() -> Result<Pool<Postgres>,anyhow::Error> {
     dotenv::dotenv()?;
-    let db_url = std::env::var("DATABASE_URL")?;
+   let db_url = std::env::var("DATABASE_URL")?;
 
-    let pool = PgPoolOptions::new()
+let pool = PgPoolOptions::new()
         .max_connections(100)
-        .connect(&db_url)
+        .connect(&*std::env::var("DATABASE_URL")?)
         .await?;
     Ok(pool)
 }
