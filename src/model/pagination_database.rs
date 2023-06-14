@@ -42,7 +42,7 @@ pub async fn pagination_logic(
 ) -> Result<Vec<Posts>, anyhow::Error> {
     let page = params.page;
     let per_page = params.per_page;
-    let posts_pagination: Vec<Posts> = select_posts(&db).await?;
-    let paginated_users = paginate(posts_pagination.clone(), page, per_page);
+    let posts_pagination: Vec<Posts> = select_posts(db).await?;
+    let paginated_users = paginate(posts_pagination, page, per_page);
     Ok(paginated_users)
 }
