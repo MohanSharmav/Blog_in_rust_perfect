@@ -5,7 +5,6 @@ use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
 use handlebars::Handlebars;
 use magic_crypt::{new_magic_crypt, MagicCryptTrait};
-use serde::de::DeserializeOwned;
 use serde_json::json;
 use sqlx::PgPool;
 
@@ -25,7 +24,7 @@ pub async fn get_data_from_register_page(
     form: web::Form<User>,
     db: web::Data<PgPool>,
     handlebars: web::Data<Handlebars<'_>>,
-    mag: &web::Data<Config>,
+    mag: web::Data<Config>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let user = &form.username;
     let password = &form.password;

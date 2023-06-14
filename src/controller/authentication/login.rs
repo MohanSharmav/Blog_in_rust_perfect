@@ -33,7 +33,7 @@ pub async fn get_data_from_login_page(
     req: HttpRequest,
     _user: Option<Identity>,
     db: web::Data<PgPool>,
-    mag: &web::Data<Config>,
+    mag: web::Data<Config>,
 ) -> Result<Redirect, actix_web::Error> {
     let username = &form.username;
     let password = &form.password.to_string();
