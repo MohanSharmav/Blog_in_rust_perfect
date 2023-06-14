@@ -10,9 +10,9 @@ use std::fs;
 
 pub async fn pagination_display(
     params: web::Query<PaginationParams>,
-    db: web::Data<PgPool>
+    db: web::Data<PgPool>,
 ) -> Result<HttpResponse, actix_web::Error> {
-    let total_posts_length: f64 = perfect_pagination_logic().await? as f64;
+    let total_posts_length: f64 = perfect_pagination_logic(&db).await? as f64;
     let posts_per_page = total_posts_length / 3.0;
     let posts_per_page = posts_per_page.round();
     let posts_per_page = posts_per_page as i64;
@@ -29,12 +29,12 @@ pub async fn pagination_display(
         .register_template_string("pagination_page", &index_template)
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let paginators = pagination_logic(params.clone())
+    let paginators = pagination_logic(params.clone(), &db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let _current_page = params.page;
-    let exact_posts_only = select_specific_pages_post(_current_page)
+    let exact_posts_only = select_specific_pages_post(_current_page, &db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -58,20 +58,11 @@ pub async fn pagination_display(
         .body(htmls))
 }
 
-pub async fn perfect_pagination_logic() -> Result<i64, actix_web::error::Error> {
-    dotenv::dotenv().map_err(actix_web::error::ErrorInternalServerError)?;
-
-    let db_url =
-        std::env::var("DATABASE_URL").map_err(actix_web::error::ErrorInternalServerError)?;
-
-    let pool = PgPoolOptions::new()
-        .max_connections(100)
-        .connect(&db_url)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
+pub async fn perfect_pagination_logic(
+    db: &web::Data<PgPool>,
+) -> Result<i64, actix_web::error::Error> {
     let rows = sqlx::query("SELECT COUNT(*) FROM posts")
-        .fetch_all(&pool)
+        .fetch_all(&***db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

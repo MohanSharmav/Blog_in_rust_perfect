@@ -5,14 +5,14 @@ use crate::model::pagination_database::{pagination_logic, PaginationParams};
 use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
 use serde_json::json;
-use std::fs;
 use sqlx::PgPool;
+use std::fs;
 
 pub async fn common_page_controller(
     params: web::Query<PaginationParams>,
-    db: web::Data<PgPool>
+    db: web::Data<PgPool>,
 ) -> Result<HttpResponse, actix_web::Error> {
-    let total_posts_length: f64 = perfect_pagination_logic().await? as f64;
+    let total_posts_length: f64 = perfect_pagination_logic(&db).await? as f64;
     let posts_per_page = total_posts_length / 3.0;
     let posts_per_page = posts_per_page.round();
     let posts_per_page = posts_per_page as i64;
@@ -28,11 +28,11 @@ pub async fn common_page_controller(
         .register_template_string("common", &index_template)
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let paginators = pagination_logic(params.clone())
+    let paginators = pagination_logic(params.clone(), &db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     let current_page = params.page;
-    let exact_posts_only = select_specific_pages_post(current_page)
+    let exact_posts_only = select_specific_pages_post(current_page, &db.clone())
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

@@ -1,19 +1,15 @@
 use crate::model::database::Posts;
-use sqlx::postgres::PgPoolOptions;
-use sqlx::Row;
+use actix_web::web::Data;
+use sqlx::{PgPool, Row};
 
-pub async fn query_single_post(titles: i32) -> Result<Vec<String>, anyhow::Error> {
-    dotenv::dotenv()?;
-    let db_url = std::env::var("DATABASE_URL")?;
-    let pool = PgPoolOptions::new()
-        .max_connections(100)
-        .connect(&db_url)
-        .await?;
-
+pub async fn query_single_post(
+    titles: i32,
+    db: &Data<PgPool>,
+) -> Result<Vec<String>, anyhow::Error> {
     let mut single_post = Vec::new();
     let rows = sqlx::query("SELECT title,description FROM posts WHERE id=$1")
         .bind(titles)
-        .fetch_all(&pool)
+        .fetch_all(&***db)
         .await?;
     for row in rows {
         let title: String = row.get("title");
@@ -23,19 +19,15 @@ pub async fn query_single_post(titles: i32) -> Result<Vec<String>, anyhow::Error
     }
     Ok(single_post)
 }
-pub async fn query_single_post_in_struct(titles: i32) -> Result<Vec<Posts>, anyhow::Error> {
-    dotenv::dotenv()?;
-    let db_url = std::env::var("DATABASE_URL")?;
-    let pool = PgPoolOptions::new()
-        .max_connections(100)
-        .connect(&db_url)
-        .await?;
-
+pub async fn query_single_post_in_struct(
+    titles: i32,
+    db: &Data<PgPool>,
+) -> Result<Vec<Posts>, anyhow::Error> {
     let single_post = sqlx::query_as::<_, Posts>(
         "select id, title, description, category_id from posts  WHERE id=$1",
     )
     .bind(titles)
-    .fetch_all(&pool)
+    .fetch_all(&***db)
     .await?;
     Ok(single_post)
 }

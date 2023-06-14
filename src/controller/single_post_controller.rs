@@ -2,9 +2,13 @@ use crate::model::single_posts_database::{query_single_post, query_single_post_i
 use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
 use serde_json::json;
+use sqlx::PgPool;
 use std::fs;
 
-pub async fn get_single_post(path: web::Path<String>) -> Result<HttpResponse, actix_web::Error> {
+pub async fn get_single_post(
+    path: web::Path<String>,
+    db: web::Data<PgPool>,
+) -> Result<HttpResponse, actix_web::Error> {
     let titles = path.parse::<i32>().unwrap_or_default();
     //Todo
     let mut handlebars = handlebars::Handlebars::new();
@@ -14,11 +18,11 @@ pub async fn get_single_post(path: web::Path<String>) -> Result<HttpResponse, ac
         .register_template_string("single", &index_template)
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let single_post = query_single_post(titles)
+    let single_post = query_single_post(titles, &db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let single_post_struct = query_single_post_in_struct(titles)
+    let single_post_struct = query_single_post_in_struct(titles, &db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

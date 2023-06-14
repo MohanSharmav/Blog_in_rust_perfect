@@ -1,6 +1,7 @@
 use crate::model::database::{select_posts, Posts};
 use actix_web::{web, Error as ActixError};
 use serde::Deserialize;
+use sqlx::PgPool;
 
 #[derive(Deserialize, Copy, Clone)]
 pub struct PaginationParams {
@@ -37,10 +38,11 @@ pub fn paginate<T>(items: Vec<T>, page: i32, per_page: i32) -> Vec<T> {
 
 pub async fn pagination_logic(
     params: web::Query<PaginationParams>,
+    db: &web::Data<PgPool>,
 ) -> Result<Vec<Posts>, anyhow::Error> {
     let page = params.page;
     let per_page = params.per_page;
-    let posts_pagination: Vec<Posts> = select_posts().await?;
+    let posts_pagination: Vec<Posts> = select_posts(&db).await?;
     let paginated_users = paginate(posts_pagination.clone(), page, per_page);
     Ok(paginated_users)
 }

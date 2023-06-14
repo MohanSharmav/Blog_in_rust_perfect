@@ -1,20 +1,21 @@
-use actix_web::web;
+use crate::model::database::{Categories, Posts};
 use actix_web::web::Data;
 use sqlx::PgPool;
-use crate::model::database::{Categories, Posts};
-use sqlx::postgres::PgPoolOptions;
- pub async fn get_all_categories_database(db: &sqlx::PgPool) -> Result<Vec<Categories>, anyhow::Error>
-{
-
+pub async fn get_all_categories_database(
+    db: &Data<PgPool>,
+) -> Result<Vec<Categories>, anyhow::Error> {
     let all_categories = sqlx::query_as::<_, Categories>("select name,id from categories")
-        .fetch_all(db)
+        .fetch_all(&***db)
         .await?;
 
     Ok(all_categories)
 }
 
-pub async fn create_new_category_database(db: &sqlx::PgPool, name: &String, id: &i32) -> Result<(), anyhow::Error>
-{
+pub async fn create_new_category_database(
+    db: &PgPool,
+    name: &String,
+    id: &i32,
+) -> Result<(), anyhow::Error> {
     sqlx::query("insert into categories(id,name) values ($1,$2) ")
         .bind(id)
         .bind(name)
@@ -24,8 +25,10 @@ pub async fn create_new_category_database(db: &sqlx::PgPool, name: &String, id: 
     Ok(())
 }
 
-pub async fn delete_category_database(db: &sqlx::PgPool,to_delete_category: &str) -> Result<(), anyhow::Error> {
-
+pub async fn delete_category_database(
+    db: &sqlx::PgPool,
+    to_delete_category: &str,
+) -> Result<(), anyhow::Error> {
     let to_delete_category: i32 = to_delete_category.parse::<i32>()?;
     sqlx::query("delete from posts where category_id=$1")
         .bind(to_delete_category)
@@ -45,7 +48,6 @@ pub async fn update_category_database(
     category_id: &str,
     db: &sqlx::PgPool,
 ) -> Result<(), anyhow::Error> {
-
     let category_id = category_id.parse::<i32>()?;
     sqlx::query("update categories set name=$1 where id=$2")
         .bind(name)

@@ -4,6 +4,7 @@ use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
 use magic_crypt::{new_magic_crypt, MagicCryptTrait};
 use serde_json::json;
+use sqlx::PgPool;
 use std::fs;
 
 pub async fn get_register_page() -> Result<HttpResponse, actix_web::Error> {
@@ -25,6 +26,7 @@ pub async fn get_register_page() -> Result<HttpResponse, actix_web::Error> {
 
 pub async fn get_data_from_register_page(
     form: web::Form<User>,
+    db: web::Data<PgPool>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let user = &form.username;
     let password = &form.password;
@@ -44,7 +46,7 @@ pub async fn get_data_from_register_page(
         .register_template_string("message_display", &index_template)
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    register_new_user_database(user, encrypted_password)
+    register_new_user_database(user, encrypted_password, &db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

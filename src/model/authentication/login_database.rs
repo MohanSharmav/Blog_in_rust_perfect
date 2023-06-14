@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use sqlx::postgres::{PgPoolOptions, PgRow};
+use sqlx::postgres::PgRow;
 use sqlx::{Error, FromRow, Row};
 
 #[derive(Deserialize, Debug, Clone, PartialEq)]
@@ -14,19 +14,16 @@ impl<'r> FromRow<'r, PgRow> for LoginCheck {
     }
 }
 
-pub async fn login_database(users: &String, password: String) -> Result<LoginCheck, anyhow::Error> {
-    dotenv::dotenv()?;
-    let db_url = std::env::var("DATABASE_URL")?;
-    let pool = PgPoolOptions::new()
-        .max_connections(100)
-        .connect(&db_url)
-        .await?;
-
+pub async fn login_database(
+    users: &String,
+    password: String,
+    db: &sqlx::PgPool,
+) -> Result<LoginCheck, anyhow::Error> {
     let v =
         sqlx::query_as::<_, LoginCheck>("select count(1) from users where name=$1 AND password=$2")
             .bind(users)
             .bind(password)
-            .fetch_one(&pool)
+            .fetch_one(db)
             .await?;
 
     Ok(v)
