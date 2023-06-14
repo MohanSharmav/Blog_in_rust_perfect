@@ -6,14 +6,10 @@ use magic_crypt::{new_magic_crypt, MagicCryptTrait};
 use serde_json::json;
 use sqlx::PgPool;
 use std::fs;
+use handlebars::Handlebars;
 
-pub async fn get_register_page() -> Result<HttpResponse, actix_web::Error> {
-    let mut handlebars = handlebars::Handlebars::new();
-    let index_template = fs::read_to_string("templates/register.hbs")
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-    handlebars
-        .register_template_string("register", &index_template)
-        .map_err(actix_web::error::ErrorInternalServerError)?;
+pub async fn get_register_page(    handlebars: web::Data<Handlebars<'_>>
+) -> Result<HttpResponse, actix_web::Error> {
 
     let html = handlebars
         .render("register", &json!({"yy":"uuihiuhuihiuhuih"}))
@@ -27,6 +23,8 @@ pub async fn get_register_page() -> Result<HttpResponse, actix_web::Error> {
 pub async fn get_data_from_register_page(
     form: web::Form<User>,
     db: web::Data<PgPool>,
+    handlebars: web::Data<Handlebars<'_>>
+
 ) -> Result<HttpResponse, actix_web::Error> {
     let user = &form.username;
     let password = &form.password;
@@ -37,14 +35,6 @@ pub async fn get_data_from_register_page(
     let mcrypt = new_magic_crypt!(magic_key, 256);
 
     let encrypted_password = mcrypt.encrypt_str_to_base64(password); //Encrypts the string and saves it to the 'encrypted_string' variable.
-
-    let mut handlebars = handlebars::Handlebars::new();
-    let index_template = fs::read_to_string("templates/message_display.hbs")
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    handlebars
-        .register_template_string("message_display", &index_template)
-        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     register_new_user_database(user, encrypted_password, &db)
         .await

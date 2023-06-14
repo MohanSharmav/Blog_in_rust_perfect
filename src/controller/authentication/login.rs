@@ -6,6 +6,7 @@ use actix_web::{HttpMessage as _, HttpRequest, Responder};
 use serde::Deserialize;
 use serde_json::json;
 use std::fs;
+use handlebars::Handlebars;
 
 use crate::model::authentication::login_database::{login_database, LoginCheck};
 use magic_crypt::{new_magic_crypt, MagicCryptTrait};
@@ -16,14 +17,8 @@ pub struct User {
     pub(crate) username: String,
     pub(crate) password: String,
 }
-pub async fn get_login_page() -> Result<HttpResponse, actix_web::Error> {
-    let mut handlebars = handlebars::Handlebars::new();
-    let index_template = fs::read_to_string("templates/login.hbs")
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    handlebars
-        .register_template_string("login", &index_template)
-        .map_err(actix_web::error::ErrorInternalServerError)?;
+pub async fn get_login_page(    handlebars: web::Data<Handlebars<'_>>
+) -> Result<HttpResponse, actix_web::Error> {
 
     let html = handlebars
         .render("login", &json!({"yy":"uuihiuhuihiuhuih"}))
