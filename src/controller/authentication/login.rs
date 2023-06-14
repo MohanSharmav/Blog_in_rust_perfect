@@ -1,13 +1,14 @@
+use crate::controller::constants::Config;
+use crate::model::authentication::login_database::{login_database, LoginCheck};
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
 use actix_web::web::Redirect;
 use actix_web::{web, HttpResponse};
 use actix_web::{HttpMessage as _, HttpRequest, Responder};
 use handlebars::Handlebars;
+use magic_crypt::{new_magic_crypt, MagicCryptTrait};
 use serde::Deserialize;
 use serde_json::json;
-use crate::model::authentication::login_database::{login_database, LoginCheck};
-use magic_crypt::{new_magic_crypt, MagicCryptTrait};
 use sqlx::PgPool;
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
@@ -32,12 +33,14 @@ pub async fn get_data_from_login_page(
     req: HttpRequest,
     _user: Option<Identity>,
     db: web::Data<PgPool>,
+    mag: &web::Data<Config>,
 ) -> Result<Redirect, actix_web::Error> {
     let username = &form.username;
     let password = &form.password.to_string();
 
-    let magic_key =
-        std::env::var("MAGIC_KEY").map_err(actix_web::error::ErrorInternalServerError)?;
+    // let magic_key =
+    //     std::env::var("MAGIC_KEY").map_err(actix_web::error::ErrorInternalServerError)?;
+    let magic_key = &mag.magic_key;
 
     let mcrypt = new_magic_crypt!(magic_key, 256); //Creates an instance of the magic crypt library/crate.
     let encrypted_password = mcrypt.encrypt_str_to_base64(password);

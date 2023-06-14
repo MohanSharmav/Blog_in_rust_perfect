@@ -4,26 +4,25 @@ mod model;
 use crate::controller::authentication::login::{
     check_user, get_data_from_login_page, get_login_page, logout,
 };
+use crate::controller::authentication::register::{get_data_from_register_page, get_register_page};
 use crate::controller::category_controller::{
     delete_category, get_all_categories_controller, get_category_with_pagination, get_new_category,
     page_to_update_category, receive_new_category, receive_updated_category,
 };
+use crate::controller::common_controller::common_page_controller;
+use crate::controller::constants::Config;
 use crate::controller::pagination_controller::pagination_display;
 use crate::controller::posts_controller::{
     delete_post, get_new_post, page_to_update_post, receive_new_posts, receive_updated_post,
 };
 use crate::controller::single_post_controller::get_single_post;
-use actix_web::{web, App, HttpServer, Result};
-
-use actix_web::cookie::Key;
-
-use crate::controller::authentication::register::{get_data_from_register_page, get_register_page};
-use crate::controller::common_controller::common_page_controller;
 use crate::model::database::get_database_connection;
 use actix_identity::IdentityMiddleware;
 use actix_session::config::PersistentSession;
 use actix_session::storage::CookieSessionStore;
 use actix_session::SessionMiddleware;
+use actix_web::cookie::Key;
+use actix_web::{web, App, HttpServer, Result};
 use handlebars::Handlebars;
 
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
@@ -37,15 +36,17 @@ async fn main() -> Result<(), anyhow::Error> {
     #[cfg(not(feature = "cors_for_local_development"))]
     let cookie_secure = true;
     let database_connection = get_database_connection().await?;
-
     let handlebars = Handlebars::new();
-
     Handlebars::new().register_templates_directory(".hbs", "./templates")?;
+    let value = std::env::var("MAGIC_KEY")?;
+    let config = Config { magic_key: value };
+    let confi = web::Data::new(config.clone());
 
     HttpServer::new(move || {
         App::new()
             .app_data(database_connection.clone())
             .app_data(web::Data::new(handlebars.clone()))
+            .app_data(confi.clone())
             .wrap(IdentityMiddleware::default())
             .wrap(
                 SessionMiddleware::builder(CookieSessionStore::default(), secret_key.clone())
