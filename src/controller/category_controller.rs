@@ -10,13 +10,11 @@ use actix_web::{web, HttpResponse};
 use anyhow::Result;
 use serde_json::json;
 use sqlx::PgPool;
-use std::fs;
 use handlebars::Handlebars;
 
 pub async fn get_all_categories_controller(
     db: web::Data<PgPool>,
-    handlebars: web::Data<Handlebars<'_>>,
-
+    handlebars: web::Data<Handlebars<'_>>
 ) -> Result<HttpResponse, actix_web::Error> {
     let all_categories = get_all_categories_database(&db)
         .await
@@ -31,15 +29,8 @@ pub async fn get_all_categories_controller(
         .body(html))
 }
 
-pub async fn get_new_category() -> Result<HttpResponse, actix_web::Error> {
-    let mut handlebars = handlebars::Handlebars::new();
-    let index_template = fs::read_to_string("templates/new_category.hbs")
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    handlebars
-        .register_template_string("new_category", &index_template)
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
+pub async fn get_new_category(    handlebars: web::Data<Handlebars<'_>>
+) -> Result<HttpResponse, actix_web::Error> {
     let html = handlebars
         .render("new_category", &json!({"o":"ax"}))
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -52,15 +43,8 @@ pub async fn get_new_category() -> Result<HttpResponse, actix_web::Error> {
 pub async fn receive_new_category(
     form: web::Form<Categories>,
     db: web::Data<PgPool>,
+    handlebars: web::Data<Handlebars<'_>>
 ) -> Result<HttpResponse, actix_web::Error> {
-    let mut handlebars = handlebars::Handlebars::new();
-    let index_template = fs::read_to_string("templates/message_display.hbs")
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    handlebars
-        .register_template_string("message_display", &index_template)
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
     let name = &form.name;
     let id = &form.id;
     create_new_category_database(&db, name, id)
@@ -80,17 +64,11 @@ pub async fn receive_new_category(
 pub async fn delete_category(
     id: web::Path<String>,
     db: web::Data<PgPool>,
+    handlebars: web::Data<Handlebars<'_>>
 ) -> Result<HttpResponse, actix_web::Error> {
     let to_delete_category = &id.into_inner();
     delete_category_database(&db, to_delete_category)
         .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    let mut handlebars = handlebars::Handlebars::new();
-    let index_template = fs::read_to_string("templates/message_display.hbs")
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-    handlebars
-        .register_template_string("message_display", &index_template)
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let success_message = "the category deleted successfully";
@@ -105,14 +83,9 @@ pub async fn delete_category(
 
 pub async fn page_to_update_category(
     to_be_updated_category: web::Path<String>,
+    handlebars: web::Data<Handlebars<'_>>
 ) -> Result<HttpResponse, actix_web::Error> {
-    let mut handlebars = handlebars::Handlebars::new();
-    let index_template = fs::read_to_string("templates/update_category.hbs")
-        .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    handlebars
-        .register_template_string("update_category", &index_template)
-        .map_err(actix_web::error::ErrorInternalServerError)?;
     let to_be_updated_category = to_be_updated_category.clone();
     let html = handlebars
         .render(
@@ -130,13 +103,8 @@ pub async fn receive_updated_category(
     form: web::Form<Categories>,
     current_category_name: web::Path<String>,
     db: web::Data<PgPool>,
+    handlebars: web::Data<Handlebars<'_>>
 ) -> Result<HttpResponse, actix_web::Error> {
-    let mut handlebars = handlebars::Handlebars::new();
-    let index_template = fs::read_to_string("templates/message_display.hbs")
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-    handlebars
-        .register_template_string("message_display", &index_template)
-        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let current_post_name = &current_category_name.into_inner();
     let name = &form.name;
@@ -157,6 +125,7 @@ pub async fn get_category_with_pagination(
     path: web::Path<String>,
     _params: web::Query<PaginationParams>,
     db: web::Data<PgPool>,
+    handlebars: web::Data<Handlebars<'_>>
 ) -> Result<HttpResponse, actix_web::Error> {
     let category_input: String = path.into_inner();
     let total_posts_length = category_pagination_logic(&category_input,&db)
@@ -171,12 +140,6 @@ pub async fn get_category_with_pagination(
         pages_count.push(i + 1_i64);
     }
 
-    let mut handlebars = handlebars::Handlebars::new();
-    let index_template = fs::read_to_string("templates/category.hbs")
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-    handlebars
-        .register_template_string("category", &index_template)
-        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let category_postinng = category_pagination_controller_database_function(&category_input, &db)
         .await
