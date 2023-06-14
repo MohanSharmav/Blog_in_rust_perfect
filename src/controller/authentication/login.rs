@@ -6,8 +6,6 @@ use actix_web::{HttpMessage as _, HttpRequest, Responder};
 use handlebars::Handlebars;
 use serde::Deserialize;
 use serde_json::json;
-use std::fs;
-
 use crate::model::authentication::login_database::{login_database, LoginCheck};
 use magic_crypt::{new_magic_crypt, MagicCryptTrait};
 use sqlx::PgPool;

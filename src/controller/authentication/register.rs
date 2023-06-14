@@ -6,7 +6,6 @@ use handlebars::Handlebars;
 use magic_crypt::{new_magic_crypt, MagicCryptTrait};
 use serde_json::json;
 use sqlx::PgPool;
-use std::fs;
 
 pub async fn get_register_page(
     handlebars: web::Data<Handlebars<'_>>,
