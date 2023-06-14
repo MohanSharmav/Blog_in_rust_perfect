@@ -133,10 +133,10 @@ pub async fn get_category_with_pagination(
     let total_posts_length = total_posts_length as f64;
     let posts_per_page = total_posts_length / 3.0;
     let posts_per_page = posts_per_page.round();
-    let posts_per_page = posts_per_page as i64;
+    let posts_per_page = posts_per_page as usize;
     let mut pages_count = Vec::new();
     for i in 0..posts_per_page {
-        pages_count.push(i + 1_i64);
+        pages_count.push(i + 1);
     }
 
     let category_postinng = category_pagination_controller_database_function(&category_input, &db)
