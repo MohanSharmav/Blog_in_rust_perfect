@@ -4,7 +4,6 @@ use crate::model::pagination_database::{pagination_logic, PaginationParams};
 use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
 use serde_json::json;
-use sqlx::postgres::PgPoolOptions;
 use sqlx::{PgPool, Row};
 use std::fs;
 
@@ -76,20 +75,14 @@ pub async fn perfect_pagination_logic(
     Ok(counting_final)
 }
 
-pub async fn category_pagination_logic(category_input: &String) -> Result<i64, anyhow::Error> {
-    dotenv::dotenv()?;
-    let db_url = std::env::var("DATABASE_URL")?;
-    let pool = PgPoolOptions::new()
-        .max_connections(100)
-        .connect(&db_url)
-        .await?;
+pub async fn category_pagination_logic(category_input: &String,db: &web::Data<PgPool>) -> Result<i64, anyhow::Error> {
 
     let category_input = category_input.to_string();
     let category_id = category_input.parse::<i32>()?;
 
     let rows = sqlx::query("SELECT COUNT(*) FROM posts where category_id=$1")
         .bind(category_id)
-        .fetch_all(&pool)
+        .fetch_all(&***db)
         .await?;
 
     let mut counting_final: i64 = 0;

@@ -45,7 +45,7 @@ pub async fn get_data_from_login_page(
 
     let magic_key =
         std::env::var("MAGIC_KEY").map_err(actix_web::error::ErrorInternalServerError)?;
-    // println!("{}", magic_key);
+
     let mcrypt = new_magic_crypt!(magic_key, 256); //Creates an instance of the magic crypt library/crate.
     let encrypted_password = mcrypt.encrypt_str_to_base64(password);
 

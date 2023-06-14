@@ -11,18 +11,13 @@ use anyhow::Result;
 use serde_json::json;
 use sqlx::PgPool;
 use std::fs;
+use handlebars::Handlebars;
 
 pub async fn get_all_categories_controller(
     db: web::Data<PgPool>,
+    handlebars: web::Data<Handlebars<'_>>,
+
 ) -> Result<HttpResponse, actix_web::Error> {
-    let mut handlebars = handlebars::Handlebars::new();
-    let index_template = fs::read_to_string("templates/all_categories.hbs")
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    handlebars
-        .register_template_string("all_categories", &index_template)
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
     let all_categories = get_all_categories_database(&db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -164,7 +159,7 @@ pub async fn get_category_with_pagination(
     db: web::Data<PgPool>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let category_input: String = path.into_inner();
-    let total_posts_length = category_pagination_logic(&category_input)
+    let total_posts_length = category_pagination_logic(&category_input,&db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     let total_posts_length = total_posts_length as f64;

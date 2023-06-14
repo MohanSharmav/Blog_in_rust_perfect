@@ -7,3 +7,4 @@ pub(crate) mod pagination_logic;
 pub(crate) mod posts_controller;
 pub(crate) mod sample;
 pub(crate) mod single_post_controller;
+pub(crate) mod handlebars_main;
