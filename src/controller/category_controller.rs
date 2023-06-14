@@ -8,13 +8,13 @@ use crate::model::pagination_database::PaginationParams;
 use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
 use anyhow::Result;
+use handlebars::Handlebars;
 use serde_json::json;
 use sqlx::PgPool;
-use handlebars::Handlebars;
 
 pub async fn get_all_categories_controller(
     db: web::Data<PgPool>,
-    handlebars: web::Data<Handlebars<'_>>
+    handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let all_categories = get_all_categories_database(&db)
         .await
@@ -29,7 +29,8 @@ pub async fn get_all_categories_controller(
         .body(html))
 }
 
-pub async fn get_new_category(    handlebars: web::Data<Handlebars<'_>>
+pub async fn get_new_category(
+    handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let html = handlebars
         .render("new_category", &json!({"o":"ax"}))
@@ -43,7 +44,7 @@ pub async fn get_new_category(    handlebars: web::Data<Handlebars<'_>>
 pub async fn receive_new_category(
     form: web::Form<Categories>,
     db: web::Data<PgPool>,
-    handlebars: web::Data<Handlebars<'_>>
+    handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let name = &form.name;
     let id = &form.id;
@@ -64,7 +65,7 @@ pub async fn receive_new_category(
 pub async fn delete_category(
     id: web::Path<String>,
     db: web::Data<PgPool>,
-    handlebars: web::Data<Handlebars<'_>>
+    handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let to_delete_category = &id.into_inner();
     delete_category_database(&db, to_delete_category)
@@ -83,9 +84,8 @@ pub async fn delete_category(
 
 pub async fn page_to_update_category(
     to_be_updated_category: web::Path<String>,
-    handlebars: web::Data<Handlebars<'_>>
+    handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
-
     let to_be_updated_category = to_be_updated_category.clone();
     let html = handlebars
         .render(
@@ -103,9 +103,8 @@ pub async fn receive_updated_category(
     form: web::Form<Categories>,
     current_category_name: web::Path<String>,
     db: web::Data<PgPool>,
-    handlebars: web::Data<Handlebars<'_>>
+    handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
-
     let current_post_name = &current_category_name.into_inner();
     let name = &form.name;
     update_category_database(name, current_post_name, &db)
@@ -125,10 +124,10 @@ pub async fn get_category_with_pagination(
     path: web::Path<String>,
     _params: web::Query<PaginationParams>,
     db: web::Data<PgPool>,
-    handlebars: web::Data<Handlebars<'_>>
+    handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let category_input: String = path.into_inner();
-    let total_posts_length = category_pagination_logic(&category_input,&db)
+    let total_posts_length = category_pagination_logic(&category_input, &db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     let total_posts_length = total_posts_length as f64;
@@ -139,7 +138,6 @@ pub async fn get_category_with_pagination(
     for i in 0..posts_per_page {
         pages_count.push(i + 1_i64);
     }
-
 
     let category_postinng = category_pagination_controller_database_function(&category_input, &db)
         .await

@@ -28,16 +28,6 @@ use handlebars::Handlebars;
 
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
-//
-// fn register_template_files(
-//     handlebars: &mut Handlebars,
-//     files: &[&str],
-// ) -> Result<(), handlebars::TemplateFileError> {
-//     for file in files {
-//         handlebars.register_template_file(file, file)?;
-//     }
-//     Ok(())
-// }
 
 #[actix_web::main]
 async fn main() -> Result<(), anyhow::Error> {
@@ -47,39 +37,10 @@ async fn main() -> Result<(), anyhow::Error> {
     #[cfg(not(feature = "cors_for_local_development"))]
     let cookie_secure = true;
     let database_connection = get_database_connection().await?;
-    //
-    //  let mut handlebars= Handlebars::new();
-    // handlebars.
-    // register_template_files(
-    //     &mut handlebars,
-    //     &[
-    //         "templates/admin_page.hbs",
-    //         "templates/index.hbs",
-    //         "templates/new_category.hbs",
-    //         "templates/sample.hbs",
-    //         "templates/all_categories.hbs",
-    //         "templates/login.css",
-    //         "templates/new_post.hbs",
-    //         "templates/single.hbs",
-    //         "templates/category.hbs",
-    //         "templates/login.hbs",
-    //         "templates/pagination_page.hbs",
-    //         "templates/update_category.hbs",
-    //         "templates/common.hbs",
-    //         "templates/message_display.hbs",
-    //         "templates/register.hbs",
-    //         "templates/update_post.hbs",
-    //     ],
-    // )?;
 
-    // .register_template_source(".hbs","./templates")?;
-        // .register_templates_directory(".hbs","./templates")?;
-        // .register_templates_directory(".hbs","./templates")?;
-  let  handlebars = Handlebars::new();
+    let handlebars = Handlebars::new();
 
-    Handlebars::new()
-      .register_templates_directory(".hbs", "./templates")?;
-
+    Handlebars::new().register_templates_directory(".hbs", "./templates")?;
 
     HttpServer::new(move || {
         App::new()

@@ -4,14 +4,14 @@ use crate::model::category_database::get_all_categories_database;
 use crate::model::pagination_database::{pagination_logic, PaginationParams};
 use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
+use handlebars::Handlebars;
 use serde_json::json;
 use sqlx::PgPool;
-use handlebars::Handlebars;
 
 pub async fn common_page_controller(
     params: web::Query<PaginationParams>,
     db: web::Data<PgPool>,
-    handlebars: web::Data<Handlebars<'_>>
+    handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let total_posts_length: f64 = perfect_pagination_logic(&db).await? as f64;
     let posts_per_page = total_posts_length / 3.0;

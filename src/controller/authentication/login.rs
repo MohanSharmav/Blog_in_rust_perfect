@@ -3,10 +3,10 @@ use actix_web::http::header::ContentType;
 use actix_web::web::Redirect;
 use actix_web::{web, HttpResponse};
 use actix_web::{HttpMessage as _, HttpRequest, Responder};
+use handlebars::Handlebars;
 use serde::Deserialize;
 use serde_json::json;
 use std::fs;
-use handlebars::Handlebars;
 
 use crate::model::authentication::login_database::{login_database, LoginCheck};
 use magic_crypt::{new_magic_crypt, MagicCryptTrait};
@@ -17,9 +17,9 @@ pub struct User {
     pub(crate) username: String,
     pub(crate) password: String,
 }
-pub async fn get_login_page(    handlebars: web::Data<Handlebars<'_>>
+pub async fn get_login_page(
+    handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
-
     let html = handlebars
         .render("login", &json!({"yy":"uuihiuhuihiuhuih"}))
         .map_err(actix_web::error::ErrorInternalServerError)?;

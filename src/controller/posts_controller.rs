@@ -3,12 +3,14 @@ use crate::model::database::Posts;
 use crate::model::posts_database::{delete_post_database, update_post_database};
 use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
+use handlebars::Handlebars;
 use serde_json::json;
 use sqlx::PgPool;
-use handlebars::Handlebars;
 
-pub async fn get_new_post(db: web::Data<PgPool>, handlebars: web::Data<Handlebars<'_>>) -> Result<HttpResponse, actix_web::Error> {
-
+pub async fn get_new_post(
+    db: web::Data<PgPool>,
+    handlebars: web::Data<Handlebars<'_>>,
+) -> Result<HttpResponse, actix_web::Error> {
     let all_categories = get_all_categories_database(&db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -21,8 +23,10 @@ pub async fn get_new_post(db: web::Data<PgPool>, handlebars: web::Data<Handlebar
         .content_type(ContentType::html())
         .body(html))
 }
-pub async fn receive_new_posts(_form: web::Form<Posts>, handlebars: web::Data<Handlebars<'_>>) -> Result<HttpResponse, actix_web::Error> {
-
+pub async fn receive_new_posts(
+    _form: web::Form<Posts>,
+    handlebars: web::Data<Handlebars<'_>>,
+) -> Result<HttpResponse, actix_web::Error> {
     let success_message = "the post created successfully";
     let html = handlebars
         .render("message_display", &json!({ "message": success_message }))
@@ -36,7 +40,7 @@ pub async fn receive_new_posts(_form: web::Form<Posts>, handlebars: web::Data<Ha
 pub async fn delete_post(
     to_delete: web::Path<String>,
     db: web::Data<PgPool>,
-    handlebars: web::Data<Handlebars<'_>>
+    handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let to_delete = to_delete.into_inner();
     delete_post_database(to_delete, &db)
@@ -55,7 +59,7 @@ pub async fn delete_post(
 
 pub async fn page_to_update_post(
     to_be_updated_post: web::Path<String>,
-    handlebars: web::Data<Handlebars<'_>>
+    handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let to_be_updated_post = to_be_updated_post.clone();
     update_post_helper(&to_be_updated_post).await;
@@ -77,7 +81,7 @@ pub async fn receive_updated_post(
     form: web::Form<Posts>,
     _current_post_name: web::Path<String>,
     db: web::Data<PgPool>,
-    handlebars: web::Data<Handlebars<'_>>
+    handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let id = &form.id;
     let title = &form.title;

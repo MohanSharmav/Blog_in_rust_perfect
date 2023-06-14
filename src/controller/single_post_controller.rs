@@ -1,14 +1,14 @@
 use crate::model::single_posts_database::{query_single_post, query_single_post_in_struct};
 use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
+use handlebars::Handlebars;
 use serde_json::json;
 use sqlx::PgPool;
-use handlebars::Handlebars;
 
 pub async fn get_single_post(
     path: web::Path<String>,
     db: web::Data<PgPool>,
-    handlebars: web::Data<Handlebars<'_>>
+    handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let titles = path.parse::<i32>().unwrap_or_default();
     //Todo

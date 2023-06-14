@@ -2,15 +2,15 @@ use crate::controller::authentication::login::User;
 use crate::model::authentication::register_database::register_new_user_database;
 use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
+use handlebars::Handlebars;
 use magic_crypt::{new_magic_crypt, MagicCryptTrait};
 use serde_json::json;
 use sqlx::PgPool;
 use std::fs;
-use handlebars::Handlebars;
 
-pub async fn get_register_page(    handlebars: web::Data<Handlebars<'_>>
+pub async fn get_register_page(
+    handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
-
     let html = handlebars
         .render("register", &json!({"yy":"uuihiuhuihiuhuih"}))
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -23,8 +23,7 @@ pub async fn get_register_page(    handlebars: web::Data<Handlebars<'_>>
 pub async fn get_data_from_register_page(
     form: web::Form<User>,
     db: web::Data<PgPool>,
-    handlebars: web::Data<Handlebars<'_>>
-
+    handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let user = &form.username;
     let password = &form.password;
