@@ -3,21 +3,15 @@ use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
 use serde_json::json;
 use sqlx::PgPool;
-use std::fs;
+use handlebars::Handlebars;
 
 pub async fn get_single_post(
     path: web::Path<String>,
     db: web::Data<PgPool>,
+    handlebars: web::Data<Handlebars<'_>>
 ) -> Result<HttpResponse, actix_web::Error> {
     let titles = path.parse::<i32>().unwrap_or_default();
     //Todo
-    let mut handlebars = handlebars::Handlebars::new();
-    let index_template = fs::read_to_string("templates/single.hbs")
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-    handlebars
-        .register_template_string("single", &index_template)
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
     let single_post = query_single_post(titles, &db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;

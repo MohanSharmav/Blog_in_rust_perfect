@@ -6,11 +6,12 @@ use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
 use serde_json::json;
 use sqlx::PgPool;
-use std::fs;
+use handlebars::Handlebars;
 
 pub async fn common_page_controller(
     params: web::Query<PaginationParams>,
     db: web::Data<PgPool>,
+    handlebars: web::Data<Handlebars<'_>>
 ) -> Result<HttpResponse, actix_web::Error> {
     let total_posts_length: f64 = perfect_pagination_logic(&db).await? as f64;
     let posts_per_page = total_posts_length / 3.0;
@@ -20,13 +21,6 @@ pub async fn common_page_controller(
     for i in 0..posts_per_page {
         pages_count.push(i + 1_i64);
     }
-
-    let mut handlebars = handlebars::Handlebars::new();
-    let index_template = fs::read_to_string("templates/common.hbs")
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-    handlebars
-        .register_template_string("common", &index_template)
-        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let paginators = pagination_logic(params.clone(), &db)
         .await
@@ -40,15 +34,7 @@ pub async fn common_page_controller(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let mut handlebarss = handlebars::Handlebars::new();
-    let index_templates = fs::read_to_string("templates/common.hbs")
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    handlebarss
-        .register_template_string("common", &index_templates)
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    let htmls = handlebarss.render("common", &json!({"a":&paginators,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category}))
+    let htmls = handlebars.render("common", &json!({"a":&paginators,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category}))
         .map_err( actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
