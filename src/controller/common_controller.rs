@@ -16,10 +16,10 @@ pub async fn common_page_controller(
     let total_posts_length: f64 = perfect_pagination_logic(&db).await? as f64;
     let posts_per_page = total_posts_length / 3.0;
     let posts_per_page = posts_per_page.round();
-    let posts_per_page = posts_per_page as i64;
+    let posts_per_page = posts_per_page as usize;
     let mut pages_count = Vec::new();
     for i in 0..posts_per_page {
-        pages_count.push(i + 1_i64);
+        pages_count.push(i + 1);
     }
 
     let paginators = pagination_logic(params.clone(), &db)

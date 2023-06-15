@@ -133,12 +133,16 @@ pub async fn get_category_with_pagination(
     let total_posts_length = total_posts_length as f64;
     let posts_per_page = total_posts_length / 3.0;
     let posts_per_page = posts_per_page.round();
-    let posts_per_page = posts_per_page as usize;
-    let mut pages_count = Vec::new();
-    for i in 0..posts_per_page {
-        pages_count.push(i + 1);
-    }
-
+    let posts_per_page = posts_per_page as i32;
+     // let mut pages_count = Vec::new() ;
+    // for i in 0..posts_per_page {
+    //     pages_count.push(i + 1);
+    // }
+    // let pages_count: Vec<i32> = (1..=posts_per_page).collect();
+// let pages_count :Vec<_>= (1.. posts_per_page).into_iter().map(|i|pages_count.push(i)).collect();
+//     let pages_count :Vec<_>= (1..=posts_per_page).into_iter().collect();
+                        // 1.2.3 .push(pages_count)
+    let pages_count :Vec<_>= (1..=posts_per_page).into_iter().collect();
     let category_postinng = category_pagination_controller_database_function(&category_input, &db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
