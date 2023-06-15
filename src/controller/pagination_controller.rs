@@ -16,8 +16,7 @@ pub async fn pagination_display(
     let posts_per_page = total_posts_length / 3.0;
     let posts_per_page = posts_per_page.round();
     let posts_per_page = posts_per_page as usize;
-    let pages_count :Vec<_>= (1..=posts_per_page).into_iter().collect();
-
+    let pages_count: Vec<_> = (1..=posts_per_page).collect();
     let paginators = pagination_logic(params.clone(), &db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -47,17 +46,15 @@ pub async fn perfect_pagination_logic(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-     let mut counting_final = 0;
+    let mut counting_final = 0;
 
     let _ = rows.iter().map(|row| {
-        let title:i64 = row
+        let title: i64 = row
             .try_get("count")
-            .map_err(actix_web::error::ErrorInternalServerError)? ;
+            .map_err(actix_web::error::ErrorInternalServerError)?;
         counting_final += title;
-        Ok::<i64,actix_web::Error>(counting_final)
+        Ok::<i64, actix_web::Error>(counting_final)
     });
-
-
 
     Ok(counting_final)
 }
@@ -74,11 +71,15 @@ pub async fn category_pagination_logic(
         .fetch_all(&***db)
         .await?;
 
-    let mut counting_final = 0;
-    for row in rows {
-        let title  = row.try_get("count")?;
-        //Todo
-        counting_final = title;
-    }
-    Ok(counting_final )
+    let counting_final = 0;
+
+    let _ = rows.iter().map(|row| {
+        let title = row
+            .try_get("count")
+            .map_err(actix_web::error::ErrorInternalServerError)?;
+        let counting_final = title;
+        Ok::<i64, actix_web::Error>(counting_final)
+    });
+
+    Ok(counting_final)
 }
