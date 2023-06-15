@@ -47,13 +47,18 @@ pub async fn perfect_pagination_logic(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let mut counting_final: i64 = 0;
-    for row in rows {
-        let title: i64 = row
+     let mut counting_final = 0;
+
+    let _ = rows.iter().map(|row| {
+        let title:i64 = row
             .try_get("count")
-            .map_err(actix_web::error::ErrorInternalServerError)?;
+            .map_err(actix_web::error::ErrorInternalServerError)? ;
         counting_final += title;
-    }
+        Ok::<i64,actix_web::Error>(counting_final)
+    });
+
+
+
     Ok(counting_final)
 }
 
