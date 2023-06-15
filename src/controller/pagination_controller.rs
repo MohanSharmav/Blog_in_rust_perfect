@@ -16,10 +16,7 @@ pub async fn pagination_display(
     let posts_per_page = total_posts_length / 3.0;
     let posts_per_page = posts_per_page.round();
     let posts_per_page = posts_per_page as usize;
-    let mut pages_count = Vec::new();
-    for i in 0..posts_per_page {
-        pages_count.push(i + 1);
-    }
+    let pages_count :Vec<_>= (1..=posts_per_page).into_iter().collect();
 
     let paginators = pagination_logic(params.clone(), &db)
         .await
