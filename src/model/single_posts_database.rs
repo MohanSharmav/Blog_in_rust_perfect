@@ -6,17 +6,21 @@ pub async fn query_single_post(
     titles: i32,
     db: &Data<PgPool>,
 ) -> Result<Vec<String>, anyhow::Error> {
-    let mut single_post = Vec::new();
+    // let mut single_post = Vec::new();
     let rows = sqlx::query("SELECT title,description FROM posts WHERE id=$1")
         .bind(titles)
         .fetch_all(&***db)
         .await?;
-    for row in rows {
-        let title: String = row.get("title");
-        let description: String = row.get("description");
-        let single_post_string = title + " " + &*description;
-        single_post.push(single_post_string);
-    }
+
+    let single_post = rows
+        .iter()
+        .map(|row| {
+            let title: String = row.get("title");
+            let description: String = row.get("description");
+            title + " " + &*description
+        })
+        .collect();
+
     Ok(single_post)
 }
 pub async fn query_single_post_in_struct(

@@ -17,7 +17,7 @@ pub async fn common_page_controller(
     let posts_per_page = total_posts_length / 3.0;
     let posts_per_page = posts_per_page.round();
     let posts_per_page = posts_per_page as usize;
-    let pages_count :Vec<_>= (1..=posts_per_page).into_iter().collect();
+    let pages_count: Vec<_> = (1..=posts_per_page).collect();
 
     let paginators = pagination_logic(params.clone(), &db)
         .await
