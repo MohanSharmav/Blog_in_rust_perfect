@@ -5,7 +5,6 @@ pub async fn query_single_post(
     titles: i32,
     db: &Pool<Postgres>,
 ) -> Result<Vec<String>, anyhow::Error> {
-    let mut single_post = Vec::new();
     let rows = sqlx::query("SELECT title,description FROM posts WHERE id=$1")
         .bind(titles)
         .fetch_all(db)
@@ -16,7 +15,7 @@ pub async fn query_single_post(
         .map(|row| {
             let title: String = row.get("title");
             let description: String = row.get("description");
-            title + " " + &*description
+            title + " " + &description
         })
         .collect();
 
