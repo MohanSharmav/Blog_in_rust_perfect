@@ -10,13 +10,12 @@ use crate::controller::category_controller::{
     page_to_update_category, receive_new_category, receive_updated_category,
 };
 use crate::controller::common_controller::common_page_controller;
-use crate::controller::constants::Config;
+use crate::controller::constants::ConfigurationConstants;
 use crate::controller::pagination_controller::pagination_display;
 use crate::controller::posts_controller::{
     delete_post, get_new_post, page_to_update_post, receive_new_posts, receive_updated_post,
 };
 use crate::controller::single_post_controller::get_single_post;
-use crate::model::database::get_database_connection;
 use actix_identity::IdentityMiddleware;
 use actix_session::config::PersistentSession;
 use actix_session::storage::CookieSessionStore;
@@ -24,27 +23,41 @@ use actix_session::SessionMiddleware;
 use actix_web::cookie::Key;
 use actix_web::{web, App, HttpServer, Result};
 use handlebars::Handlebars;
+use magic_crypt::new_magic_crypt;
+use sqlx::postgres::PgPoolOptions;
 
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
 
 #[actix_web::main]
 async fn main() -> Result<(), anyhow::Error> {
+    std::env::set_var("RUST_LOG", "debug");
+    env_logger::init();
+
     let secret_key = Key::generate();
     #[cfg(feature = "cors_for_local_development")]
     let cookie_secure = false;
     #[cfg(not(feature = "cors_for_local_development"))]
     let cookie_secure = true;
-    let database_connection = get_database_connection().await?;
     let handlebars = Handlebars::new();
     Handlebars::new().register_templates_directory(".hbs", "./templates")?;
+    dotenv::dotenv()?;
     let value = std::env::var("MAGIC_KEY")?;
-    let config = Config { magic_key: value };
+    let mcrypt = new_magic_crypt!(value, 256); //Creates an instance of the magic crypt library/crate.
+    let db_url = std::env::var("DATABASE_URL")?;
+    let pool = PgPoolOptions::new()
+        .max_connections(100)
+        .connect(&*db_url)
+        .await?;
+
+    let config = ConfigurationConstants {
+        magic_key: mcrypt,
+        database_connection: pool,
+    };
     let confi = web::Data::new(config.clone());
 
     HttpServer::new(move || {
         App::new()
-            .app_data(database_connection.clone())
             .app_data(web::Data::new(handlebars.clone()))
             .app_data(confi.clone())
             .wrap(IdentityMiddleware::default())

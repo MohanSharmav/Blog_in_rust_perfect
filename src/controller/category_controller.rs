@@ -1,3 +1,4 @@
+use crate::controller::constants::ConfigurationConstants;
 use crate::controller::pagination_controller::category_pagination_logic;
 use crate::model::category_database::{
     category_pagination_controller_database_function, create_new_category_database,
@@ -10,13 +11,13 @@ use actix_web::{web, HttpResponse};
 use anyhow::Result;
 use handlebars::Handlebars;
 use serde_json::json;
-use sqlx::PgPool;
 
 pub async fn get_all_categories_controller(
-    db: web::Data<PgPool>,
+    config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
-    let all_categories = get_all_categories_database(&db)
+    let db = &config.database_connection;
+    let all_categories = get_all_categories_database(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -43,15 +44,15 @@ pub async fn get_new_category(
 
 pub async fn receive_new_category(
     form: web::Form<Categories>,
-    db: web::Data<PgPool>,
+    config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let name = &form.name;
     let id = &form.id;
-    create_new_category_database(&db, name, id)
+    let db = &config.database_connection;
+    create_new_category_database(db, name, id)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-
     let success_message = "the categories created successfully";
     let html = handlebars
         .render("message_display", &json!({ "message": success_message }))
@@ -64,11 +65,12 @@ pub async fn receive_new_category(
 
 pub async fn delete_category(
     id: web::Path<String>,
-    db: web::Data<PgPool>,
+    config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let to_delete_category = &id.into_inner();
-    delete_category_database(&db, to_delete_category)
+    let db = &config.database_connection;
+    delete_category_database(db, to_delete_category)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -102,12 +104,13 @@ pub async fn page_to_update_category(
 pub async fn receive_updated_category(
     form: web::Form<Categories>,
     current_category_name: web::Path<String>,
-    db: web::Data<PgPool>,
+    config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
+    let db = &config.database_connection;
     let current_post_name = &current_category_name.into_inner();
     let name = &form.name;
-    update_category_database(name, current_post_name, &db)
+    update_category_database(name, current_post_name, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     let success_message = "the post created successfully";
@@ -123,19 +126,20 @@ pub async fn receive_updated_category(
 pub async fn get_category_with_pagination(
     path: web::Path<String>,
     _params: web::Query<PaginationParams>,
-    db: web::Data<PgPool>,
+    config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
+    let db = &config.database_connection;
     let category_input: String = path.into_inner();
-    let total_posts_length = category_pagination_logic(&category_input, &db)
+    let total_posts_length = category_pagination_logic(&category_input, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     let total_posts_length = total_posts_length as f64;
     let posts_per_page = total_posts_length / 3.0;
     let posts_per_page = posts_per_page.round();
     let posts_per_page = posts_per_page as i32;
-    let pages_count :Vec<_>= (1..=posts_per_page).into_iter().collect();
-    let category_postinng = category_pagination_controller_database_function(&category_input, &db)
+    let pages_count: Vec<_> = (1..=posts_per_page).collect();
+    let category_postinng = category_pagination_controller_database_function(&category_input, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

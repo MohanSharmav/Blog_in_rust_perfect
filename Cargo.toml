@@ -32,3 +32,5 @@ cargo-watch = "8.4.0"
 typeof = "1.0.0"
 thiserror = "1.0.40"
 glob = "0.3.1"
+env_logger = "0.10.0"
+

@@ -1,8 +1,6 @@
-use actix_web::web::Data;
 use serde::Deserialize;
 use serde::Serialize;
-use sqlx::postgres::PgPoolOptions;
-use sqlx::PgPool;
+use sqlx::{Pool, Postgres};
 
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
 pub struct Categories {
@@ -26,22 +24,11 @@ pub struct UpdatePost {
     pub(crate) name: String,
 }
 
-pub async fn select_posts(db: &Data<PgPool>) -> Result<Vec<Posts>, anyhow::Error> {
+pub async fn select_posts(db: &Pool<Postgres>) -> Result<Vec<Posts>, anyhow::Error> {
     let postsing =
         sqlx::query_as::<_, Posts>("select id, title, description, category_id from posts")
-            .fetch_all(&***db)
+            .fetch_all(db)
             .await?;
 
     Ok(postsing)
-}
-
-pub async fn get_database_connection() -> Result<PgPool, anyhow::Error> {
-    dotenv::dotenv()?;
-    let db_url = std::env::var("DATABASE_URL")?;
-
-    let pool = PgPoolOptions::new()
-        .max_connections(100)
-        .connect(&db_url)
-        .await?;
-    Ok(pool)
 }

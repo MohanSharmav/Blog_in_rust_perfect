@@ -1,3 +1,4 @@
+use crate::controller::constants::ConfigurationConstants;
 use crate::controller::pagination_logic::select_specific_pages_post;
 use crate::model::category_database::get_all_categories_database;
 use crate::model::pagination_database::{pagination_logic, PaginationParams};
@@ -5,29 +6,29 @@ use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
 use handlebars::Handlebars;
 use serde_json::json;
-use sqlx::{PgPool, Row};
+use sqlx::{Pool, Postgres, Row};
 
 pub async fn pagination_display(
     params: web::Query<PaginationParams>,
-    db: web::Data<PgPool>,
+    config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
-    let total_posts_length: f64 = perfect_pagination_logic(&db).await? as f64;
+    let db = &config.database_connection;
+    let total_posts_length: f64 = perfect_pagination_logic(db).await? as f64;
     let posts_per_page = total_posts_length / 3.0;
     let posts_per_page = posts_per_page.round();
     let posts_per_page = posts_per_page as usize;
-    let pages_count :Vec<_>= (1..=posts_per_page).into_iter().collect();
-
-    let paginators = pagination_logic(params.clone(), &db)
+    let pages_count: Vec<_> = (1..=posts_per_page).collect();
+    let paginators = pagination_logic(params.clone(), db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let _current_page = params.page;
-    let exact_posts_only = select_specific_pages_post(_current_page, &db)
+    let exact_posts_only = select_specific_pages_post(_current_page, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let all_category = get_all_categories_database(&db)
+    let all_category = get_all_categories_database(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -39,46 +40,42 @@ pub async fn pagination_display(
         .body(htmls))
 }
 
-pub async fn perfect_pagination_logic(
-    db: &web::Data<PgPool>,
-) -> Result<i64, actix_web::error::Error> {
+pub async fn perfect_pagination_logic(db: &Pool<Postgres>) -> Result<i64, actix_web::error::Error> {
     let rows = sqlx::query("SELECT COUNT(*) FROM posts")
-        .fetch_all(&***db)
+        .fetch_all(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-     let mut counting_final = 0;
+    let mut counting_final = 0;
 
     let _ = rows.iter().map(|row| {
-        let title:i64 = row
+        let title: i64 = row
             .try_get("count")
-            .map_err(actix_web::error::ErrorInternalServerError)? ;
+            .map_err(actix_web::error::ErrorInternalServerError)?;
         counting_final += title;
-        Ok::<i64,actix_web::Error>(counting_final)
+        Ok::<i64, actix_web::Error>(counting_final)
     });
-
-
 
     Ok(counting_final)
 }
 
 pub async fn category_pagination_logic(
     category_input: &String,
-    db: &web::Data<PgPool>,
+    db: &Pool<Postgres>,
 ) -> Result<i64, anyhow::Error> {
     let category_input = category_input.to_string();
     let category_id = category_input.parse::<i32>()?;
 
     let rows = sqlx::query("SELECT COUNT(*) FROM posts where category_id=$1")
         .bind(category_id)
-        .fetch_all(&***db)
+        .fetch_all(db)
         .await?;
 
     let mut counting_final = 0;
     for row in rows {
-        let title  = row.try_get("count")?;
+        let title = row.try_get("count")?;
         //Todo
         counting_final = title;
     }
-    Ok(counting_final )
+    Ok(counting_final)
 }

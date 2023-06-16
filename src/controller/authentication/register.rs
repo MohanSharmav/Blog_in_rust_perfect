@@ -1,12 +1,11 @@
 use crate::controller::authentication::login::User;
-use crate::controller::constants::Config;
+use crate::controller::constants::ConfigurationConstants;
 use crate::model::authentication::register_database::register_new_user_database;
 use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
 use handlebars::Handlebars;
-use magic_crypt::{new_magic_crypt, MagicCryptTrait};
+use magic_crypt::MagicCryptTrait;
 use serde_json::json;
-use sqlx::PgPool;
 
 pub async fn get_register_page(
     handlebars: web::Data<Handlebars<'_>>,
@@ -22,17 +21,15 @@ pub async fn get_register_page(
 
 pub async fn get_data_from_register_page(
     form: web::Form<User>,
-    db: web::Data<PgPool>,
     handlebars: web::Data<Handlebars<'_>>,
-    mag: web::Data<Config>,
+    config: web::Data<ConfigurationConstants>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let user = &form.username;
     let password = &form.password;
-    let magic_key = &mag.magic_key;
-    let mcrypt = new_magic_crypt!(magic_key, 256);
+    let mcrypt = &config.magic_key;
+    let db = &config.database_connection;
     let encrypted_password = mcrypt.encrypt_str_to_base64(password); //Encrypts the string and saves it to the 'encrypted_string' variable.
-
-    register_new_user_database(user, encrypted_password, &db)
+    register_new_user_database(user, encrypted_password, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

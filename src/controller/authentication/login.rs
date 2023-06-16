@@ -1,4 +1,4 @@
-use crate::controller::constants::Config;
+use crate::controller::constants::ConfigurationConstants;
 use crate::model::authentication::login_database::{login_database, LoginCheck};
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
@@ -6,10 +6,9 @@ use actix_web::web::Redirect;
 use actix_web::{web, HttpResponse};
 use actix_web::{HttpMessage as _, HttpRequest, Responder};
 use handlebars::Handlebars;
-use magic_crypt::{new_magic_crypt, MagicCryptTrait};
+use magic_crypt::MagicCryptTrait;
 use serde::Deserialize;
 use serde_json::json;
-use sqlx::PgPool;
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct User {
@@ -32,15 +31,15 @@ pub async fn get_data_from_login_page(
     form: web::Form<User>,
     req: HttpRequest,
     _user: Option<Identity>,
-    db: web::Data<PgPool>,
-    mag: web::Data<Config>,
+    config: web::Data<ConfigurationConstants>,
 ) -> Result<Redirect, actix_web::Error> {
     let username = &form.username;
     let password = &form.password.to_string();
-    let magic_key = &mag.magic_key;
-    let mcrypt = new_magic_crypt!(magic_key, 256); //Creates an instance of the magic crypt library/crate.
+    let mcrypt = &config.magic_key;
+    // let Config{magic_key,database_connection }=mag;
     let encrypted_password = mcrypt.encrypt_str_to_base64(password);
-    let result = login_database(username, encrypted_password, &db)
+    let db = &config.database_connection;
+    let result = login_database(username, encrypted_password, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
