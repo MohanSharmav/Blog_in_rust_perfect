@@ -33,7 +33,6 @@ pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
 async fn main() -> Result<(), anyhow::Error> {
     std::env::set_var("RUST_LOG", "debug");
     env_logger::init();
-
     let secret_key = Key::generate();
     #[cfg(feature = "cors_for_local_development")]
     let cookie_secure = false;
