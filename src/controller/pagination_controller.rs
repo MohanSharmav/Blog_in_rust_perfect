@@ -65,18 +65,16 @@ pub async fn category_pagination_logic(
 ) -> Result<i64, anyhow::Error> {
     let category_input = category_input.to_string();
     let category_id = category_input.parse::<i32>()?;
-
     let rows = sqlx::query("SELECT COUNT(*) FROM posts where category_id=$1")
         .bind(category_id)
         .fetch_all(db)
         .await?;
 
-    let mut counting_final = 0;
+     let mut counting_final = 0;
     let _ = rows.iter().map(|row| {
-        let title = row
+         counting_final = row
             .try_get("count")
             .map_err(actix_web::error::ErrorInternalServerError)?;
-        let counting_final = title;
         Ok::<i64, actix_web::Error>(counting_final)
     });
     Ok(counting_final)

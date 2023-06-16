@@ -1,5 +1,6 @@
 use crate::model::database::{select_posts, Posts};
 use actix_web::{web, Error as ActixError};
+use anyhow::anyhow;
 use serde::Deserialize;
 use sqlx::{Pool, Postgres};
 
@@ -42,6 +43,10 @@ pub async fn pagination_logic(
 ) -> Result<Vec<Posts>, anyhow::Error> {
     let page = params.page;
     let per_page = params.per_page;
+    if page<1 && per_page<1
+    {
+        Err(anyhow!("Invalid page"))?
+    };
     let posts_pagination: Vec<Posts> = select_posts(db).await?;
     let paginated_users = paginate(posts_pagination, page, per_page);
     Ok(paginated_users)
