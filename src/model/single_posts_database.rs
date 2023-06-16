@@ -10,12 +10,16 @@ pub async fn query_single_post(
         .bind(titles)
         .fetch_all(db)
         .await?;
-    for row in rows {
-        let title: String = row.get("title");
-        let description: String = row.get("description");
-        let single_post_string = title + " " + &*description;
-        single_post.push(single_post_string);
-    }
+
+    let single_post = rows
+        .iter()
+        .map(|row| {
+            let title: String = row.get("title");
+            let description: String = row.get("description");
+            title + " " + &*description
+        })
+        .collect();
+
     Ok(single_post)
 }
 pub async fn query_single_post_in_struct(

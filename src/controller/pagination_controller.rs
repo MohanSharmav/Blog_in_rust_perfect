@@ -72,10 +72,12 @@ pub async fn category_pagination_logic(
         .await?;
 
     let mut counting_final = 0;
-    for row in rows {
-        let title = row.try_get("count")?;
-        //Todo
-        counting_final = title;
-    }
+    let _ = rows.iter().map(|row| {
+        let title = row
+            .try_get("count")
+            .map_err(actix_web::error::ErrorInternalServerError)?;
+        let counting_final = title;
+        Ok::<i64, actix_web::Error>(counting_final)
+    });
     Ok(counting_final)
 }
