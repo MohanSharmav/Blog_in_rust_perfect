@@ -39,14 +39,15 @@ async fn main() -> Result<(), anyhow::Error> {
     #[cfg(not(feature = "cors_for_local_development"))]
     let cookie_secure = true;
     let handlebars = Handlebars::new();
-    Handlebars::new().register_templates_directory(".hbs", "./templates")?;
+
+    Handlebars::new().register_templates_directory(".hbs", "./Blog_new_database/templates")?;
     dotenv::dotenv()?;
     let value = std::env::var("MAGIC_KEY")?;
     let mcrypt = new_magic_crypt!(value, 256); //Creates an instance of the magic crypt library/crate.
     let db_url = std::env::var("DATABASE_URL")?;
     let pool = PgPoolOptions::new()
         .max_connections(100)
-        .connect(&*db_url)
+        .connect(&db_url)
         .await?;
 
     let config = ConfigurationConstants {

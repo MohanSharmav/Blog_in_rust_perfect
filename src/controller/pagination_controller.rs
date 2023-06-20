@@ -3,11 +3,35 @@ use crate::controller::pagination_logic::select_specific_pages_post;
 use crate::model::category_database::get_all_categories_database;
 use crate::model::pagination_database::{pagination_logic, PaginationParams};
 use actix_web::http::header::ContentType;
-use actix_web::{web, HttpResponse};
+use actix_web::{http, web, HttpResponse, ResponseError};
 use handlebars::Handlebars;
+use http::StatusCode;
 use serde_json::json;
 use sqlx::{Pool, Postgres, Row};
+use std::fmt::{Debug, Display, Formatter};
+#[derive(Debug)]
+struct MyOwnErrors {
+    StatusCode: i32,
+}
+// trait ResponseError {
+//     fn description(&self) -> &str
+// }
 
+impl Display for MyOwnErrors {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "MyOwnErrors: StatusCode {}", self.StatusCode)
+    }
+}
+// pub trait ResponseError: fmt::Debug + fmt::Display {
+//
+//     fn status_code(&self) -> StatusCode;
+// }
+
+impl ResponseError for MyOwnErrors {
+    fn status_code(&self) -> StatusCode {
+        StatusCode::BAD_GATEWAY
+    }
+}
 pub async fn pagination_display(
     params: web::Query<PaginationParams>,
     config: web::Data<ConfigurationConstants>,
@@ -46,36 +70,38 @@ pub async fn perfect_pagination_logic(db: &Pool<Postgres>) -> Result<i64, actix_
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let mut counting_final = 0;
+    let counting_final: Vec<Result<i64, actix_web::Error>> = rows
+        .into_iter()
+        .map(|row| {
+            let final_count: i64 = row
+                .try_get("count")
+                .map_err(actix_web::error::ErrorInternalServerError)?;
+            Ok::<i64, actix_web::Error>(final_count)
+        })
+        .collect();
 
-    let _ = rows.iter().map(|row| {
-        let title: i64 = row
-            .try_get("count")
-            .map_err(actix_web::error::ErrorInternalServerError)?;
-        counting_final += title;
-        Ok::<i64, actix_web::Error>(counting_final)
-    });
+    // let a = &counting_final.get(1).ok_or(actix_web::error::ResponseError::status_code::Ok)?;
+    // let a = &counting_final.get(1).ok_or(format!("bad"))?;
+    // let a = &counting_final.get(1).ok_or(|| <dyn actix_web::ResponseError>::some_error())?;
+    // let a = &counting_final.get(1).ok_or(  || actix_web::ResponseError::error_response(&actix_web_validator::Error::from(errors)))?;
+    // let a = &counting_final.get(1).ok_or(|| actix_web::ResponseError::error_response())?;
+    let a = counting_final
+        .get(1).clone()
+        // .ok_or(MyOwnErrors{StatusCode:200})?;
+        .ok_or_else(||actix_web::error::ErrorInternalServerError("error"))?;
 
-    Ok(counting_final)
-}
-
-pub async fn category_pagination_logic(
-    category_input: &String,
-    db: &Pool<Postgres>,
-) -> Result<i64, anyhow::Error> {
-    let category_input = category_input.to_string();
-    let category_id = category_input.parse::<i32>()?;
-    let rows = sqlx::query("SELECT COUNT(*) FROM posts where category_id=$1")
-        .bind(category_id)
-        .fetch_all(db)
-        .await?;
-
-     let mut counting_final = 0;
-    let _ = rows.iter().map(|row| {
-         counting_final = row
-            .try_get("count")
-            .map_err(actix_web::error::ErrorInternalServerError)?;
-        Ok::<i64, actix_web::Error>(counting_final)
-    });
-    Ok(counting_final)
+    let b = a
+        .as_ref()
+        .map(|i| i).clone()
+         .map_err(actix_web::error::ErrorInternalServerError)?;
+    //
+    // let b = a
+    //     .as_ref()
+    //     .map(|i| i.clone())
+    // .map_err(actix_web::error::ErrorInternalServerError);
+    // let c = b
+    //     .as_ref()
+    //     .map(|i| i.clone())
+    //     .map_err(actix_web::error::ErrorInternalServerError)?;
+    Ok(1)
 }

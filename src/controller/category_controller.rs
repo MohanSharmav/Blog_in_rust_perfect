@@ -1,11 +1,10 @@
 use crate::controller::constants::ConfigurationConstants;
-use crate::controller::pagination_controller::category_pagination_logic;
 use crate::model::category_database::{
     category_pagination_controller_database_function, create_new_category_database,
     delete_category_database, get_all_categories_database, update_category_database,
 };
 use crate::model::database::Categories;
-use crate::model::pagination_database::PaginationParams;
+use crate::model::pagination_database::{category_pagination_logic, PaginationParams};
 use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
 use anyhow::Result;
