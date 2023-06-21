@@ -69,7 +69,7 @@ pub async fn category_pagination_logic(
         })
         .collect();
 
-    let a = counting_final.get(1).ok_or(anyhow!("{}", "error"))?;
+    let a = counting_final.get(0).ok_or(anyhow!("{}", "error"))?;
     let c = a
         .as_ref()
         .map(|i| i.clone())
