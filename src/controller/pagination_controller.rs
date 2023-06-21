@@ -9,27 +9,22 @@ use http::StatusCode;
 use serde_json::json;
 use sqlx::{Pool, Postgres, Row};
 use std::fmt::{Debug, Display, Formatter};
+use warp::http::status;
+
 #[derive(Debug)]
 struct MyOwnErrors {
-    StatusCode: i32,
+    status_codes: i32,
 }
-// trait ResponseError {
-//     fn description(&self) -> &str
-// }
 
 impl Display for MyOwnErrors {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "MyOwnErrors: StatusCode {}", self.StatusCode)
+        write!(f, "MyOwnErrors: StatusCode {}", self.status_codes)
     }
 }
-// pub trait ResponseError: fmt::Debug + fmt::Display {
-//
-//     fn status_code(&self) -> StatusCode;
-// }
 
 impl ResponseError for MyOwnErrors {
     fn status_code(&self) -> StatusCode {
-        StatusCode::BAD_GATEWAY
+        status::StatusCode::BAD_GATEWAY
     }
 }
 pub async fn pagination_display(
@@ -80,28 +75,16 @@ pub async fn perfect_pagination_logic(db: &Pool<Postgres>) -> Result<i64, actix_
         })
         .collect();
 
-    // let a = &counting_final.get(1).ok_or(actix_web::error::ResponseError::status_code::Ok)?;
-    // let a = &counting_final.get(1).ok_or(format!("bad"))?;
-    // let a = &counting_final.get(1).ok_or(|| <dyn actix_web::ResponseError>::some_error())?;
-    // let a = &counting_final.get(1).ok_or(  || actix_web::ResponseError::error_response(&actix_web_validator::Error::from(errors)))?;
-    // let a = &counting_final.get(1).ok_or(|| actix_web::ResponseError::error_response())?;
-    let a = counting_final
-        .get(1).clone()
-        // .ok_or(MyOwnErrors{StatusCode:200})?;
-        .ok_or_else(||actix_web::error::ErrorInternalServerError("error"))?;
+     let a = counting_final
+        .get(1)
+        .clone()
+        .ok_or_else(|| actix_web::error::ErrorInternalServerError("error"))?;
 
     let b = a
         .as_ref()
-        .map(|i| i).clone()
-         .map_err(actix_web::error::ErrorInternalServerError)?;
-    //
-    // let b = a
-    //     .as_ref()
-    //     .map(|i| i.clone())
-    // .map_err(actix_web::error::ErrorInternalServerError);
-    // let c = b
-    //     .as_ref()
-    //     .map(|i| i.clone())
-    //     .map_err(actix_web::error::ErrorInternalServerError)?;
-    Ok(1)
+        .map(|i| i)
+        .clone()
+        .map_err(|_er| actix_web::error::ErrorInternalServerError("error"))?;
+
+    Ok(*b)
 }

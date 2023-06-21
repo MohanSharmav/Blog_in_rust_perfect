@@ -38,9 +38,9 @@ async fn main() -> Result<(), anyhow::Error> {
     let cookie_secure = false;
     #[cfg(not(feature = "cors_for_local_development"))]
     let cookie_secure = true;
-    let handlebars = Handlebars::new();
+    let mut handlebars = Handlebars::new();
 
-    Handlebars::new().register_templates_directory(".hbs", "./Blog_new_database/templates")?;
+    handlebars.register_templates_directory(".hbs", "./templates/")?;
     dotenv::dotenv()?;
     let value = std::env::var("MAGIC_KEY")?;
     let mcrypt = new_magic_crypt!(value, 256); //Creates an instance of the magic crypt library/crate.
