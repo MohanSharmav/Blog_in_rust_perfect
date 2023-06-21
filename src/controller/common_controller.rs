@@ -19,10 +19,7 @@ pub async fn common_page_controller(
     let posts_per_page = posts_per_page.round();
     let posts_per_page = posts_per_page as usize;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    let paginators = pagination_logic(params.clone(), db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-    let current_page = params.page;
+     let current_page = params.page;
     let exact_posts_only = select_specific_pages_post(current_page, &db.clone())
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -31,7 +28,7 @@ pub async fn common_page_controller(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let htmls = handlebars.render("common", &json!({"a":&paginators,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category}))
+    let htmls = handlebars.render("common", &json!({"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category}))
         .map_err( actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()

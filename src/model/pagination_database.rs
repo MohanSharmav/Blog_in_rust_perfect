@@ -7,7 +7,6 @@ use sqlx::{Pool, Postgres, Row};
 #[derive(Deserialize, Copy, Clone)]
 pub struct PaginationParams {
     pub(crate) page: i32,
-    pub per_page: i32,
 }
 
 #[derive(Debug)]
@@ -27,13 +26,12 @@ impl std::fmt::Display for MyError {
     }
 }
 
-pub fn paginate<T>(items: Vec<T>, page: i32, per_page: i32) -> Vec<T> {
-    let start_index = (page - 1) * per_page;
-    let _end_index = start_index + per_page;
+pub fn paginate<T>(items: Vec<T>, page: i32) -> Vec<T> {
+    let start_index = (page - 1) * 1;
+    let _end_index = start_index + 3;
     items
         .into_iter()
         .skip(start_index as usize)
-        .take(per_page as usize)
         .collect()
 }
 
@@ -42,12 +40,11 @@ pub async fn pagination_logic(
     db: &Pool<Postgres>,
 ) -> Result<Vec<Posts>, anyhow::Error> {
     let page = params.page;
-    let per_page = params.per_page;
-    if page < 1 && per_page < 1 {
+    if page < 1  {
         Err(anyhow!("Invalid page"))?
     };
     let posts_pagination: Vec<Posts> = select_posts(db).await?;
-    let paginated_users = paginate(posts_pagination, page, per_page);
+    let paginated_users = paginate(posts_pagination, page);
     Ok(paginated_users)
 }
 
