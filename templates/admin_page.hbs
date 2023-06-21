@@ -74,16 +74,20 @@ div.content {
 </div>
 
 <div class="content">
-    MAIN PAGE
-<p class="listing category">
+    <div class="jumbotron  text-center">
+        <center></center><h3>Main Page</h3>
+    </div>
+
+    <p>
+        <button type="button" class="btn btn-success">    <a href="/posts/new">Create new post</a> </button>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        <button type="button" class="btn btn-success"><a href="/category/new">Create new category</a></button>
+    </p>
+    Categories are:-<br>
     {{#each o}}
         <a href="/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>  &nbsp;&nbsp;&nbsp;   <a href="/delete_category/{{this.id}}">Delete</a> &nbsp;   <a href="/category/{{this.id}}/edit">Update </a></p>
     {{/each}}
-    </p>
-    <p>
-        <a href="/posts/new">Create new post</a> &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        <a href="/category/new">Create new category</a>
-    </p>
+
+
         <div class="row">
             <div class="col-12">
                 <table class="table table-bordered">
@@ -139,7 +143,6 @@ div.content {
 <!--            <a href="?page={{this}}">{{this}}</a>-->
 <!--        {{/each--}}-->
 <!--    </div>-->
-    <button type="button"> <a href="/logout">Logout</a></button>
 
 </div>
 </p>

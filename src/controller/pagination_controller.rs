@@ -75,15 +75,12 @@ pub async fn perfect_pagination_logic(db: &Pool<Postgres>) -> Result<i64, actix_
         })
         .collect();
 
-     let a = counting_final
+    let a = counting_final
         .get(0)
-        .clone()
         .ok_or_else(|| actix_web::error::ErrorInternalServerError("error-1"))?;
 
     let b = a
         .as_ref()
-        .map(|i| i)
-        .clone()
         .map_err(|_er| actix_web::error::ErrorInternalServerError("error-2"))?;
 
     Ok(*b)

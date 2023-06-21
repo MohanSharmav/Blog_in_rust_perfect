@@ -39,7 +39,7 @@ pub async fn get_data_from_login_page(
     // let Config{magic_key,database_connection }=mag;
     let encrypted_password = mcrypt.encrypt_str_to_base64(password);
     let db = &config.database_connection;
-    println!("🤣{:?}",encrypted_password);
+    println!("🤣{:?}", encrypted_password);
     let result = login_database(username, encrypted_password, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;

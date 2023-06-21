@@ -1,11 +1,7 @@
-
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Titljjjjje</title>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
 
 
 body {
@@ -62,23 +58,66 @@ div.content {
     float: none;
   }
 }
+
 </style>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    </head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+    <script type="text/javascript">
+function get_value() {
+  var x = document.getElementById("cat").value;
+  alert(x);
+}
+
+</script>
+</head>
 <body>
-<div class="jumbotron text-center">
-<h2>Categories are</h2>
-<h3>
-{{#each z}}
-    <h3><a href="/categories/{{this.id}}">{{this.name}}</a>     &nbsp; &nbsp;  <a href="/delete_category/{{this}}">Delete</a> &nbsp; <a href="/category/{{this.id}}/edit">Update </a> &nbsp;  </h3>
-{{/each}}
-</h3>
+
+<div class="sidebar">
+    <a class="active" href="/admin?page=1">Home</a>
+    <a href="#">Posts only</a>
+    <a href="/category">Categories Only</a>
 </div>
-</p>
+
+<div class="content">
+
+<h2>Categories are</h2>
+    <button type="button" class="btn btn-success"><a href="/category/new">Create new category</a></button>
+
+    <div class="row">
+        <div class="col-4">
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th scope="col">Categories</th>
+                    <th scope="col" >Option</th>
+                </tr>
+                </thead>
+                <tbody>
+{{#each z}}
+    <td> <a href="/categories/{{this.id}}">{{this.name}}</td>     &nbsp;
+    &nbsp;  <td><a href="/delete_category/{{this}}">Delete</a> &nbsp
+    <a href="/category/{{this.id}}/edit">Update </a> &nbsp;  </td>
+    </tr>
+{{/each}}
+
+                </tbody>
+            </table>
+
+
+</div>
+        <button type="button"> <a href="/logout">Logout</a></button>
+
+    </div>
+</div>
 </body>
 </html>
 

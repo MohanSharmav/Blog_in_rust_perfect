@@ -26,13 +26,10 @@ impl std::fmt::Display for MyError {
     }
 }
 
-pub fn paginate<T>(items: Vec<T>, page: i32) -> Vec<T> {
-    let start_index = (page - 1) * 1;
+pub fn paginate<T>(items: Vec<T>, _page: i32) -> Vec<T> {
+    let start_index = 1;
     let _end_index = start_index + 3;
-    items
-        .into_iter()
-        .skip(start_index as usize)
-        .collect()
+    items.into_iter().skip(start_index as usize).collect()
 }
 
 pub async fn pagination_logic(
@@ -40,7 +37,7 @@ pub async fn pagination_logic(
     db: &Pool<Postgres>,
 ) -> Result<Vec<Posts>, anyhow::Error> {
     let page = params.page;
-    if page < 1  {
+    if page < 1 {
         Err(anyhow!("Invalid page"))?
     };
     let posts_pagination: Vec<Posts> = select_posts(db).await?;
@@ -72,7 +69,7 @@ pub async fn category_pagination_logic(
     let a = counting_final.get(0).ok_or(anyhow!("{}", "error"))?;
     let c = a
         .as_ref()
-        .map(|i| i.clone())
+        .map(|i| *i)
         .map_err(|_e| anyhow::Error::msg("failed"))?;
     Ok(c)
 }

@@ -2,7 +2,7 @@ use crate::controller::constants::ConfigurationConstants;
 use crate::controller::pagination_controller::perfect_pagination_logic;
 use crate::controller::pagination_logic::select_specific_pages_post;
 use crate::model::category_database::get_all_categories_database;
-use crate::model::pagination_database::{pagination_logic, PaginationParams};
+use crate::model::pagination_database::PaginationParams;
 use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
 use handlebars::Handlebars;
@@ -19,7 +19,7 @@ pub async fn common_page_controller(
     let posts_per_page = posts_per_page.round();
     let posts_per_page = posts_per_page as usize;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
-     let current_page = params.page;
+    let current_page = params.page;
     let exact_posts_only = select_specific_pages_post(current_page, &db.clone())
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
