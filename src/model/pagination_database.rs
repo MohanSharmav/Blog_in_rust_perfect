@@ -10,6 +10,15 @@ pub struct PaginationParams {
     pub(crate) page: i32,
 }
 
+impl Default for PaginationParams {
+    fn default() -> Self {
+        PaginationParams{
+            page: 1,
+        }
+    }
+}
+
+
 
 impl std::fmt::Display for PaginationParams {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

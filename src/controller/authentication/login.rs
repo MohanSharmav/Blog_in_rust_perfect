@@ -35,7 +35,7 @@ pub async fn get_data_from_login_page(
 ) -> Result<Redirect, actix_web::Error> {
     let username = &form.username;
     let password = &form.password.to_string();
-
+println!("-------------------------------- 😂 recieved data from login page");
     let mcrypt = &config.magic_key;
     let encrypted_password = mcrypt.encrypt_str_to_base64(password);
     let db = &config.database_connection;

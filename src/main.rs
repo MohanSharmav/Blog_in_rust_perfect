@@ -70,7 +70,11 @@ async fn main() -> Result<(), anyhow::Error> {
             )
             .service(web::resource("/post_specific/{title}").to(get_single_post))
             .service(web::resource("/users").to(pagination_display))
+
+
             .service(web::resource("/").to(common_page_controller))
+
+
             // .service(web::resource("/").to(home_redirect))
             // .service(web::resource("/").to(common_page_controller))git
             .service(web::resource("/posts").to(pagination_display))
@@ -95,14 +99,13 @@ async fn main() -> Result<(), anyhow::Error> {
                 web::resource("/category/{title}/edit")
                     .route(web::get().to(page_to_update_category)),
             )
-            .service(
-                web::resource("/category/{title}").route(web::post().to(receive_updated_category)),
-            )
+            .service(web::resource("/category/{title}").route(web::post().to(receive_updated_category)), )
             .service(web::resource("/admin").to(pagination_display))
-            .service(web::resource("/login").to(get_login_page))
-            .service(
-                web::resource("/login-success").route(web::post().to(get_data_from_login_page)),
-            )
+
+            .service(web::resource("/login")
+                .route(web::get().to(get_login_page))
+                .route(web::post().to(get_data_from_login_page)))
+
             .service(web::resource("/logout").to(logout))
             .service(web::resource("/register").to(get_register_page))
             .service(
