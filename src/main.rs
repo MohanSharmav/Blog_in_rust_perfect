@@ -72,7 +72,7 @@ async fn main() -> Result<(), anyhow::Error> {
             .service(web::resource("/users").to(pagination_display))
             .service(web::resource("/").to(common_page_controller))
             // .service(web::resource("/").to(home_redirect))
-            // .service(web::resource("/").to(common_page_controller))
+            // .service(web::resource("/").to(common_page_controller))git
             .service(web::resource("/posts").to(pagination_display))
             .service(web::resource("/posts/new").to(get_new_post))
             .service(web::resource("/new_post").route(web::post().to(receive_new_posts)))
