@@ -35,11 +35,10 @@ pub async fn get_data_from_login_page(
 ) -> Result<Redirect, actix_web::Error> {
     let username = &form.username;
     let password = &form.password.to_string();
+
     let mcrypt = &config.magic_key;
-    // let Config{magic_key,database_connection }=mag;
     let encrypted_password = mcrypt.encrypt_str_to_base64(password);
     let db = &config.database_connection;
-    println!("🤣{:?}", encrypted_password);
     let result = login_database(username, encrypted_password, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;

@@ -28,7 +28,7 @@ pub async fn get_data_from_register_page(
     let password = &form.password;
     let mcrypt = &config.magic_key;
     let db = &config.database_connection;
-    let encrypted_password = mcrypt.encrypt_str_to_base64(password); //Encrypts the string and saves it to the 'encrypted_string' variable.
+    let encrypted_password = mcrypt.encrypt_str_to_base64(password);
     register_new_user_database(user, encrypted_password, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
