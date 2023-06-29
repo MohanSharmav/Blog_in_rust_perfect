@@ -9,7 +9,7 @@ use crate::controller::category_controller::{
     delete_category, get_all_categories_controller, get_category_with_pagination, get_new_category,
     page_to_update_category, receive_new_category, receive_updated_category,
 };
-use crate::controller::common_controller::common_page_controller;
+use crate::controller::common_controller::{common_page_controller, home_redirect};
 use crate::controller::constants::ConfigurationConstants;
 use crate::controller::pagination_controller::pagination_display;
 use crate::controller::posts_controller::{
@@ -71,6 +71,8 @@ async fn main() -> Result<(), anyhow::Error> {
             .service(web::resource("/post_specific/{title}").to(get_single_post))
             .service(web::resource("/users").to(pagination_display))
             .service(web::resource("/").to(common_page_controller))
+            // .service(web::resource("/").to(home_redirect))
+            // .service(web::resource("/").to(common_page_controller))
             .service(web::resource("/posts").to(pagination_display))
             .service(web::resource("/posts/new").to(get_new_post))
             .service(web::resource("/new_post").route(web::post().to(receive_new_posts)))

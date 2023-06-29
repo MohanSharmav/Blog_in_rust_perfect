@@ -5,8 +5,16 @@ use serde::Deserialize;
 use sqlx::{Pool, Postgres, Row};
 
 #[derive(Deserialize, Copy, Clone)]
+#[derive(PartialEq)]
 pub struct PaginationParams {
     pub(crate) page: i32,
+}
+
+
+impl std::fmt::Display for PaginationParams {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "PaginationParams(page1: {})", self.page)
+        }
 }
 
 #[derive(Debug)]

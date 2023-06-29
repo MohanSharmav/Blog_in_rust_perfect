@@ -1,3 +1,5 @@
+use std::arch::asm;
+use std::ptr::null;
 use crate::controller::constants::ConfigurationConstants;
 use crate::controller::pagination_controller::perfect_pagination_logic;
 use crate::controller::pagination_logic::select_specific_pages_post;
@@ -5,7 +7,11 @@ use crate::model::category_database::get_all_categories_database;
 use crate::model::pagination_database::PaginationParams;
 use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
+use actix_web::guard::Header;
+use actix_web::http::header;
+use actix_web::web::Redirect;
 use handlebars::Handlebars;
+use jwt::Header;
 use serde_json::json;
 
 pub async fn common_page_controller(
@@ -13,6 +19,14 @@ pub async fn common_page_controller(
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
+    // let x= PaginationParams{ page: 0 };
+    // if params==actix_web::web::Query(x)
+    let x=params.clone().into_inner().to_string();
+    if x==""
+    {
+        println!("😀");
+        web::Redirect::to("/?page=1");
+    }
     let db = &config.database_connection;
     let total_posts_length: f64 = perfect_pagination_logic(db).await? as f64;
     let posts_per_page = total_posts_length / 3.0;
@@ -34,4 +48,8 @@ pub async fn common_page_controller(
     Ok(HttpResponse::Ok()
         .content_type(ContentType::html())
         .body(htmls))
+}
+
+pub async fn home_redirect() -> Redirect {
+    web::Redirect::to("/?page=1")
 }
