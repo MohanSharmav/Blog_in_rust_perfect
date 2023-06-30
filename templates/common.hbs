@@ -85,11 +85,11 @@ div.content {
     <div class="container-fluid">
         <ul class="navbar-nav">
             <li class="nav-item">
-              <h2><a href="/login">Login</a></h2>
+                <h2><a href="/login">Login</a></h2>
             </li>
             &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
             <li class="nav-item">
-           <h2> <a href="/login">Register</a></h2>
+                <h2> <a href="/login">Register</a></h2>
             </li>
         </ul>
     </div>
@@ -98,84 +98,106 @@ div.content {
 
 <p class="listing category">
 <h2>Categories are:<br></h2>
+
+<script type="text/javascript">
+function get_value(value) {
+  var x = document.getElementById("cat").value;
+  alert(x);
+
+}
+</script>
+
+
+
+//categories/2?page=1
+
+<select name="category" id="category" onchange="get_value(this.value)">
     {{#each o}}
-   <h3> <a href="/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a> </p> </h3>
+        <option id="cat" value="{{this}}">{{this.name}}</option>
     {{/each}}
-    </p>
+</select>
 
-    <div class="row">
-        <div class="col-12">
-            <table class="table table">
-                <thead>
-                <tr>
-                    <th scope="col">Title</th>
-                    <th scope="col" >Description</th>
 
+
+
+{{#each o}}
+    <h3> <a href="/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a> </p> </h3>
+{{/each}}
+</p>
+
+<div class="row">
+    <div class="col-12">
+        <table class="table table">
+            <thead>
+            <tr>
+                <th scope="col">Title</th>
+                <th scope="col" >Description</th>
+
+            </tr>
+            </thead>
+            <tbody>
+
+            {{#each  tiger}}
+
+                <td> <a href="/posts/{{this.id}}"> {{this.title}}</td>
+
+                <td> <a href="/posts/{{this.id}}"> {{this.description}}</td>
+
+                </a>
                 </tr>
-                </thead>
-                <tbody>
+            {{/each}}
 
-                {{#each  tiger}}
+            </tbody>
+        </table>
 
-                    <td> <a href="/posts/{{this.id}}"> {{this.title}}</td>
-
-                    <td> <a href="/posts/{{this.id}}"> {{this.description}}</td>
-
-                    </a>
-                    </tr>
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                {{#each pages_count }}
+                    <li class="page-item"><a class="page-link" href="?page={{this}}">{{this}}</a></li>
                 {{/each}}
+            </ul>
+        </nav>
 
-                </tbody>
-            </table>
-
-            <nav aria-label="Page navigation example">
-                <ul class="pagination">
-                    {{#each pages_count }}
-                        <li class="page-item"><a class="page-link" href="?page={{this}}">{{this}}</a></li>
-                    {{/each}}
-                </ul>
-            </nav>
-
-        </div>
     </div>
+</div>
 
 
-    <!--<p class="listing category">-->
-    <!--    {{!--#each o}}-->
+<!--<p class="listing category">-->
+<!--    {{!--#each o}}-->
 <!--        <a href="/categories/{{this}}"><li>{{this}}</a>      <a href="/delete_category/{{this}}">Delete</a></p>-->
 <!--    {{/each--}}-->
-    <!--    </p>-->
+<!--    </p>-->
 
-    <!--    <p>-->
-    <!--        {{!--#each tiger}}-->
+<!--    <p>-->
+<!--        {{!--#each tiger}}-->
 <!--        <a href="/posts/{{this.title}}">-->
 <!--            {{#each this}}  " "-->
 <!--                {{ this }}-->
 <!--            {{/each}}"   "<a href="/delete_post/{{this.title}}">Delete </a> "    "<a href="/posts/{{this.title}}/edit">update</a> <br>-->
 <!--        {{/each--}}</a>-->
-    <!--    <P>-->
-    <!--    <ul>-->
+<!--    <P>-->
+<!--    <ul>-->
 
 
 
-    </ul>
+</ul>
 
 
-        {{!--#each a}}
-        <a href="/posts/{{this.title}}">
-            {{#each this}}  " "
-                {{ this }}
-            {{/each}}<br>
-        {{/each--}}</a>
-    </p>
+    {{!--#each a}}
+    <a href="/posts/{{this.title}}">
+        {{#each this}}  " "
+            {{ this }}
+        {{/each}}<br>
+    {{/each--}}</a>
+</p>
 
 
 
-    <!--    <div class="pagination_logic">-->
-    <!--        {{!--#each pages_count }}-->
+<!--    <div class="pagination_logic">-->
+<!--        {{!--#each pages_count }}-->
 <!--            <a href="?page={{this}}">{{this}}</a>-->
 <!--        {{/each--}}-->
-    <!--    </div>-->
+<!--    </div>-->
 
 </div>
 <!--<div class="pagination_section">-->

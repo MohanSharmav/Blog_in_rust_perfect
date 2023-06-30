@@ -4,26 +4,21 @@ use anyhow::anyhow;
 use serde::Deserialize;
 use sqlx::{Pool, Postgres, Row};
 
-#[derive(Deserialize, Copy, Clone)]
-#[derive(PartialEq)]
+#[derive(Deserialize, Copy, Clone, PartialEq)]
 pub struct PaginationParams {
     pub(crate) page: i32,
 }
 
 impl Default for PaginationParams {
     fn default() -> Self {
-        PaginationParams{
-            page: 1,
-        }
+        PaginationParams { page: 1 }
     }
 }
 
-
-
 impl std::fmt::Display for PaginationParams {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            write!(f, "PaginationParams(page1: {})", self.page)
-        }
+        write!(f, "PaginationParams(page1: {})", self.page)
+    }
 }
 
 #[derive(Debug)]

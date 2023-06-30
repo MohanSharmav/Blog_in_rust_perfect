@@ -58,19 +58,143 @@ div.content {
     float: none;
   }
 }
+
+
+.dropbtn:hover, .dropbtn:focus {
+  background-color: #2980B9;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  overflow: auto;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown a:hover {background-color: #ddd;}
+
+.show {display: block;}
+
+
+.dropbtns {
+  background-color: #3498DB;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+}
+
+.dropbtns:hover, .dropbtn:focus {
+  background-color: #2980B9;
+}
+
+.dropdowns {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-contents {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  overflow: auto;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-contents a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdowns a:hover {background-color: #ddd;}
+
+.show {display: block;}
 </style>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+
+    <script>
+/* When the user clicks on the button,
+toggle between hiding and showing the dropdown content */
+function myFunction() {
+  document.getElementById("myDropdown").classList.toggle("show");
+}
+
+// Close the dropdown if the user clicks outside of it
+window.onclick = function(event) {
+  if (!event.target.matches('.dropbtn')) {
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+      }
+    }
+  }
+}
+
+function myFunctions() {
+  document.getElementById("myDropdowns").classList.toggle("show");
+}
+
+// Close the dropdown if the user clicks outside of it
+window.onclick = function(event) {
+  if (!event.target.matches('.dropbtns')) {
+    var dropdowns = document.getElementsByClassName("dropdown-contents");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+      }
+    }
+  }
+}
+
+</script>
 </head>
 <body>
 
 <div class="sidebar">
     <a class="active" href="#home">Home</a>
     <a href="#">Posts only</a>
-    <a href="/category">Categories Only</a>
+    <a href="/category">All Categories </a>
+    <div class="dropdown">
+        <button onclick="myFunction()" class="dropbtn">Categories</button>
+        <div id="myDropdown" class="dropdown-content">
+<!--            <a href="#home">Home</a>-->
+<!--            <a href="#about">About</a>-->
+<!--            <a href="#contact">Contact</a>-->
+            {{#each o}}
+                <a href="/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>
+            {{/each}}
+        </div>
+    </div>
 </div>
 
 <div class="content">
@@ -82,50 +206,64 @@ div.content {
         <button type="button" class="btn btn-success">    <a href="/posts/new">Create new post</a> </button>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
         <button type="button" class="btn btn-success"><a href="/category/new">Create new category</a></button>
     </p>
+
     Categories are:-<br>
+
+
+    <div class="dropdowns">
+        <button onclick="myFunctions()" class="dropbtns">Dropdown</button>
+        <div id="myDropdowns" class="dropdown-contents">
+            {{#each o}}
+                <a href="/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>
+            {{/each}}
+        </div>
+    </div>
+
+
+<br>
     {{#each o}}
         <a href="/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>  &nbsp;&nbsp;&nbsp;   <a href="/delete_category/{{this.id}}">Delete</a> &nbsp;   <a href="/category/{{this.id}}/edit">Update </a></p>
     {{/each}}
 
 
-        <div class="row">
-            <div class="col-12">
-                <table class="table table-bordered">
-                    <thead>
-                    <tr>
-                        <th scope="col">Title</th>
-                        <th scope="col" >Description</th>
-                        <th scope="col">Option</th>
-                    </tr>
-                    </thead>
-                    <tbody>
+    <div class="row">
+        <div class="col-12">
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th scope="col">Title</th>
+                    <th scope="col" >Description</th>
+                    <th scope="col">Option</th>
+                </tr>
+                </thead>
+                <tbody>
 
-                    {{#each  tiger}}
+                {{#each  tiger}}
 
-                       <td> <a href="/posts/{{this.id}}"> {{this.title}}</td>
+                    <td> <a href="/posts/{{this.id}}"> {{this.title}}</td>
 
                     <td> <a href="/posts/{{this.id}}"> {{this.description}}</td>
-                       <td> <a href="/delete_post/{{this.id}}"> Delete  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     </a>
-                       <a href="/posts/{{this.id}}/edit"> update </a>
-                       </td>
-                           <td {{this.id}}>{{this.id}}</td>
+                    <td> <a href="/delete_post/{{this.id}}"> Delete  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     </a>
+                        <a href="/posts/{{this.id}}/edit"> update </a>
+                    </td>
+                    <td {{this.id}}>{{this.id}}</td>
                     </a>
                     </tr>
-                   {{/each}}
+                {{/each}}
 
-                    </tbody>
-                </table>
+                </tbody>
+            </table>
 
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination">
-    {{#each pages_count }}
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    {{#each pages_count }}
                         <li class="page-item"><a class="page-link" href="?page={{this}}">{{this}}</a></li>
-    {{/each}}
-                    </ul>
-                </nav>
+                    {{/each}}
+                </ul>
+            </nav>
 
-            </div>
         </div>
+    </div>
 
 
 
@@ -133,16 +271,16 @@ div.content {
 
     </ul>
 
-</a>
+    </a>
     </p>
 
 
 
-<!--    <div class="pagination_logic">-->
-<!--        {{!--#each pages_count }}-->
+    <!--    <div class="pagination_logic">-->
+    <!--        {{!--#each pages_count }}-->
 <!--            <a href="?page={{this}}">{{this}}</a>-->
 <!--        {{/each--}}-->
-<!--    </div>-->
+    <!--    </div>-->
 
 </div>
 </p>
