@@ -3,7 +3,7 @@ use crate::controller::pagination_logic::select_specific_pages_post;
 use crate::model::category_database::get_all_categories_database;
 use crate::model::pagination_database::{pagination_logic, PaginationParams};
 use actix_web::http::header::ContentType;
-use actix_web::{http, web, HttpResponse, ResponseError};
+use actix_web::{http, web, HttpResponse, ResponseError, Responder};
 use handlebars::Handlebars;
 use http::StatusCode;
 use serde_json::json;
@@ -40,6 +40,11 @@ pub async fn pagination_display(
     mut params: Option<Query<PaginationParams>>,
 
 ) -> Result<HttpResponse, actix_web::Error> {
+// )-> impl Responder{
+    if user.is_none(){
+        return  Ok(HttpResponse::SeeOther().insert_header((http::header::LOCATION,"/")).body(""));
+    }
+
     let db = &config.database_connection;
     let total_posts_length: f64 = perfect_pagination_logic(db).await? as f64;
     let posts_per_page = total_posts_length / 3.0;
@@ -47,7 +52,7 @@ pub async fn pagination_display(
     let posts_per_page = posts_per_page as usize;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     println!("a----------------------------");
-    check_user(user);
+
     let pari = params.get_or_insert(Query(PaginationParams::default()));
 let current_pag=pari.0;
     let current_page = current_pag.page;
@@ -68,6 +73,10 @@ let current_pag=pari.0;
 
     let htmls = handlebars.render("admin_page", &json!({"a":&paginators,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category}))
         .map_err( actix_web::error::ErrorInternalServerError)?;
+
+
+
+    // let c=check_user(user).await;
 
     Ok(HttpResponse::Ok()
         .content_type(ContentType::html())
