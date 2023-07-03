@@ -1,3 +1,6 @@
+use actix::{Response, utils};
+use actix_http::body::MessageBody;
+use actix_http::StatusCode;
 use crate::controller::constants::ConfigurationConstants;
 use crate::model::authentication::login_database::{login_database, LoginCheck};
 use actix_identity::Identity;
@@ -9,6 +12,9 @@ use handlebars::Handlebars;
 use magic_crypt::MagicCryptTrait;
 use serde::Deserialize;
 use serde_json::json;
+use actix_web::dev::{ServiceRequest, ServiceResponse};
+use actix_web::error::InternalError;
+use actix_web_lab::middleware::Next;
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct User {
@@ -35,7 +41,6 @@ pub async fn get_data_from_login_page(
 ) -> Result<Redirect, actix_web::Error> {
     let username = &form.username;
     let password = &form.password.to_string();
-    println!("-------------------------------- 😂 recieved data from login page");
     let mcrypt = &config.magic_key;
     let encrypted_password = mcrypt.encrypt_str_to_base64(password);
     let db = &config.database_connection;
@@ -59,7 +64,7 @@ pub async fn logout(id: Identity) -> impl Responder {
 }
 
 pub async fn check_user(user: Option<Identity>) -> impl Responder {
-    if let Some(_user) = user {
+    if let Some(user) = user {
         web::Redirect::to("/admin?page=1&limit=2")
     } else {
         web::Redirect::to("/")

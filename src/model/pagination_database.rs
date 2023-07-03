@@ -1,8 +1,10 @@
 use crate::model::database::{select_posts, Posts};
 use actix_web::{web, Error as ActixError};
+use actix_web::web::Query;
 use anyhow::anyhow;
 use serde::Deserialize;
 use sqlx::{Pool, Postgres, Row};
+use crate::controller::constants::ConfigurationConstants;
 
 #[derive(Deserialize, Copy, Clone, PartialEq)]
 pub struct PaginationParams {
@@ -45,13 +47,13 @@ pub fn paginate<T>(items: Vec<T>, _page: i32) -> Vec<T> {
 }
 
 pub async fn pagination_logic(
-    params: web::Query<PaginationParams>,
+    mut params: Option<Query<PaginationParams>>,
     db: &Pool<Postgres>,
 ) -> Result<Vec<Posts>, anyhow::Error> {
-    let page = params.page;
-    if page < 1 {
-        Err(anyhow!("Invalid page"))?
-    };
+    let pari = params.get_or_insert(Query(PaginationParams::default()));
+    let current_pag=pari.0;
+    let page = current_pag.page;
+
     let posts_pagination: Vec<Posts> = select_posts(db).await?;
     let paginated_users = paginate(posts_pagination, page);
     Ok(paginated_users)

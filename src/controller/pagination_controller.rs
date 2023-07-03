@@ -9,7 +9,12 @@ use http::StatusCode;
 use serde_json::json;
 use sqlx::{Pool, Postgres, Row};
 use std::fmt::{Debug, Display, Formatter};
+use actix_identity::Identity;
+use actix_web::web::Query;
+use anyhow::anyhow;
 use warp::http::status;
+use crate::controller::authentication::login::check_user;
+use crate::model::authentication::login_database::LoginCheck;
 
 #[derive(Debug)]
 struct MyOwnErrors {
@@ -28,9 +33,12 @@ impl ResponseError for MyOwnErrors {
     }
 }
 pub async fn pagination_display(
-    params: web::Query<PaginationParams>,
+    // params: web::Query<PaginationParams>,
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
+    user: Option<Identity>,
+    mut params: Option<Query<PaginationParams>>,
+
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
     let total_posts_length: f64 = perfect_pagination_logic(db).await? as f64;
@@ -38,12 +46,19 @@ pub async fn pagination_display(
     let posts_per_page = posts_per_page.round();
     let posts_per_page = posts_per_page as usize;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    let paginators = pagination_logic(params.clone(), db)
+    println!("a----------------------------");
+    check_user(user);
+    let pari = params.get_or_insert(Query(PaginationParams::default()));
+let current_pag=pari.0;
+    let current_page = current_pag.page;
+    // if current_page < 1 {
+    //     Err(|e|actix_web::error::ErrorInternalServerError(e))?
+    // };
+    let paginators = pagination_logic(params, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let _current_page = params.page;
-    let exact_posts_only = select_specific_pages_post(_current_page, db)
+    let exact_posts_only = select_specific_pages_post(current_page, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

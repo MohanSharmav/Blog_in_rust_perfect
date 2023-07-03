@@ -1,9 +1,6 @@
 mod controller;
 mod model;
-
-use crate::controller::authentication::login::{
-    check_user, get_data_from_login_page, get_login_page, logout,
-};
+use crate::controller::authentication::login::{check_user, get_data_from_login_page, get_login_page, logout};
 use crate::controller::authentication::register::{get_data_from_register_page, get_register_page};
 use crate::controller::category_controller::{
     delete_category, get_all_categories_controller, get_category_with_pagination, get_new_category,
@@ -25,6 +22,7 @@ use actix_web::{web, App, HttpServer, Result};
 use handlebars::Handlebars;
 use magic_crypt::new_magic_crypt;
 use sqlx::postgres::PgPoolOptions;
+use actix_web_lab::middleware::from_fn;
 
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
@@ -71,7 +69,7 @@ async fn main() -> Result<(), anyhow::Error> {
             .service(web::resource("/post_specific/{title}").to(get_single_post))
             .service(web::resource("/users").to(pagination_display))
             .service(web::resource("/").to(common_page_controller))
-            .service(web::resource("/posts").to(pagination_display))
+            .service(web::resource("/posts/").to(pagination_display))
             .service(web::resource("/posts/new").to(get_new_post))
             .service(web::resource("/new_post").route(web::post().to(receive_new_posts)))
             .service(web::resource("/posts/{title}").to(get_single_post))
@@ -99,7 +97,6 @@ async fn main() -> Result<(), anyhow::Error> {
                 web::resource("/category/{title}")
                     .route(web::post().to(receive_updated_category)),
             )
-            .service(web::resource("/admin").to(pagination_display))
             .service(
                 web::resource("/login")
                     .route(web::get().to(get_login_page))
@@ -112,6 +109,21 @@ async fn main() -> Result<(), anyhow::Error> {
                     .route(web::post().to(get_data_from_register_page)),
             )
             .service(web::resource("/check").to(check_user))
+            .service(web::resource("/admin").to(pagination_display))
+
+        // .wrap(from_fn(check_user)
+            // .service(web::scope("/admin")
+            //     .wrap(from_fn(check_user)
+            //               .route("/dashboard", web::get()
+            //                   .to(pagination_display))
+            //     ))
+
+            // .service(web::resource("/admin").to(pagination_display))
+            // .service(
+            //     web::scope("/admin")
+            //         .wrap(from_fn(reject_anonymous_users))
+            //         .route("/dashboard", web::get().to(pagination_display)))
+
     })
     .bind("127.0.0.1:8080")?
     .run()
