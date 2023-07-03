@@ -67,9 +67,6 @@ pub async fn check_user(user: Option<Identity>) -> impl Responder {
     if let Some(user) = user {
         web::Redirect::to("/admin?page=1&limit=2")
     } else {
-        println!("---------------------------'\
-        ------------------");
-
         web::Redirect::to("/")
     }
 }

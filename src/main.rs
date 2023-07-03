@@ -107,8 +107,9 @@ async fn main() -> Result<(), anyhow::Error> {
                 web::resource("/register")
                     .route(web::get().to(get_register_page))
                     .route(web::post().to(get_data_from_register_page)),
+
             )
-            .service(web::resource("/check").to(check_user))
+             .service(web::resource("/check").to(check_user))
             .service(web::resource("/admin").to(pagination_display))
 
         // .wrap(from_fn(check_user)
