@@ -1,20 +1,20 @@
-use actix::{Response, utils};
-use actix_http::body::MessageBody;
-use actix_http::StatusCode;
 use crate::controller::constants::ConfigurationConstants;
 use crate::model::authentication::login_database::{login_database, LoginCheck};
+use actix::{utils, Response};
+use actix_http::body::MessageBody;
+use actix_http::StatusCode;
 use actix_identity::Identity;
+use actix_web::dev::{ServiceRequest, ServiceResponse};
+use actix_web::error::InternalError;
 use actix_web::http::header::ContentType;
 use actix_web::web::Redirect;
 use actix_web::{web, HttpResponse};
 use actix_web::{HttpMessage as _, HttpRequest, Responder};
+use actix_web_lab::middleware::Next;
 use handlebars::Handlebars;
 use magic_crypt::MagicCryptTrait;
 use serde::Deserialize;
 use serde_json::json;
-use actix_web::dev::{ServiceRequest, ServiceResponse};
-use actix_web::error::InternalError;
-use actix_web_lab::middleware::Next;
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct User {
