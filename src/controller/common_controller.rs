@@ -5,7 +5,7 @@ use crate::model::category_database::get_all_categories_database;
 use crate::model::pagination_database::PaginationParams;
 use actix_web::http::header::ContentType;
 use actix_web::web::Query;
-use actix_web::{web, HttpResponse};
+use actix_web::{web, HttpResponse, Responder};
 use handlebars::Handlebars;
 use serde_json::json;
 use std::option::Option;
@@ -28,7 +28,6 @@ pub async fn common_page_controller(
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     let pari = params.get_or_insert(Query(PaginationParams::default()));
     let current_page = pari.clone().page;
-
     let exact_posts_only = select_specific_pages_post(current_page, &db.clone())
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -43,4 +42,8 @@ pub async fn common_page_controller(
     Ok(HttpResponse::Ok()
         .content_type(ContentType::html())
         .body(htmls))
+}
+
+pub async fn redirect_user() -> impl Responder {
+    web::Redirect::to("/posts")
 }

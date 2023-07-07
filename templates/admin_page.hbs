@@ -192,7 +192,7 @@ window.onclick = function(event) {
 <!--            <a href="#about">About</a>-->
 <!--            <a href="#contact">Contact</a>-->
             {{#each o}}
-                <a href="admin/category/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>
+                <a href="admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>
             {{/each}}
         </div>
     </div>
@@ -215,7 +215,7 @@ window.onclick = function(event) {
         <button onclick="myFunctions()" class="dropbtns">Dropdown</button>
         <div id="myDropdowns" class="dropdown-contents">
             {{#each o}}
-                <a href="admin/category/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>
+                <a href="admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>
             {{/each}}
         </div>
     </div>
@@ -223,7 +223,7 @@ window.onclick = function(event) {
 
 <br>
     {{#each o}}
-        <a href="admin/category/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>  &nbsp;&nbsp;&nbsp;   <a href="admin/delete_category/{{this.id}}">Delete</a> &nbsp;   <a href="admin/category/{{this.id}}/edit">Update </a></p>
+        <a href="admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>  &nbsp;&nbsp;&nbsp;   <a href="admin/delete_category/{{this.id}}">Delete</a> &nbsp;   <a href="admin/categories/{{this.id}}/edit">Update </a></p>
     {{/each}}
 
 

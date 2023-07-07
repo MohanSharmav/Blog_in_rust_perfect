@@ -1,0 +1,283 @@
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+
+
+body {
+  margin: 0;
+  font-family: "Lato", sans-serif;
+}
+
+.sidebar {
+  margin: 0;
+  padding: 0;
+  width: 200px;
+  background-color: #f1f1f1;
+  position: fixed;
+  height: 100%;
+  overflow: auto;
+}
+
+.sidebar a {
+  display: block;
+  color: black;
+  padding: 16px;
+  text-decoration: none;
+}
+
+.sidebar a.active {
+  background-color: #04AA6D;
+  color: white;
+}
+
+.sidebar a:hover:not(.active) {
+  background-color: #555;
+  color: white;
+}
+
+div.content {
+  margin-left: 200px;
+  padding: 1px 16px;
+  height: 1000px;
+}
+
+@media screen and (max-width: 700px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+  .sidebar a {float: left;}
+  div.content {margin-left: 0;}
+}
+
+@media screen and (max-width: 400px) {
+  .sidebar a {
+    text-align: center;
+    float: none;
+  }
+}
+
+
+.dropbtn:hover, .dropbtn:focus {
+  background-color: #2980B9;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  overflow: auto;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown a:hover {background-color: #ddd;}
+
+.show {display: block;}
+
+
+.dropbtns {
+  background-color: #3498DB;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+}
+
+.dropbtns:hover, .dropbtn:focus {
+  background-color: #2980B9;
+}
+
+.dropdowns {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-contents {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  overflow: auto;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-contents a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdowns a:hover {background-color: #ddd;}
+
+.show {display: block;}
+
+</style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+
+    <script>
+/* When the user clicks on the button,
+toggle between hiding and showing the dropdown content */
+function myFunction() {
+  document.getElementById("myDropdown").classList.toggle("show");
+}
+
+// Close the dropdown if the user clicks outside of it
+window.onclick = function(event) {
+  if (!event.target.matches('.dropbtn')) {
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+      }
+    }
+  }
+}
+
+function myFunctions() {
+  document.getElementById("myDropdowns").classList.toggle("show");
+}
+
+// Close the dropdown if the user clicks outside of it
+window.onclick = function(event) {
+  if (!event.target.matches('.dropbtns')) {
+    var dropdowns = document.getElementsByClassName("dropdown-contents");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+      }
+    }
+  }
+}
+
+</script>
+</head>
+<body>
+
+<div class="sidebar">
+    <a class="active" href="#home">Home</a>
+    <a href="/admin?page=1">Posts only</a>
+    <!--    <a href="/category">All Categories </a>-->
+    <div class="dropdown">
+        <button onclick="myFunction()" class="dropbtn">All Categories </button>
+        <div id="myDropdown" class="dropdown-content">
+            <!--            <a href="#home">Home</a>-->
+            <!--            <a href="#about">About</a>-->
+            <!--            <a href="#contact">Contact</a>-->
+            {{#each o}}
+                <a href="admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>
+            {{/each}}
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="jumbotron  text-center">
+        <center></center><h3>Main Page</h3>
+    </div>
+
+    <p>
+        <button type="button" class="btn btn-success">    <a href="admin/posts/new">Create new post</a> </button>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        <button type="button" class="btn btn-success"><a href="admin/categories/new">Create new category</a></button>
+    </p>
+
+    Categories are:-<br>
+
+
+    <div class="dropdowns">
+        <button onclick="myFunctions()" class="dropbtns">Dropdown</button>
+        <div id="myDropdowns" class="dropdown-contents">
+            {{#each o}}
+                <a href="admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>
+            {{/each}}
+        </div>
+    </div>
+
+
+    <br>
+    {{#each o}}
+        <a href="admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>  &nbsp;&nbsp;&nbsp;   <a href="admin/delete_category/{{this.id}}">Delete</a> &nbsp;   <a href="admin/categories/{{this.id}}/edit">Update </a></p>
+    {{/each}}
+
+
+    <div class="row">
+        <div class="col-12">
+            <table class="table table">
+                <thead>
+                <tr>
+                    <th scope="col">Title</th>
+                    <th scope="col" >Description</th>
+
+                </tr>
+                </thead>
+                <tbody>
+                {{#each  tiger}}
+
+                    <td> <a href="/posts/{{this.id}}"> {{this.title}}</td>
+
+                    <td> <a href="/posts/{{this.id}}"> {{this.description}}</td>
+
+                    </a>
+                    </tr>
+                {{/each}}
+
+                </tbody>
+            </table>
+
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    {{#each pages_count }}
+                        <li class="page-item"><a class="page-link" href="?page={{this}}">{{this}}</a></li>
+                    {{/each}}
+                </ul>
+            </nav>
+
+        </div>
+    </div>
+</div>
+
+</p>
+<p>
+    {{#each p}}
+    <a href="/posts/{{this.title}}">
+        {{#each this}}
+            {{ this}}    &nbsp;
+        {{/each}}<br>
+    {{/each}}</a>
+</p>
+
+{{#each pages_count }}
+    <p class="page-item"><a class="page-link" href="?page={{this}}">{{this}}</a></p>
+{{/each}}
+
+</p>
+</body>
+</html>
