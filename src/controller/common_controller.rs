@@ -20,6 +20,7 @@ pub async fn common_page_controller(
     //      Some(_)=>params.map(|i|i),
     //  None=>Some(Query::<PaginationParams>::from(actix_web::web::Query(PaginationParams::default())))
     //  };
+    println!("--------------------------------");
     let db = &config.database_connection;
     let total_posts_length: f64 = perfect_pagination_logic(db).await? as f64;
     let posts_per_page = total_posts_length / 3.0;
