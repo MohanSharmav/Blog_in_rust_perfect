@@ -32,6 +32,8 @@ pub async fn common_page_controller(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
+
+    println!("-----------------😀{:?}", exact_posts_only);
     let all_category = get_all_categories_database(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
