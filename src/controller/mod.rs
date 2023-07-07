@@ -1,3 +1,4 @@
+pub(crate) mod admin_function;
 pub(crate) mod authentication;
 pub(crate) mod category_controller;
 pub(crate) mod common_controller;

@@ -184,15 +184,15 @@ window.onclick = function(event) {
 <div class="sidebar">
     <a class="active" href="#home">Home</a>
     <a href="/admin?page=1">Posts only</a>
-<!--    <a href="/category">All Categories </a>-->
+    <!--    <a href="/category">All Categories </a>-->
     <div class="dropdown">
         <button onclick="myFunction()" class="dropbtn">All Categories </button>
         <div id="myDropdown" class="dropdown-content">
-<!--            <a href="#home">Home</a>-->
-<!--            <a href="#about">About</a>-->
-<!--            <a href="#contact">Contact</a>-->
+            <!--            <a href="#home">Home</a>-->
+            <!--            <a href="#about">About</a>-->
+            <!--            <a href="#contact">Contact</a>-->
             {{#each o}}
-                <a href="admin/category/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>
+                <a href="admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>
             {{/each}}
         </div>
     </div>
@@ -215,77 +215,27 @@ window.onclick = function(event) {
         <button onclick="myFunctions()" class="dropbtns">Dropdown</button>
         <div id="myDropdowns" class="dropdown-contents">
             {{#each o}}
-                <a href="admin/category/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>
+                <a href="admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>
             {{/each}}
         </div>
     </div>
 
 
-<br>
+    <br>
     {{#each o}}
-        <a href="admin/category/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>  &nbsp;&nbsp;&nbsp;   <a href="admin/delete_category/{{this.id}}">Delete</a> &nbsp;   <a href="admin/category/{{this.id}}/edit">Update </a></p>
+        <a href="admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>  &nbsp;&nbsp;&nbsp;   <a href="admin/delete_category/{{this.id}}">Delete</a> &nbsp;   <a href="admin/categories/{{this.id}}/edit">Update </a></p>
     {{/each}}
 
 
-    <div class="row">
-        <div class="col-12">
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                    <th scope="col">Title</th>
-                    <th scope="col" >Description</th>
-                    <th scope="col">Option</th>
-                </tr>
-                </thead>
-                <tbody>
+    <div class="jumbotron text-center">
+        <h3>
+            {{#each single_post}}
+                {{this.title}}
+                {{this.description}}
+            {{/each}}
+        </h3>
 
-                {{#each  tiger}}
-
-                    <td> <a href="admin/posts/{{this.id}}"> {{this.title}}</td>
-
-                    <td> <a href="admin/posts/{{this.id}}"> {{this.description}}</td>
-                    <td> <a href="admin/delete_post/{{this.id}}"> Delete  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     </a>
-                        <a href="admin/posts/{{this.id}}/edit"> update </a>
-                    </td>
-                    <td {{this.id}}>{{this.id}}</td>
-                    </a>
-                    </tr>
-                {{/each}}
-
-                </tbody>
-            </table>
-
-            <nav aria-label="Page navigation example">
-                <ul class="pagination">
-                    {{#each pages_count }}
-                        <li class="page-item"><a class="page-link" href="?page={{this}}">{{this}}</a></li>
-                    {{/each}}
-                </ul>
-            </nav>
-
-        </div>
     </div>
-
-
-
-
-
-    </ul>
-
-    </a>
-    </p>
-
-
-
-    <!--    <div class="pagination_logic">-->
-    <!--        {{!--#each pages_count }}-->
-<!--            <a href="?page={{this}}">{{this}}</a>-->
-<!--        {{/each--}}-->
-    <!--    </div>-->
-
 </div>
-</p>
-
 </body>
 </html>
-

@@ -26,6 +26,7 @@ use handlebars::Handlebars;
 use magic_crypt::new_magic_crypt;
 use sqlx::postgres::PgPoolOptions;
 use warp::get;
+use crate::controller::admin_function::admin_category_display;
 
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
@@ -109,6 +110,9 @@ async fn main() -> Result<(), anyhow::Error> {
                     .route(web::get().to(get_new_category))
                     .route(web::post().to(receive_new_category)),
             )
+
+            //no ui
+
             .service(web::resource("/admin/categories/{title}/edit")
                     .route(web::get().to(page_to_update_category)),
             )
@@ -118,12 +122,17 @@ async fn main() -> Result<(), anyhow::Error> {
                 .route(web::get().to(get_all_categories_controller)))
             .service(web::resource("/admin/posts/new")
                          .to(get_new_post))
+
             .service(web::resource( "/admin/posts/").route(web::post().to(receive_new_posts)))
-
+            //change ui
             .service(web::resource("/admin/posts/{post_id}").route(web::get().to(get_single_post)))
+            //change ui
+            .service(web::resource("/admin/category/{category_id}").to(get_category_with_pagination))
 
-
-        //Login
+            .service(web::resource("/admin/delete_category/{name}").route(web::get().to(delete_category)))
+             .service(web::resource("/admin/category/{category_id}").route(web::get().to(admin_category_display)))
+            //change ui
+            //Login
 
             .service(
                 web::resource("/login")
@@ -143,7 +152,7 @@ async fn main() -> Result<(), anyhow::Error> {
             .service(web::resource("/posts/{post_id}").route(web::get().to(get_single_post)))
 //below two is not working
             .service(web::resource(" /posts/page/{page_number}").route(web::get().to(common_page_controller)))
-            .service(web::resource("/posts/category/{category_id}"))
+            .service(web::resource("/posts/category/{category_id}").to(get_category_with_pagination))
 
 
 

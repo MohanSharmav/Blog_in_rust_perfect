@@ -133,7 +133,6 @@ div.content {
 
 
 <p class="listing category">
-<h2>Categories are:<br></h2>
 
 <script type="text/javascript">
 function get_value(value) {
@@ -143,29 +142,18 @@ function get_value(value) {
 }
 </script>
 
-
-
-//categories/2?page=1
-
-<select name="category" id="category" onchange="get_value(this.value)">
-    {{#each o}}
-        <option id="cat" value="{{this}}">{{this.name}}</option>
-    {{/each}}
-</select>
-
-
 <div class="dropdown">
     <button class="dropbtn">Dropdown</button>
     <div class="dropdown-content">
         {{#each o}}
-            <a href="/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>
+            <a href="posts/category/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>
         {{/each}}
     </div>
 </div>
 
 
 {{#each o}}
-    <h3> <a href="/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a> </p> </h3>
+    <h3> <a href="posts/category/{{this.id}}?page=1"><strong>{{this.name}}</strong></a> </p> </h3>
 {{/each}}
 </p>
 
