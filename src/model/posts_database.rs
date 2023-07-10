@@ -16,13 +16,11 @@ pub async fn update_post_database(
     title: &String,
     description: &String,
     id: &&i32,
-    category_id: &&i32,
     db: &Pool<Postgres>,
 ) -> Result<(), anyhow::Error> {
     sqlx::query("update posts set title=$1 ,description=$2, category_id=$3 where id=$4")
         .bind(title)
         .bind(description)
-        .bind(category_id)
         .bind(id)
         .execute(db)
         .await?;

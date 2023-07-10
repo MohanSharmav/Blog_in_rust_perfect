@@ -26,7 +26,7 @@ pub async fn query_single_post_in_struct(
     db: &Pool<Postgres>,
 ) -> Result<Vec<Posts>, anyhow::Error> {
     let single_post = sqlx::query_as::<_, Posts>(
-        "select id, title, description, category_id from posts  WHERE id=$1",
+        "select id, title, description from posts  WHERE id=$1",
     )
     .bind(titles)
     .fetch_all(db)

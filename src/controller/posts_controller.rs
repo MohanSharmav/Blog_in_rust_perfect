@@ -88,10 +88,9 @@ pub async fn receive_updated_post(
     let db = &config.database_connection;
     let id = &form.id;
     let title = &form.title;
-    let category_id = &form.category_id;
     let description = &form.description;
 
-    update_post_database(title, description, &id, &category_id, db)
+    update_post_database(title, description, &id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

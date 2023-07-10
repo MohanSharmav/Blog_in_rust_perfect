@@ -13,7 +13,6 @@ pub struct Posts {
     pub(crate) id: i32,
     pub(crate) title: String,
     pub(crate) description: String,
-    pub(crate) category_id: i32,
 }
 
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
