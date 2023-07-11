@@ -39,8 +39,7 @@ pub async fn admin_category_display(
     let posts_per_page = posts_per_page as i32;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     // let category_postinng = category_pagination_controller_database_function(&category_input, db)
-    let category_postinng = category_pagination_controller_database_function( db)
-
+    let category_postinng = category_pagination_controller_database_function( category_input,db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
