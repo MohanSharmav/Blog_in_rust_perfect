@@ -120,7 +120,7 @@ async fn main() -> Result<(), anyhow::Error> {
                     .route(web::get().to(get_all_categories_controller)),
             )
             .service(web::resource("/admin/posts/new").to(get_new_post))
-            .service(web::resource("/admin/posts/").route(web::post().to(receive_new_posts)))
+            .service(web::resource("/admin/posts").route(web::post().to(receive_new_posts)))
             //change ui
             .service(
                 web::resource("/admin/posts/{post_id}")

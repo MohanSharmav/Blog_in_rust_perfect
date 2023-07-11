@@ -18,11 +18,38 @@ pub async fn update_post_database(
     id: &&i32,
     db: &Pool<Postgres>,
 ) -> Result<(), anyhow::Error> {
-    sqlx::query("update posts set title=$1 ,description=$2, category_id=$3 where id=$4")
+    sqlx::query("update posts set title=$1 ,description=$2 where id=$3")
         .bind(title)
         .bind(description)
         .bind(id)
         .execute(db)
         .await?;
+    Ok(())
+}
+
+
+pub async fn create_post_database(
+    id: usize,
+    title: String,
+    description: String,
+    category_id: &i32,
+    db: &Pool<Postgres>,
+) -> Result<(), anyhow::Error>{
+    //categories_posts
+     let id=id as i32;
+    println!("{:?} {:?}{:?}{:?}",id,category_id,title,description);
+    sqlx::query("insert into posts values($1,$2,$3)")
+        .bind(id)
+        .bind(title)
+        .bind(description)
+        .execute(db)
+        .await?;
+
+    sqlx::query("insert into categories_posts values ($1,$2)")
+         .bind(id)
+        .bind(category_id)
+        .execute(db)
+        .await?;
+
     Ok(())
 }
