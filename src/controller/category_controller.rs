@@ -109,7 +109,7 @@ pub async fn receive_updated_category(
     let db = &config.database_connection;
     let current_post_name = &current_category_name.into_inner();
     let name = &form.name;
-    update_category_database(name, current_post_name, db)
+    update_category_database(name,  db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     let success_message = "the post created successfully";
@@ -138,8 +138,9 @@ pub async fn get_category_with_pagination(
     let posts_per_page = posts_per_page.round();
     let posts_per_page = posts_per_page as i32;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    let category_postinng = category_pagination_controller_database_function(&category_input, db)
-        .await
+    // let category_postinng = category_pagination_controller_database_function(&category_input, db)
+    let category_postinng = category_pagination_controller_database_function( db)
+    .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars

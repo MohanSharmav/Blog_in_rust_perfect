@@ -25,7 +25,7 @@ pub struct UpdatePost {
 
 pub async fn select_posts(db: &Pool<Postgres>) -> Result<Vec<Posts>, anyhow::Error> {
     let postsing =
-        sqlx::query_as::<_, Posts>("select id, title, description, category_id from posts")
+        sqlx::query_as::<_, Posts>("select id, title, description from posts")
             .fetch_all(db)
             .await?;
 
