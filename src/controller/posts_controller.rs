@@ -53,7 +53,6 @@ pub async fn delete_post(
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
-    println!("----------------------------------------------------------------");
     let db = &config.database_connection;
     let to_delete = to_delete.into_inner();
     delete_post_database(to_delete, db)

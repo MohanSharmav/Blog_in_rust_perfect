@@ -109,10 +109,7 @@ async fn main() -> Result<(), anyhow::Error> {
             //no ui
             .service(
                 web::resource("/admin/categories/{title}/edit")
-                    .route(web::get().to(page_to_update_category)),
-            )
-            .service(
-                web::resource(" /admin/categories/{category_id}")
+                    .route(web::get().to(page_to_update_category))
                     .route(web::post().to(receive_updated_category)),
             )
             .service(
@@ -130,6 +127,7 @@ async fn main() -> Result<(), anyhow::Error> {
             .service(
                 web::resource("/admin/posts/{post_id}/edit")
                     .route(web::get().to(page_to_update_post)),
+
             )
             .service(web::resource("/admin/post/delete/{post_id}").route(web::get().to(delete_post)))
             //change ui

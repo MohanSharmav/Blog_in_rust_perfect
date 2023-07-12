@@ -106,10 +106,12 @@ pub async fn receive_updated_category(
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
+    println!("--------------------------------🙃");
     let db = &config.database_connection;
     let current_post_name = &current_category_name.into_inner();
     let name = &form.name;
-    update_category_database(name,  db)
+    let id=&form.id;
+    update_category_database(name, id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     let success_message = "the post created successfully";

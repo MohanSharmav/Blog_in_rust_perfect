@@ -250,8 +250,9 @@ function myFunctionForDelete(){
                     <td> <a href="admin/posts/{{this.id}}"> {{this.title}}</td>
 
                     <td> <a href="admin/posts/{{this.id}}"> {{this.description}}</td>
-                    <td> <p onclick="myFunctionForDelete()" ><a href="admin/post/delete/{{this.id}}"> Delete</p>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     </a>
-                        <a href="admin/post/delete/{{this.id}}/edit"> update </a>
+                    <td> <a  onclick="myFunctionForDelete()" href="admin/post/delete/{{this.id}}"> Delete</a>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     </a>
+                        <a href="admin/posts/{{this.id}}/edit"> update </a>
+
                     </td>
                     <td {{this.id}}>{{this.id}}</td>
                     </a>

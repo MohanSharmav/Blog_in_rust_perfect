@@ -45,13 +45,13 @@ pub async fn delete_category_database(
 
 pub async fn update_category_database(
     name: &String,
-    // category_id: &str,
+    category_id: &i32,
     db: &Pool<Postgres>,
 ) -> Result<(), anyhow::Error> {
     // let category_id = category_id.parse::<i32>()?;
-    sqlx::query("update categories set name=$1")
+    sqlx::query("update categories set name=$1 where id=$2")
         .bind(name)
-        // .bind(category_id)
+         .bind(category_id)
         .execute(db)
         .await?;
     Ok(())
