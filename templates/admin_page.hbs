@@ -188,11 +188,11 @@ function myFunctionForDelete(){
 <body>
 
 <div class="sidebar">
-    <a class="active" href="#home">Home</a>
+    <a class="active" href="/admin">Home</a>
     <a href="/admin?page=1">Posts only</a>
 <!--    <a href="/category">All Categories </a>-->
     <div class="dropdown">
-        <button onclick="myFunction()" class="dropbtn">All Categories </button>
+        <p onclick="myFunction()" class="dropbtn">&nbsp;&nbsp;&nbsp;All Categories </p>
         <div id="myDropdown" class="dropdown-content">
 <!--            <a href="#home">Home</a>-->
 <!--            <a href="#about">About</a>-->
@@ -229,7 +229,7 @@ function myFunctionForDelete(){
 
 <br>
     {{#each o}}
-        <a href="admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>  &nbsp;&nbsp;&nbsp;     <a href="admin/delete_category/{{this.id}}">Delete</a>  &nbsp;   <a href="admin/categories/{{this.id}}/edit">Update </a></p>
+        <a href="admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>  &nbsp;&nbsp;&nbsp;     <a  onclick="myFunctionForDelete()" href="admin/delete_category/{{this.id}}">Delete</a>  &nbsp;   <a href="admin/categories/{{this.id}}/edit">Update </a></p>
     {{/each}}
 
 

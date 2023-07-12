@@ -126,7 +126,8 @@ async fn main() -> Result<(), anyhow::Error> {
             )
             .service(
                 web::resource("/admin/posts/{post_id}/edit")
-                    .route(web::get().to(page_to_update_post)),
+                    .route(web::get().to(page_to_update_post))
+                    .route(web::post().to(receive_updated_post))
 
             )
             .service(web::resource("/admin/post/delete/{post_id}").route(web::get().to(delete_post)))
