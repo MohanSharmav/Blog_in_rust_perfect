@@ -177,6 +177,12 @@ window.onclick = function(event) {
   }
 }
 
+function myFunctionForDelete(){
+ confirm("Do want to delete the post!");
+  window.location.assign("http:/localhost:8080/admin/post/delete/{{this.id}}/edit")
+
+}
+
 </script>
 </head>
 <body>
@@ -223,7 +229,7 @@ window.onclick = function(event) {
 
 <br>
     {{#each o}}
-        <a href="admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>  &nbsp;&nbsp;&nbsp;   <a href="admin/delete_category/{{this.id}}">Delete</a> &nbsp;   <a href="admin/categories/{{this.id}}/edit">Update </a></p>
+        <a href="admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>  &nbsp;&nbsp;&nbsp;     <a href="admin/delete_category/{{this.id}}">Delete</a>  &nbsp;   <a href="admin/categories/{{this.id}}/edit">Update </a></p>
     {{/each}}
 
 
@@ -244,8 +250,8 @@ window.onclick = function(event) {
                     <td> <a href="admin/posts/{{this.id}}"> {{this.title}}</td>
 
                     <td> <a href="admin/posts/{{this.id}}"> {{this.description}}</td>
-                    <td> <a href="admin/delete_post/{{this.id}}"> Delete  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     </a>
-                        <a href="admin/posts/{{this.id}}/edit"> update </a>
+                    <td> <p onclick="myFunctionForDelete()" ><a href="admin/post/delete/{{this.id}}"> Delete</p>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     </a>
+                        <a href="admin/post/delete/{{this.id}}/edit"> update </a>
                     </td>
                     <td {{this.id}}>{{this.id}}</td>
                     </a>

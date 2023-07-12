@@ -124,12 +124,14 @@ async fn main() -> Result<(), anyhow::Error> {
             //change ui
             .service(
                 web::resource("/admin/posts/{post_id}")
-                    .route(web::get().to(admin_unique_posts_display)),
+                    .route(web::get().to(admin_unique_posts_display))
+                // .route(web::delete().to(delete_post))
             )
             .service(
                 web::resource("/admin/posts/{post_id}/edit")
                     .route(web::get().to(page_to_update_post)),
             )
+            .service(web::resource("/admin/post/delete/{post_id}").route(web::get().to(delete_post)))
             //change ui
             .service(web::resource("/admin/categories/{category_id}").to(admin_category_display))
             .service(

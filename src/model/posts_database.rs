@@ -5,6 +5,14 @@ pub async fn delete_post_database(
     db: &Pool<Postgres>,
 ) -> Result<(), anyhow::Error> {
     let to_delete = to_delete.parse::<i32>()?;
+    // delete from categories_posts where post_id=5;
+    //
+    // delete from posts where id=5
+
+    sqlx::query("delete from categories_posts where post_id=$1")
+        .bind(to_delete)
+        .execute(db)
+        .await?;
     sqlx::query("delete from posts where id=$1")
         .bind(to_delete)
         .execute(db)
