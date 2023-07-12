@@ -15,12 +15,6 @@ pub async fn common_page_controller(
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
-    // println!("--------------------------------🙃{}",params.is_some());
-    // let mut par = match params{
-    //      Some(_)=>params.map(|i|i),
-    //  None=>Some(Query::<PaginationParams>::from(actix_web::web::Query(PaginationParams::default())))
-    //  };
-    println!("--------------------------------");
     let db = &config.database_connection;
     let total_posts_length: f64 = perfect_pagination_logic(db).await? as f64;
     let posts_per_page = total_posts_length / 3.0;
@@ -34,7 +28,6 @@ pub async fn common_page_controller(
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
 
-    println!("-----------------😀{:?}", exact_posts_only);
     let all_category = get_all_categories_database(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -49,4 +42,11 @@ pub async fn common_page_controller(
 
 pub async fn redirect_user() -> impl Responder {
     web::Redirect::to("/posts")
+}
+
+
+pub async fn set_posts_per_page()->i32
+{
+ let posts_per_page=3;
+    posts_per_page
 }

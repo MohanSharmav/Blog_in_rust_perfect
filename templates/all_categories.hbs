@@ -103,7 +103,7 @@ function get_value() {
                 </thead>
                 <tbody>
 {{#each z}}
-    <td> <a href="/categories/{{this.id}}">{{this.name}}</td>     &nbsp;
+    <td> <a href="categories/{{this.id}}?page=1">{{this.name}}</td>     &nbsp;
     &nbsp;  <td><a href="/delete_category/{{this}}">Delete</a> &nbsp
     <a href="/category/{{this.id}}/edit">Update </a> &nbsp;  </td>
     </tr>
