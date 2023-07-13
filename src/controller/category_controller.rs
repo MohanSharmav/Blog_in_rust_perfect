@@ -1,3 +1,4 @@
+use actix_identity::Identity;
 use crate::controller::constants::ConfigurationConstants;
 use crate::model::category_database::{
     category_pagination_controller_database_function, create_new_category_database,
@@ -6,15 +7,23 @@ use crate::model::category_database::{
 use crate::model::database::Categories;
 use crate::model::pagination_database::{category_pagination_logic, PaginationParams};
 use actix_web::http::header::ContentType;
-use actix_web::{web, HttpResponse};
+use actix_web::{web, HttpResponse, http};
 use anyhow::Result;
 use handlebars::Handlebars;
 use serde_json::json;
+use crate::controller::authentication::login::check_user;
+use crate::model::authentication::login_database::LoginCheck;
 
 pub async fn get_all_categories_controller(
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
+    user: Option<Identity>,
 ) -> Result<HttpResponse, actix_web::Error> {
+    if user.is_none() {
+        return Ok(HttpResponse::SeeOther()
+            .insert_header((http::header::LOCATION, "/"))
+            .body(""));
+    }
     let db = &config.database_connection;
     let all_categories = get_all_categories_database(db)
         .await
@@ -45,7 +54,13 @@ pub async fn receive_new_category(
     form: web::Form<Categories>,
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
+    user: Option<Identity>,
 ) -> Result<HttpResponse, actix_web::Error> {
+    if user.is_none() {
+        return Ok(HttpResponse::SeeOther()
+            .insert_header((http::header::LOCATION, "/"))
+            .body(""));
+    }
     let name = &form.name;
     let id = &form.id;
     let db = &config.database_connection;
