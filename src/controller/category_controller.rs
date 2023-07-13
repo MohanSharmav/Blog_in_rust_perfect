@@ -1,18 +1,18 @@
-use actix_identity::Identity;
+use crate::controller::authentication::login::check_user;
 use crate::controller::constants::ConfigurationConstants;
+use crate::model::authentication::login_database::LoginCheck;
 use crate::model::category_database::{
     category_pagination_controller_database_function, create_new_category_database,
     delete_category_database, get_all_categories_database, update_category_database,
 };
 use crate::model::database::Categories;
 use crate::model::pagination_database::{category_pagination_logic, PaginationParams};
+use actix_identity::Identity;
 use actix_web::http::header::ContentType;
-use actix_web::{web, HttpResponse, http};
+use actix_web::{http, web, HttpResponse};
 use anyhow::Result;
 use handlebars::Handlebars;
 use serde_json::json;
-use crate::controller::authentication::login::check_user;
-use crate::model::authentication::login_database::LoginCheck;
 
 pub async fn get_all_categories_controller(
     config: web::Data<ConfigurationConstants>,
@@ -40,7 +40,13 @@ pub async fn get_all_categories_controller(
 
 pub async fn get_new_category(
     handlebars: web::Data<Handlebars<'_>>,
+    user: Option<Identity>,
 ) -> Result<HttpResponse, actix_web::Error> {
+    if user.is_none() {
+        return Ok(HttpResponse::SeeOther()
+            .insert_header((http::header::LOCATION, "/"))
+            .body(""));
+    }
     let html = handlebars
         .render("new_category", &json!({"o":"ax"}))
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -81,7 +87,13 @@ pub async fn delete_category(
     id: web::Path<String>,
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
+    user: Option<Identity>,
 ) -> Result<HttpResponse, actix_web::Error> {
+    if user.is_none() {
+        return Ok(HttpResponse::SeeOther()
+            .insert_header((http::header::LOCATION, "/"))
+            .body(""));
+    }
     let to_delete_category = &id.into_inner();
     let db = &config.database_connection;
     delete_category_database(db, to_delete_category)
@@ -101,7 +113,13 @@ pub async fn delete_category(
 pub async fn page_to_update_category(
     to_be_updated_category: web::Path<String>,
     handlebars: web::Data<Handlebars<'_>>,
+    user: Option<Identity>,
 ) -> Result<HttpResponse, actix_web::Error> {
+    if user.is_none() {
+        return Ok(HttpResponse::SeeOther()
+            .insert_header((http::header::LOCATION, "/"))
+            .body(""));
+    }
     let to_be_updated_category = to_be_updated_category.clone();
     let html = handlebars
         .render(
@@ -124,7 +142,7 @@ pub async fn receive_updated_category(
     let db = &config.database_connection;
     let current_post_name = &current_category_name.into_inner();
     let name = &form.name;
-    let id=&form.id;
+    let id = &form.id;
     update_category_database(name, id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -155,8 +173,8 @@ pub async fn get_category_with_pagination(
     let posts_per_page = posts_per_page as i32;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     // let category_postinng = category_pagination_controller_database_function(&category_input, db)
-    let category_postinng = category_pagination_controller_database_function( category_input,db)
-    .await
+    let category_postinng = category_pagination_controller_database_function(category_input, db)
+        .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars

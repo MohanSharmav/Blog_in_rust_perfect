@@ -76,7 +76,7 @@ div.content {
 <div class="content">
     {{to_be_updated_post}}
 </p>
-<form action="http://localhost:8080/admin/categories/{{to_be_updated_post}}/edit" method="post">
+<form action="http://localhost:8080/admin/category/{{to_be_updated_post}}/edit" method="post">
     <input type="text" name="id"  value="{{to_be_updated_post}}"  placeholder="id" class="form-control"><br>
     <input type="text" name="name"   placeholder="name" class="form-control"><br>
     <input type="submit" value="Submit">

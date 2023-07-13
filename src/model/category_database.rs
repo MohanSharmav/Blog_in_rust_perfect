@@ -35,6 +35,11 @@ pub async fn delete_category_database(
     //     .execute(db)
     //     .await?;
 
+    sqlx::query("delete from categories_posts where category_id=$1")
+        .bind(to_delete_category)
+        .execute(db)
+        .await?;
+
     sqlx::query("delete from categories where id=$1")
         .bind(to_delete_category)
         .execute(db)
@@ -51,7 +56,7 @@ pub async fn update_category_database(
     // let category_id = category_id.parse::<i32>()?;
     sqlx::query("update categories set name=$1 where id=$2")
         .bind(name)
-         .bind(category_id)
+        .bind(category_id)
         .execute(db)
         .await?;
     Ok(())
@@ -62,10 +67,10 @@ pub async fn category_pagination_controller_database_function(
     db: &Pool<Postgres>,
 ) -> Result<Vec<PostsCategories>, anyhow::Error> {
     println!("😀");
-     let category_id = category_id.parse::<i32>()?;
+    let category_id = category_id.parse::<i32>()?;
     // "select id,title, description,category_id from posts where category_id=$1",
     // "select id,title, description from posts",
-//    let all_categories = sqlx::query_as::<_, Categories>("select name,id from categories")
+    //    let all_categories = sqlx::query_as::<_, Categories>("select name,id from categories")
     let category_posts = sqlx::query_as::<_, PostsCategories>(
         "select posts.title,posts.id,posts.description,categories.name from posts,categories_posts,categories where categories_posts.post_id=posts.id and categories.id=categories_posts.category_id and categories_posts.category_id=$1"
     )

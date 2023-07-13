@@ -1,9 +1,10 @@
 use crate::controller::authentication::login::check_user;
+use crate::controller::common_controller::set_posts_per_page;
 use crate::controller::constants::ConfigurationConstants;
-use crate::model::pagination_logic::select_specific_pages_post;
 use crate::model::authentication::login_database::LoginCheck;
 use crate::model::category_database::get_all_categories_database;
 use crate::model::pagination_database::{pagination_logic, PaginationParams};
+use crate::model::pagination_logic::select_specific_pages_post;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
 use actix_web::web::Query;
@@ -45,9 +46,15 @@ pub async fn pagination_display(
             .body(""));
     }
     let db = &config.database_connection;
-    let total_posts_length: f64 = perfect_pagination_logic(db).await? as f64;
-    let posts_per_page = total_posts_length / 3.0;
-    let posts_per_page = posts_per_page.round();
+    let total_posts_length = perfect_pagination_logic(db).await?;
+
+    let posts_per_page_constant = set_posts_per_page().await as i64;
+    let mut posts_per_page = total_posts_length / posts_per_page_constant;
+    let check_remainder = total_posts_length % posts_per_page_constant;
+
+    if check_remainder != 0 {
+        posts_per_page += 1;
+    }
     let posts_per_page = posts_per_page as usize;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     let pari = params.get_or_insert(Query(PaginationParams::default()));

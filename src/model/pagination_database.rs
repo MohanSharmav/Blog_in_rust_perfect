@@ -46,7 +46,7 @@ pub fn paginate<T>(items: Vec<T>, _page: i32) -> Vec<T> {
     items.into_iter().skip(start_index as usize).collect()
 }
 
-pub async fn    pagination_logic(
+pub async fn pagination_logic(
     mut params: Option<Query<PaginationParams>>,
     db: &Pool<Postgres>,
 ) -> Result<Vec<Posts>, anyhow::Error> {
@@ -66,10 +66,10 @@ pub async fn category_pagination_logic(
     let category_input = category_input.to_string();
     // let category_id = category_input.parse::<i32>()?;
     // let rows = sqlx::query("SELECT COUNT(*) FROM posts where category_id=$1")
-  //  let rows = sqlx::query("SELECT COUNT(*) FROM posts where category_id=$1")
+    //  let rows = sqlx::query("SELECT COUNT(*) FROM posts where category_id=$1")
 
     let rows = sqlx::query("SELECT COUNT(*) FROM posts")
-    // .bind(category_id)
+        // .bind(category_id)
         .fetch_all(db)
         .await?;
 

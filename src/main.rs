@@ -108,7 +108,7 @@ async fn main() -> Result<(), anyhow::Error> {
             )
             //no ui
             .service(
-                web::resource("/admin/categories/{title}/edit")
+                web::resource("/admin/category/{title}/edit")
                     .route(web::get().to(page_to_update_category))
                     .route(web::post().to(receive_updated_category)),
             )
@@ -121,20 +121,20 @@ async fn main() -> Result<(), anyhow::Error> {
             //change ui
             .service(
                 web::resource("/admin/posts/{post_id}")
-                    .route(web::get().to(admin_unique_posts_display))
-                // .route(web::delete().to(delete_post))
+                    .route(web::get().to(admin_unique_posts_display)), // .route(web::delete().to(delete_post))
             )
             .service(
                 web::resource("/admin/posts/{post_id}/edit")
                     .route(web::get().to(page_to_update_post))
-                    .route(web::post().to(receive_updated_post))
-
+                    .route(web::post().to(receive_updated_post)),
             )
-            .service(web::resource("/admin/post/{post_id}/delete").route(web::get().to(delete_post)))
+            .service(
+                web::resource("/admin/post/{post_id}/delete").route(web::get().to(delete_post)),
+            )
             //change ui
             .service(web::resource("/admin/categories/{category_id}").to(admin_category_display))
             .service(
-                web::resource("/admin/delete_category/{name}")
+                web::resource("/admin/category/{name}/delete")
                     .route(web::get().to(delete_category)),
             )
             // .service(web::resource("/admin/category/{category_id}").route(web::get().to(admin_category_display)))

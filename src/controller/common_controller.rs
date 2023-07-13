@@ -1,8 +1,8 @@
 use crate::controller::constants::ConfigurationConstants;
 use crate::controller::pagination_controller::perfect_pagination_logic;
-use crate::model::pagination_logic::select_specific_pages_post;
 use crate::model::category_database::get_all_categories_database;
 use crate::model::pagination_database::PaginationParams;
+use crate::model::pagination_logic::select_specific_pages_post;
 use actix_web::http::header::ContentType;
 use actix_web::web::Query;
 use actix_web::{web, HttpResponse, Responder};
@@ -16,10 +16,15 @@ pub async fn common_page_controller(
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
-    let total_posts_length: f64 = perfect_pagination_logic(db).await? as f64;
-    let posts_per_page_constant=set_posts_per_page().await;
-    let posts_per_page = total_posts_length / 3.0;
-    let posts_per_page = posts_per_page.round();
+    let total_posts_length = perfect_pagination_logic(db).await?;
+    let posts_per_page_constant = set_posts_per_page().await as i64;
+    let mut posts_per_page = total_posts_length / posts_per_page_constant;
+    let check_remainder = total_posts_length % posts_per_page_constant;
+
+    if check_remainder != 0 {
+        posts_per_page += 1;
+    }
+    // let posts_per_page = posts_per_page.round();
     let posts_per_page = posts_per_page as usize;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     let pari = params.get_or_insert(Query(PaginationParams::default()));
@@ -27,7 +32,6 @@ pub async fn common_page_controller(
     let exact_posts_only = select_specific_pages_post(current_page, &db.clone())
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-
 
     let all_category = get_all_categories_database(db)
         .await
@@ -45,9 +49,6 @@ pub async fn redirect_user() -> impl Responder {
     web::Redirect::to("/posts")
 }
 
-
-pub async fn set_posts_per_page()->i32
-{
- let posts_per_page=3;
-    posts_per_page
+pub async fn set_posts_per_page() -> i32 {
+    3
 }

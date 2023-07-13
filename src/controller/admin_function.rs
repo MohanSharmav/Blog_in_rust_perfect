@@ -2,7 +2,6 @@ use crate::controller::authentication::login::check_user;
 use crate::controller::constants::ConfigurationConstants;
 use crate::controller::pagination_controller::perfect_pagination_logic;
 // use crate::controller::pagination_logic::select_specific_pages_post;
-use crate::model::pagination_logic::select_specific_pages_post;
 use crate::model::authentication::login_database::LoginCheck;
 use crate::model::category_database::{
     category_pagination_controller_database_function, get_all_categories_database,
@@ -10,6 +9,7 @@ use crate::model::category_database::{
 use crate::model::pagination_database::{
     category_pagination_logic, pagination_logic, PaginationParams,
 };
+use crate::model::pagination_logic::select_specific_pages_post;
 use crate::model::single_posts_database::{query_single_post, query_single_post_in_struct};
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
@@ -28,7 +28,13 @@ pub async fn admin_category_display(
     _params: web::Query<PaginationParams>,
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
+    user: Option<Identity>,
 ) -> Result<HttpResponse, actix_web::Error> {
+    if user.is_none() {
+        return Ok(HttpResponse::SeeOther()
+            .insert_header((http::header::LOCATION, "/"))
+            .body(""));
+    }
     let db = &config.database_connection;
     let category_input: String = path.into_inner();
     let total_posts_length = category_pagination_logic(&category_input, db)
@@ -40,7 +46,7 @@ pub async fn admin_category_display(
     let posts_per_page = posts_per_page as i32;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     // let category_postinng = category_pagination_controller_database_function(&category_input, db)
-    let category_postinng = category_pagination_controller_database_function( category_input,db)
+    let category_postinng = category_pagination_controller_database_function(category_input, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

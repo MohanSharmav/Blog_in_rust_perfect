@@ -1,16 +1,25 @@
 use crate::controller::constants::ConfigurationConstants;
 use crate::model::category_database::get_all_categories_database;
 use crate::model::database::{CreatePost, Posts};
-use crate::model::posts_database::{create_post_database, delete_post_database, update_post_database};
+use crate::model::posts_database::{
+    create_post_database, delete_post_database, update_post_database,
+};
+use actix_identity::Identity;
 use actix_web::http::header::ContentType;
-use actix_web::{web, HttpResponse};
+use actix_web::{http, web, HttpResponse};
 use handlebars::Handlebars;
 use serde_json::json;
 
 pub async fn get_new_post(
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
+    user: Option<Identity>,
 ) -> Result<HttpResponse, actix_web::Error> {
+    if user.is_none() {
+        return Ok(HttpResponse::SeeOther()
+            .insert_header((http::header::LOCATION, "/"))
+            .body(""));
+    }
     let db = &config.database_connection;
     let all_categories = get_all_categories_database(db)
         .await
@@ -30,10 +39,10 @@ pub async fn receive_new_posts(
     config: web::Data<ConfigurationConstants>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
-    let id=form.id as usize;
-    let title =&form.title;
-    let description=&form.description;
-    let category_id=&form.category_id;
+    let id = form.id as usize;
+    let title = &form.title;
+    let description = &form.description;
+    let category_id = &form.category_id;
     create_post_database(id, title.clone(), description.clone(), category_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
