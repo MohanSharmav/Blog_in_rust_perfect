@@ -130,7 +130,7 @@ async fn main() -> Result<(), anyhow::Error> {
                     .route(web::post().to(receive_updated_post))
 
             )
-            .service(web::resource("/admin/post/delete/{post_id}").route(web::get().to(delete_post)))
+            .service(web::resource("/admin/post/{post_id}/delete").route(web::get().to(delete_post)))
             //change ui
             .service(web::resource("/admin/categories/{category_id}").to(admin_category_display))
             .service(

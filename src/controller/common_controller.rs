@@ -1,6 +1,6 @@
 use crate::controller::constants::ConfigurationConstants;
 use crate::controller::pagination_controller::perfect_pagination_logic;
-use crate::controller::pagination_logic::select_specific_pages_post;
+use crate::model::pagination_logic::select_specific_pages_post;
 use crate::model::category_database::get_all_categories_database;
 use crate::model::pagination_database::PaginationParams;
 use actix_web::http::header::ContentType;
@@ -17,6 +17,7 @@ pub async fn common_page_controller(
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
     let total_posts_length: f64 = perfect_pagination_logic(db).await? as f64;
+    let posts_per_page_constant=set_posts_per_page().await;
     let posts_per_page = total_posts_length / 3.0;
     let posts_per_page = posts_per_page.round();
     let posts_per_page = posts_per_page as usize;

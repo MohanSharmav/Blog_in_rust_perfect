@@ -121,7 +121,6 @@ pub async fn receive_updated_category(
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
-    println!("--------------------------------🙃");
     let db = &config.database_connection;
     let current_post_name = &current_category_name.into_inner();
     let name = &form.name;

@@ -1,7 +1,8 @@
 use crate::controller::authentication::login::check_user;
 use crate::controller::constants::ConfigurationConstants;
 use crate::controller::pagination_controller::perfect_pagination_logic;
-use crate::controller::pagination_logic::select_specific_pages_post;
+// use crate::controller::pagination_logic::select_specific_pages_post;
+use crate::model::pagination_logic::select_specific_pages_post;
 use crate::model::authentication::login_database::LoginCheck;
 use crate::model::category_database::{
     category_pagination_controller_database_function, get_all_categories_database,
