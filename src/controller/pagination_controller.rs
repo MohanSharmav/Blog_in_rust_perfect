@@ -103,3 +103,29 @@ pub async fn perfect_pagination_logic(db: &Pool<Postgres>) -> Result<i64, actix_
 
     Ok(*b)
 }
+
+pub async fn get_pagination_for_all_categories_list(db: &Pool<Postgres>)-> Result<i64, actix_web::error::Error> {
+    let rows = sqlx::query("SELECT COUNT(*) FROM categories")
+        .fetch_all(db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    let counting_final: Vec<Result<i64, actix_web::Error>> = rows
+        .into_iter()
+        .map(|row| {
+            let final_count: i64 = row
+                .try_get("count")
+                .map_err(actix_web::error::ErrorInternalServerError)?;
+            Ok::<i64, actix_web::Error>(final_count)
+        })
+        .collect();
+
+    let a = counting_final
+        .get(0)
+        .ok_or_else(|| actix_web::error::ErrorInternalServerError("error-1"))?;
+
+    let b = a
+        .as_ref()
+        .map_err(|_er| actix_web::error::ErrorInternalServerError("error-2"))?;
+
+    Ok(*b)}

@@ -83,17 +83,26 @@ pub async fn delete_post(
 }
 
 pub async fn page_to_update_post(
+    config: web::Data<ConfigurationConstants>,
     to_be_updated_post: web::Path<String>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let to_be_updated_post = to_be_updated_post.clone();
     update_post_helper(&to_be_updated_post).await;
+    let db = &config.database_connection;
+
+    let all_category = get_all_categories_database(db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
     let html = handlebars
         .render(
             "update_post",
-            &json!({ "to_be_updated_post": &to_be_updated_post }),
+            &json!({ "to_be_updated_post": &to_be_updated_post,"o":all_category }),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
+
+
     Ok(HttpResponse::Ok()
         .content_type(ContentType::html())
         .body(html))

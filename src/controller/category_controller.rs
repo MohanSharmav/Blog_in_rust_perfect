@@ -9,15 +9,17 @@ use crate::model::pagination_database::{category_pagination_logic, PaginationPar
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
 use actix_web::{http, web, HttpResponse};
+use actix_web::web::Query;
 use anyhow::Result;
 use handlebars::Handlebars;
 use serde_json::json;
+use crate::controller::pagination_controller::{get_pagination_for_all_categories_list};
 
 pub async fn get_all_categories_controller(
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
-
+    mut params: Option<Query<PaginationParams>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     if user.is_none() {
         return Ok(HttpResponse::SeeOther()
@@ -25,9 +27,24 @@ pub async fn get_all_categories_controller(
             .body(""));
     }
 
-
-
     let db = &config.database_connection;
+
+    let total_posts_length = get_pagination_for_all_categories_list(db).await?;
+
+    let posts_per_page_constant = set_posts_per_page().await as i64;
+    let mut posts_per_page = total_posts_length / posts_per_page_constant;
+    let check_remainder = total_posts_length % posts_per_page_constant;
+
+    if check_remainder != 0 {
+        posts_per_page += 1;
+    }
+    let posts_per_page = posts_per_page as usize;
+    let pages_count: Vec<_> = (1..=posts_per_page).collect();
+    let pari = params.get_or_insert(Query(PaginationParams::default()));
+    let current_pag = pari.0;
+    let _current_page = current_pag.page;
+
+
 
     let all_category = get_all_categories_database(db)
         .await
@@ -38,7 +55,7 @@ pub async fn get_all_categories_controller(
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
-        .render("all_categories", &json!({ "z": &all_categories,"o":all_category }))
+        .render("all_categories", &json!({ "z": &all_categories,"o":all_category,"pages_count":pages_count}))
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()

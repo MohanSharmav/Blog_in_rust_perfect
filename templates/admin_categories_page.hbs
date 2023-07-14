@@ -1,4 +1,5 @@
 
+
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -131,6 +132,51 @@ div.content {
 
 .show {display: block;}
 
+       .sidebars {
+      width: 200px;
+      height: 100vh;
+      background-color: #f1f1f1;
+      padding: 20px;
+      float: left;
+    }
+
+    /* Sidebar links */
+    .sidebars a {
+      display: block;
+      color: #000;
+      padding: 8px 16px;
+      text-decoration: none;
+    }
+
+    /* Active link */
+    .sidebars a.active {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    /* Dropdown menu */
+    .sidebars .dropdown-contenting {
+      display: none;
+      padding-left: 20px;
+    }
+
+    .sidebars .dropdown-contenting a {
+      padding: 5px 0;
+    }
+
+    /* Show dropdown menu on hover */
+    .sidebars .dropdown:hover .dropdown-contenting {
+      display: block;
+    }
+
+    /* Content */
+    .content {
+      margin-left: 220px; /* Adjust the value to match the sidebar width */
+      padding: 20px;
+    }
+
+
+
 </style>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -138,6 +184,9 @@ div.content {
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
     <script>
 /* When the user clicks on the button,
@@ -178,54 +227,40 @@ window.onclick = function(event) {
   }
 }
 
+function myFunctionForDelete(){
+ confirm("Do want to delete the post!");
+  window.location.assign("http:/localhost:8080/admin/post/delete/{{this.id}}/edit")
+
+}
+
+
+
+
 </script>
 </head>
 <body>
-
-<div class="sidebar">
-    <a class="active" href="#home">Home</a>
-    <a href="/admin?page=1">Posts only</a>
-    <!--    <a href="/category">All Categories </a>-->
+<div class="sidebars">
+    <a class="active" href="/admin">Home</a>
+    <a href="/admin/categories">Manage Categories</a>
     <div class="dropdown">
-        <button onclick="myFunction()" class="dropbtn">All Categories </button>
-        <div id="myDropdown" class="dropdown-content">
-            <!--            <a href="#home">Home</a>-->
-            <!--            <a href="#about">About</a>-->
-            <!--            <a href="#contact">Contact</a>-->
+        <a href="#">Categories</a>
+        <div class="dropdown-contenting">
             {{#each o}}
-                <a href="admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>
+                <a href="http://localhost:8080/admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>
             {{/each}}
         </div>
     </div>
+    &nbsp;&nbsp;&nbsp;<button type="button" class="btn btn-danger" class="btn btn-default btn-sm">
+    <a href="/logout">
+        <span class="glyphicon glyphicon-log-out"></span> Log out</a></button>
 </div>
 
 <div class="content">
-    <div class="jumbotron  text-center">
-        <center></center><h3>Main Page</h3>
-    </div>
-
-    <p>
-        <button type="button" class="btn btn-success">    <a href="admin/posts/new">Create new post</a> </button>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        <button type="button" class="btn btn-success"><a href="admin/categories/new">Create new category</a></button>
-    </p>
-
-    Categories are:-<br>
-
-
-    <div class="dropdowns">
-        <button onclick="myFunctions()" class="dropbtns">Dropdown</button>
-        <div id="myDropdowns" class="dropdown-contents">
-            {{#each o}}
-                <a href="admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>
-            {{/each}}
-        </div>
+    <div class="jumbotron text-center">
+        <a href="/admin"><h1>Blog</h1></a>
     </div>
 
 
-    <br>
-    {{#each o}}
-        <a href="admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>  &nbsp;&nbsp;&nbsp;   <a href="admin/delete_category/{{this.id}}">Delete</a> &nbsp;   <a href="admin/categories/{{this.id}}/edit">Update </a></p>
-    {{/each}}
 
 
     <div class="row">

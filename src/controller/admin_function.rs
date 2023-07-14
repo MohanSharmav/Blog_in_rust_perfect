@@ -1,6 +1,6 @@
 use crate::controller::common_controller::set_posts_per_page;
 use crate::controller::constants::ConfigurationConstants;
-use crate::model::category_database::category_pagination_controller_database_function;
+use crate::model::category_database::{category_pagination_controller_database_function, get_all_categories_database};
 use crate::model::pagination_database::{category_pagination_logic, PaginationParams};
 use crate::model::single_posts_database::{query_single_post, query_single_post_in_struct};
 use actix_identity::Identity;
@@ -27,6 +27,11 @@ pub async fn admin_category_display(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
+    let all_category = get_all_categories_database(db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
+
     let posts_per_page_constant = set_posts_per_page().await as i64;
     let mut posts_per_page = total_posts_length / posts_per_page_constant;
     let check_remainder = total_posts_length % posts_per_page_constant;
@@ -42,7 +47,7 @@ pub async fn admin_category_display(
     let html = handlebars
         .render(
             "admin_categories_page",
-            &json!({"tiger":&category_postinng,"pages_count":&pages_count}),
+            &json!({"tiger":&category_postinng,"pages_count":&pages_count,"o":all_category}),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -62,6 +67,10 @@ pub async fn admin_unique_posts_display(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
+    let all_category = get_all_categories_database(db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
     let single_post_struct = query_single_post_in_struct(titles, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -69,7 +78,7 @@ pub async fn admin_unique_posts_display(
     let html = handlebars
         .render(
             "admin_single_post",
-            &json!({"o":&single_post,"single_post":single_post_struct}),
+            &json!({"o":&single_post,"single_post":single_post_struct,"o":all_category}),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
