@@ -48,7 +48,7 @@ pub async fn get_data_from_login_page(
             .map_err(actix_web::error::ErrorInternalServerError)?;
         Ok(web::Redirect::to("/admin?page=1&limit=2"))
     } else {
-        HttpResponse::Unauthorized().body("Invalid username or password");
+        // HttpResponse::Unauthorized().body("Invalid username or password");
         Ok(web::Redirect::to("/posts"))
     }
 }

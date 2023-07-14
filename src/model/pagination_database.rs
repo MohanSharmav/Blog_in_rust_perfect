@@ -1,6 +1,6 @@
 use crate::model::database::{select_posts, Posts};
 use actix_web::web::Query;
-use actix_web::{ Error as ActixError};
+use actix_web::Error as ActixError;
 use anyhow::anyhow;
 use serde::Deserialize;
 use sqlx::{Pool, Postgres, Row};
@@ -59,11 +59,11 @@ pub async fn pagination_logic(
 }
 
 pub async fn category_pagination_logic(
-    category_input: &String,
+    category_input: &str,
     db: &Pool<Postgres>,
 ) -> Result<i64, anyhow::Error> {
     let category_id = category_input.parse::<i32>()?;
-    let rows=sqlx::query("SELECT COUNT(*) FROM categories_posts where category_id=$1")
+    let rows = sqlx::query("SELECT COUNT(*) FROM categories_posts where category_id=$1")
         .bind(category_id)
         .fetch_all(db)
         .await?;
@@ -85,6 +85,4 @@ pub async fn category_pagination_logic(
         .map_err(|_e| anyhow::Error::msg("failed"))?;
 
     Ok(c)
-
-
 }

@@ -1,17 +1,13 @@
+use crate::controller::common_controller::set_posts_per_page;
 use crate::controller::constants::ConfigurationConstants;
-use crate::model::category_database::{
-    category_pagination_controller_database_function,
-};
-use crate::model::pagination_database::{
-    category_pagination_logic, PaginationParams,
-};
+use crate::model::category_database::category_pagination_controller_database_function;
+use crate::model::pagination_database::{category_pagination_logic, PaginationParams};
 use crate::model::single_posts_database::{query_single_post, query_single_post_in_struct};
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
 use actix_web::{http, web, HttpResponse};
 use handlebars::Handlebars;
 use serde_json::json;
-use crate::controller::common_controller::set_posts_per_page;
 
 pub async fn admin_category_display(
     path: web::Path<String>,

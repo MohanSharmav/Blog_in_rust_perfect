@@ -1,3 +1,4 @@
+use crate::controller::common_controller::set_posts_per_page;
 use crate::controller::constants::ConfigurationConstants;
 use crate::model::category_database::{
     category_pagination_controller_database_function, create_new_category_database,
@@ -11,7 +12,6 @@ use actix_web::{http, web, HttpResponse};
 use anyhow::Result;
 use handlebars::Handlebars;
 use serde_json::json;
-use crate::controller::common_controller::set_posts_per_page;
 
 pub async fn get_all_categories_controller(
     config: web::Data<ConfigurationConstants>,
@@ -46,6 +46,7 @@ pub async fn get_new_category(
             .insert_header((http::header::LOCATION, "/"))
             .body(""));
     }
+
     let html = handlebars
         .render("new_category", &json!({"o":"ax"}))
         .map_err(actix_web::error::ErrorInternalServerError)?;

@@ -31,7 +31,6 @@ impl ResponseError for MyOwnErrors {
     }
 }
 pub async fn pagination_display(
-    // params: web::Query<PaginationParams>,
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
