@@ -24,7 +24,6 @@ pub async fn common_page_controller(
     if check_remainder != 0 {
         posts_per_page += 1;
     }
-    // let posts_per_page = posts_per_page.round();
     let posts_per_page = posts_per_page as usize;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     let pari = params.get_or_insert(Query(PaginationParams::default()));

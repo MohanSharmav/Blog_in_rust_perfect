@@ -1,27 +1,17 @@
-use crate::controller::authentication::login::check_user;
 use crate::controller::constants::ConfigurationConstants;
-use crate::controller::pagination_controller::perfect_pagination_logic;
-// use crate::controller::pagination_logic::select_specific_pages_post;
-use crate::model::authentication::login_database::LoginCheck;
 use crate::model::category_database::{
-    category_pagination_controller_database_function, get_all_categories_database,
+    category_pagination_controller_database_function,
 };
 use crate::model::pagination_database::{
-    category_pagination_logic, pagination_logic, PaginationParams,
+    category_pagination_logic, PaginationParams,
 };
-use crate::model::pagination_logic::select_specific_pages_post;
 use crate::model::single_posts_database::{query_single_post, query_single_post_in_struct};
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
-use actix_web::web::Query;
-use actix_web::{http, web, HttpResponse, Responder, ResponseError};
-use anyhow::anyhow;
+use actix_web::{http, web, HttpResponse};
 use handlebars::Handlebars;
-use http::StatusCode;
 use serde_json::json;
-use sqlx::{Pool, Postgres, Row};
-use std::fmt::{Debug, Display, Formatter};
-use warp::http::status;
+use crate::controller::common_controller::set_posts_per_page;
 
 pub async fn admin_category_display(
     path: web::Path<String>,
@@ -40,12 +30,15 @@ pub async fn admin_category_display(
     let total_posts_length = category_pagination_logic(&category_input, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    let total_posts_length = total_posts_length as f64;
-    let posts_per_page = total_posts_length / 3.0;
-    let posts_per_page = posts_per_page.round();
-    let posts_per_page = posts_per_page as i32;
+
+    let posts_per_page_constant = set_posts_per_page().await as i64;
+    let mut posts_per_page = total_posts_length / posts_per_page_constant;
+    let check_remainder = total_posts_length % posts_per_page_constant;
+
+    if check_remainder != 0 {
+        posts_per_page += 1;
+    }
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    // let category_postinng = category_pagination_controller_database_function(&category_input, db)
     let category_postinng = category_pagination_controller_database_function(category_input, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -69,7 +62,6 @@ pub async fn admin_unique_posts_display(
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
     let titles = path.parse::<i32>().unwrap_or_default();
-    //Todo
     let single_post = query_single_post(titles, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;

@@ -22,11 +22,9 @@ use actix_session::storage::CookieSessionStore;
 use actix_session::SessionMiddleware;
 use actix_web::cookie::Key;
 use actix_web::{web, App, HttpServer, Result};
-use actix_web_lab::middleware::from_fn;
 use handlebars::Handlebars;
 use magic_crypt::new_magic_crypt;
 use sqlx::postgres::PgPoolOptions;
-use warp::get;
 
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
@@ -133,6 +131,7 @@ async fn main() -> Result<(), anyhow::Error> {
             )
             //change ui
             .service(web::resource("/admin/categories/{category_id}").to(admin_category_display))
+
             .service(
                 web::resource("/admin/category/{name}/delete")
                     .route(web::get().to(delete_category)),

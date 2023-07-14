@@ -7,10 +7,10 @@ pub async fn select_specific_pages_post(
     db: &Pool<Postgres>,
 ) -> Result<Vec<Posts>, anyhow::Error> {
     let start_page = start_page;
-    let mut new_start_page = start_page;
-    if start_page > 1 {
-        new_start_page += 2
-    }
+    // let mut _new_start_page = start_page;
+    // if start_page > 1 {
+    //     _new_start_page += 2
+    // }
 
     let posts_per_page = set_posts_per_page().await;
     //

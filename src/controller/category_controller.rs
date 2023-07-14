@@ -1,6 +1,4 @@
-use crate::controller::authentication::login::check_user;
 use crate::controller::constants::ConfigurationConstants;
-use crate::model::authentication::login_database::LoginCheck;
 use crate::model::category_database::{
     category_pagination_controller_database_function, create_new_category_database,
     delete_category_database, get_all_categories_database, update_category_database,
@@ -13,6 +11,7 @@ use actix_web::{http, web, HttpResponse};
 use anyhow::Result;
 use handlebars::Handlebars;
 use serde_json::json;
+use crate::controller::common_controller::set_posts_per_page;
 
 pub async fn get_all_categories_controller(
     config: web::Data<ConfigurationConstants>,
@@ -140,7 +139,7 @@ pub async fn receive_updated_category(
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
-    let current_post_name = &current_category_name.into_inner();
+    let _current_post_name = &current_category_name.into_inner();
     let name = &form.name;
     let id = &form.id;
     update_category_database(name, id, db)
@@ -167,10 +166,14 @@ pub async fn get_category_with_pagination(
     let total_posts_length = category_pagination_logic(&category_input, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    let total_posts_length = total_posts_length as f64;
-    let posts_per_page = total_posts_length / 3.0;
-    let posts_per_page = posts_per_page.round();
-    let posts_per_page = posts_per_page as i32;
+
+    let posts_per_page_constant = set_posts_per_page().await as i64;
+    let mut posts_per_page = total_posts_length / posts_per_page_constant;
+    let check_remainder = total_posts_length % posts_per_page_constant;
+
+    if check_remainder != 0 {
+        posts_per_page += 1;
+    }
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     // let category_postinng = category_pagination_controller_database_function(&category_input, db)
     let category_postinng = category_pagination_controller_database_function(category_input, db)

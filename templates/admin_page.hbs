@@ -239,9 +239,9 @@ function myFunctionForDelete(){
 <body>
 <div class="sidebars">
     <a class="active" href="/admin">Home</a>
-    <a href="/admin/categories">All Categories</a>
+    <a href="/admin/categories">Manage Categories</a>
     <div class="dropdown">
-        <a href="#">Dropdown</a>
+        <a href="#">Categories</a>
         <div class="dropdown-contenting">
             {{#each o}}
                 <a href="admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>
@@ -254,7 +254,7 @@ function myFunctionForDelete(){
 </div>
 
 <div class="content">
-    <div class="jumbotron  text-center">
+    <div class="jumbotron text-center">
         <a href="/admin"><h1>Blog</h1></a>
     </div>
     <!--    <h1>copy everything till here</h1>-->

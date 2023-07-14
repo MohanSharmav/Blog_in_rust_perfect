@@ -1,15 +1,12 @@
-use crate::controller::authentication::login::check_user;
 use crate::controller::common_controller::set_posts_per_page;
 use crate::controller::constants::ConfigurationConstants;
-use crate::model::authentication::login_database::LoginCheck;
 use crate::model::category_database::get_all_categories_database;
 use crate::model::pagination_database::{pagination_logic, PaginationParams};
 use crate::model::pagination_logic::select_specific_pages_post;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
 use actix_web::web::Query;
-use actix_web::{http, web, HttpResponse, Responder, ResponseError};
-use anyhow::anyhow;
+use actix_web::{http, web, HttpResponse, ResponseError};
 use handlebars::Handlebars;
 use http::StatusCode;
 use serde_json::json;
@@ -60,9 +57,7 @@ pub async fn pagination_display(
     let pari = params.get_or_insert(Query(PaginationParams::default()));
     let current_pag = pari.0;
     let current_page = current_pag.page;
-    // if current_page < 1 {
-    //     Err(|e|actix_web::error::ErrorInternalServerError)?
-    // };
+
     let paginators = pagination_logic(params, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
