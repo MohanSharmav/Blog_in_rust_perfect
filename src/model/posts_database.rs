@@ -5,10 +5,6 @@ pub async fn delete_post_database(
     db: &Pool<Postgres>,
 ) -> Result<(), anyhow::Error> {
     let to_delete = to_delete.parse::<i32>()?;
-    // delete from categories_posts where post_id=5;
-    //
-    // delete from posts where id=5
-
     sqlx::query("delete from categories_posts where post_id=$1")
         .bind(to_delete)
         .execute(db)
@@ -42,9 +38,7 @@ pub async fn create_post_database(
     category_id: &i32,
     db: &Pool<Postgres>,
 ) -> Result<(), anyhow::Error> {
-    //categories_posts
     let id = id as i32;
-    println!("{:?} {:?}{:?}{:?}", id, category_id, title, description);
     sqlx::query("insert into posts values($1,$2,$3)")
         .bind(id)
         .bind(title)

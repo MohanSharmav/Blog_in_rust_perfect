@@ -20,7 +20,6 @@ pub async fn common_page_controller(
     let posts_per_page_constant = set_posts_per_page().await as i64;
     let mut posts_per_page = total_posts_length / posts_per_page_constant;
     let check_remainder = total_posts_length % posts_per_page_constant;
-
     if check_remainder != 0 {
         posts_per_page += 1;
     }

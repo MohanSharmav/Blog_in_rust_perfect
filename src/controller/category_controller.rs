@@ -1,5 +1,6 @@
 use crate::controller::common_controller::set_posts_per_page;
 use crate::controller::constants::ConfigurationConstants;
+use crate::controller::pagination_controller::get_pagination_for_all_categories_list;
 use crate::model::category_database::{
     category_pagination_controller_database_function, create_new_category_database,
     delete_category_database, get_all_categories_database, update_category_database,
@@ -8,12 +9,11 @@ use crate::model::database::Categories;
 use crate::model::pagination_database::{category_pagination_logic, PaginationParams};
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
-use actix_web::{http, web, HttpResponse};
 use actix_web::web::Query;
+use actix_web::{http, web, HttpResponse};
 use anyhow::Result;
 use handlebars::Handlebars;
 use serde_json::json;
-use crate::controller::pagination_controller::{get_pagination_for_all_categories_list};
 
 pub async fn get_all_categories_controller(
     config: web::Data<ConfigurationConstants>,
@@ -28,9 +28,7 @@ pub async fn get_all_categories_controller(
     }
 
     let db = &config.database_connection;
-
     let total_posts_length = get_pagination_for_all_categories_list(db).await?;
-
     let posts_per_page_constant = set_posts_per_page().await as i64;
     let mut posts_per_page = total_posts_length / posts_per_page_constant;
     let check_remainder = total_posts_length % posts_per_page_constant;
@@ -43,9 +41,6 @@ pub async fn get_all_categories_controller(
     let pari = params.get_or_insert(Query(PaginationParams::default()));
     let current_pag = pari.0;
     let _current_page = current_pag.page;
-
-
-
     let all_category = get_all_categories_database(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -55,7 +50,10 @@ pub async fn get_all_categories_controller(
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
-        .render("all_categories", &json!({ "z": &all_categories,"o":all_category,"pages_count":pages_count}))
+        .render(
+            "all_categories",
+            &json!({ "z": &all_categories,"o":all_category,"pages_count":pages_count}),
+        )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
@@ -213,7 +211,6 @@ pub async fn get_category_with_pagination(
         posts_per_page += 1;
     }
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    // let category_postinng = category_pagination_controller_database_function(&category_input, db)
     let category_postinng = category_pagination_controller_database_function(category_input, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;

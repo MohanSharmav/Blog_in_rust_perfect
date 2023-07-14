@@ -1,6 +1,8 @@
 use crate::controller::common_controller::set_posts_per_page;
 use crate::controller::constants::ConfigurationConstants;
-use crate::model::category_database::{category_pagination_controller_database_function, get_all_categories_database};
+use crate::model::category_database::{
+    category_pagination_controller_database_function, get_all_categories_database,
+};
 use crate::model::pagination_database::{category_pagination_logic, PaginationParams};
 use crate::model::single_posts_database::{query_single_post, query_single_post_in_struct};
 use actix_identity::Identity;
@@ -30,7 +32,6 @@ pub async fn admin_category_display(
     let all_category = get_all_categories_database(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-
 
     let posts_per_page_constant = set_posts_per_page().await as i64;
     let mut posts_per_page = total_posts_length / posts_per_page_constant;

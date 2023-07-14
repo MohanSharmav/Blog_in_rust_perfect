@@ -30,7 +30,10 @@ pub async fn get_new_post(
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
-        .render("new_post", &json!({ "all_categories": all_categories,"o":all_category }))
+        .render(
+            "new_post",
+            &json!({ "all_categories": all_categories,"o":all_category }),
+        )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
@@ -101,7 +104,6 @@ pub async fn page_to_update_post(
             &json!({ "to_be_updated_post": &to_be_updated_post,"o":all_category }),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
-
 
     Ok(HttpResponse::Ok()
         .content_type(ContentType::html())

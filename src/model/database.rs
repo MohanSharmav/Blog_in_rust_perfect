@@ -22,7 +22,6 @@ pub struct UpdatePost {
     pub(crate) description: String,
     pub(crate) name: String,
 }
-// posts.title posts.id,posts.description,categories.name
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
 pub struct PostsCategories {
     pub title: String,

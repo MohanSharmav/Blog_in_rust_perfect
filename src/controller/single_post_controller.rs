@@ -12,7 +12,6 @@ pub async fn get_single_post(
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
     let titles = path.parse::<i32>().unwrap_or_default();
-    //Todo
     let single_post = query_single_post(titles, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
