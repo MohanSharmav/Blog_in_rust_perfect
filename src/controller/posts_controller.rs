@@ -25,8 +25,12 @@ pub async fn get_new_post(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
+    let all_category = get_all_categories_database(db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
     let html = handlebars
-        .render("new_post", &json!({ "all_categories": all_categories }))
+        .render("new_post", &json!({ "all_categories": all_categories,"o":all_category }))
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()

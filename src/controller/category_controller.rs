@@ -17,19 +17,28 @@ pub async fn get_all_categories_controller(
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
+
 ) -> Result<HttpResponse, actix_web::Error> {
     if user.is_none() {
         return Ok(HttpResponse::SeeOther()
             .insert_header((http::header::LOCATION, "/"))
             .body(""));
     }
+
+
+
     let db = &config.database_connection;
+
+    let all_category = get_all_categories_database(db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
     let all_categories = get_all_categories_database(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
-        .render("all_categories", &json!({ "z": &all_categories }))
+        .render("all_categories", &json!({ "z": &all_categories,"o":all_category }))
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
@@ -38,6 +47,7 @@ pub async fn get_all_categories_controller(
 }
 
 pub async fn get_new_category(
+    config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
 ) -> Result<HttpResponse, actix_web::Error> {
@@ -46,9 +56,13 @@ pub async fn get_new_category(
             .insert_header((http::header::LOCATION, "/"))
             .body(""));
     }
+    let db = &config.database_connection;
+    let all_category = get_all_categories_database(db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
-        .render("new_category", &json!({"o":"ax"}))
+        .render("new_category", &json!({"o":"ax","o":all_category}))
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
@@ -111,6 +125,7 @@ pub async fn delete_category(
 }
 
 pub async fn page_to_update_category(
+    config: web::Data<ConfigurationConstants>,
     to_be_updated_category: web::Path<String>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
@@ -120,11 +135,16 @@ pub async fn page_to_update_category(
             .insert_header((http::header::LOCATION, "/"))
             .body(""));
     }
+    let db = &config.database_connection;
+    let all_category = get_all_categories_database(db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
     let to_be_updated_category = to_be_updated_category.clone();
     let html = handlebars
         .render(
             "update_category",
-            &json!({ "to_be_updated_post": &to_be_updated_category }),
+            &json!({ "to_be_updated_post": &to_be_updated_category ,"o":all_category}),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
