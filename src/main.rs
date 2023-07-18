@@ -125,6 +125,8 @@ async fn main() -> Result<(), anyhow::Error> {
             .service(
                 web::resource("/posts/category/{category_id}").to(get_category_with_pagination),
             )
+
+        // .service(web::resource("/posts/page/2").route(web::get().to())
     })
     .bind("127.0.0.1:8080")?
     .run()

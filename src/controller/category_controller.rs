@@ -1,10 +1,7 @@
 use crate::controller::common_controller::set_posts_per_page;
 use crate::controller::constants::ConfigurationConstants;
 use crate::controller::pagination_controller::get_pagination_for_all_categories_list;
-use crate::model::category_database::{
-    category_pagination_controller_database_function, create_new_category_database,
-    delete_category_database, get_all_categories_database, update_category_database,
-};
+use crate::model::category_database::{category_pagination_controller_database_function, create_new_category_database, delete_category_database, get_all_categories_database, update_category_database};
 use crate::model::database::Categories;
 use crate::model::pagination_database::{category_pagination_logic, PaginationParams};
 use actix_identity::Identity;
@@ -41,10 +38,13 @@ pub async fn get_all_categories_controller(
     let pari = params.get_or_insert(Query(PaginationParams::default()));
     let current_pag = pari.0;
     let _current_page = current_pag.page;
+
+    // let par=params.unwrap_or_else(1);
+    // let parii=par.page;
     let all_category = get_all_categories_database(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-
+    // get_all_categories_database
     let all_categories = get_all_categories_database(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -72,7 +72,7 @@ pub async fn get_new_category(
             .body(""));
     }
     let db = &config.database_connection;
-    let all_category = get_all_categories_database(db)
+    let all_category = get_all_categories_database(db, )
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -151,7 +151,7 @@ pub async fn page_to_update_category(
             .body(""));
     }
     let db = &config.database_connection;
-    let all_category = get_all_categories_database(db)
+    let all_category = get_all_categories_database(db, )
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -193,7 +193,7 @@ pub async fn receive_updated_category(
 
 pub async fn get_category_with_pagination(
     path: web::Path<String>,
-    _params: web::Query<PaginationParams>,
+    params: web::Query<PaginationParams>,
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
@@ -202,7 +202,7 @@ pub async fn get_category_with_pagination(
     let total_posts_length = category_pagination_logic(&category_input, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-
+    let par=params.page;
     let posts_per_page_constant = set_posts_per_page().await as i64;
     let mut posts_per_page = total_posts_length / posts_per_page_constant;
     let check_remainder = total_posts_length % posts_per_page_constant;
@@ -211,7 +211,7 @@ pub async fn get_category_with_pagination(
         posts_per_page += 1;
     }
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    let category_postinng = category_pagination_controller_database_function(category_input, db)
+    let category_postinng = category_pagination_controller_database_function(category_input, db,par)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

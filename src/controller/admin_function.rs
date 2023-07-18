@@ -13,7 +13,7 @@ use serde_json::json;
 
 pub async fn admin_category_display(
     path: web::Path<String>,
-    _params: web::Query<PaginationParams>,
+    params: web::Query<PaginationParams>,
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
@@ -29,10 +29,11 @@ pub async fn admin_category_display(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let all_category = get_all_categories_database(db)
+    let all_category = get_all_categories_database(db, )
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
+    let par=params.page;
     let posts_per_page_constant = set_posts_per_page().await as i64;
     let mut posts_per_page = total_posts_length / posts_per_page_constant;
     let check_remainder = total_posts_length % posts_per_page_constant;
@@ -41,7 +42,7 @@ pub async fn admin_category_display(
         posts_per_page += 1;
     }
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    let category_postinng = category_pagination_controller_database_function(category_input, db)
+    let category_postinng = category_pagination_controller_database_function(category_input, db,par )
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -68,7 +69,7 @@ pub async fn admin_unique_posts_display(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let all_category = get_all_categories_database(db)
+    let all_category = get_all_categories_database(db, )
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

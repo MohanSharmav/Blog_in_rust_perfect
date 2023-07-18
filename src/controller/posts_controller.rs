@@ -21,11 +21,11 @@ pub async fn get_new_post(
             .body(""));
     }
     let db = &config.database_connection;
-    let all_categories = get_all_categories_database(db)
+    let all_categories = get_all_categories_database(db, )
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let all_category = get_all_categories_database(db)
+    let all_category = get_all_categories_database(db, )
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -94,7 +94,7 @@ pub async fn page_to_update_post(
     update_post_helper(&to_be_updated_post).await;
     let db = &config.database_connection;
 
-    let all_category = get_all_categories_database(db)
+    let all_category = get_all_categories_database(db, )
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
