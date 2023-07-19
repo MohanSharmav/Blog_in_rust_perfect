@@ -38,6 +38,19 @@ pub struct CreatePost {
     pub category_id: i32,
 }
 
+
+#[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
+pub struct CreateNewPost {
+    pub title: String,
+    pub description: String,
+    pub category_id: i32,
+}
+
+#[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
+pub struct GetId{
+    pub id: i32,
+}
+
 pub async fn select_posts(db: &Pool<Postgres>) -> Result<Vec<Posts>, anyhow::Error> {
     let postsing = sqlx::query_as::<_, Posts>("select id, title, description from posts")
         .fetch_all(db)

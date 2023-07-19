@@ -78,7 +78,7 @@ async fn main() -> Result<(), anyhow::Error> {
             .service(web::resource("/").to(redirect_user))
             .service(web::resource("/check").to(check_user))
             // perfect admin url
-            .service(web::resource("/admin/page/{page_number}").to(pagination_display))
+            .service(web::resource("/admin/posts/page/{page_number}").to(pagination_display))
             .service(
                 web::resource("/admin/categories/new")
                     .route(web::get().to(get_new_category))
