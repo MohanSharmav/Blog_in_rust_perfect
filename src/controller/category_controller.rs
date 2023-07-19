@@ -1,10 +1,7 @@
 use crate::controller::common_controller::set_posts_per_page;
 use crate::controller::constants::ConfigurationConstants;
 use crate::controller::pagination_controller::get_pagination_for_all_categories_list;
-use crate::model::category_database::{
-    category_pagination_controller_database_function, create_new_category_database,
-    delete_category_database, get_all_categories_database, update_category_database,
-};
+use crate::model::category_database::{category_pagination_controller_database_function, create_new_category_database, delete_category_database, get_all_categories_database, get_all_categories_database_with_pagination_display, update_category_database};
 use crate::model::database::Categories;
 use crate::model::pagination_database::{category_pagination_logic, PaginationParams};
 use actix_identity::Identity;
@@ -19,7 +16,8 @@ pub async fn get_all_categories_controller(
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
-    mut params: Option<Query<PaginationParams>>,
+    // mut params: Option<Query<PaginationParams>>,
+    params: web::Path<i32>,
 ) -> Result<HttpResponse, actix_web::Error> {
     if user.is_none() {
         return Ok(HttpResponse::SeeOther()
@@ -38,17 +36,22 @@ pub async fn get_all_categories_controller(
     }
     let posts_per_page = posts_per_page as usize;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    let pari = params.get_or_insert(Query(PaginationParams::default()));
-    let current_pag = pari.0;
-    let _current_page = current_pag.page;
+    // let pari = params.get_or_insert(Query(PaginationParams::default()));
+    // let current_pag = pari.0;
+    // let _current_page = current_pag.page;
 
     // let par=params.unwrap_or_else(1);
     // let parii=par.page;
+    let posts_per_page_constant=set_posts_per_page().await;
+    let param= params.into_inner();
     let all_category = get_all_categories_database(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     // get_all_categories_database
-    let all_categories = get_all_categories_database(db)
+    // let all_categories = get_all_categories_database(db,)
+    //     .await
+    //     .map_err(actix_web::error::ErrorInternalServerError)?;
+    let all_categories = get_all_categories_database_with_pagination_display(db,param,posts_per_page_constant)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

@@ -90,7 +90,7 @@ async fn main() -> Result<(), anyhow::Error> {
                     .route(web::post().to(receive_updated_category)),
             )
             .service(
-                web::resource("/admin/categories")
+                web::resource("/admin/categories/page/{page_number}")
                     .route(web::get().to(get_all_categories_controller)),
             )
             .service(web::resource("/admin/posts/new").to(get_new_post))
