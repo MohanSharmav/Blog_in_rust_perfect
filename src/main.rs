@@ -77,7 +77,7 @@ async fn main() -> Result<(), anyhow::Error> {
             .service(web::resource("/").to(redirect_user))
             .service(web::resource("/check").to(check_user))
             // perfect admin url
-            .service(web::resource("/admin").to(pagination_display))
+            .service(web::resource("/admin/page/{page_number}").to(pagination_display))
             .service(
                 web::resource("/admin/categories/new")
                     .route(web::get().to(get_new_category))
@@ -106,7 +106,7 @@ async fn main() -> Result<(), anyhow::Error> {
             .service(
                 web::resource("/admin/post/{post_id}/delete").route(web::get().to(delete_post)),
             )
-            .service(web::resource("/admin/categories/{category_id}").to(admin_category_display))
+            .service(web::resource("/admin/categories/{category_id}/page/{page_number}").to(admin_category_display))
             .service(
                 web::resource("/admin/category/{name}/delete")
                     .route(web::get().to(delete_category)),
@@ -125,15 +125,15 @@ async fn main() -> Result<(), anyhow::Error> {
             // .service(web::resource("/posts").route(web::get().to(common_page_controller)))
             .service(web::resource("/posts/{post_id}").route(web::get().to(get_single_post)))
             //below two is not working
-            .service(
-                web::resource(" /posts/page/{page_number}")
-                    .route(web::get().to(common_page_controller)),
-            )
+            // .service(
+            //     web::resource(" /posts/page/{page_number}")
+            //         .route(web::get().to(common_page_controller)),
+            // )
             // .service(
             //     web::resource("/posts/category/{category_id}").to(get_category_with_pagination),
             // )
             .service(
-                web::resource("/posts/category/{category_id}/{page_number}").to(get_category_with_pagination),
+                web::resource("/posts/category/{category_id}/page/{page_number}").to(get_category_with_pagination),
             )
         .service(web::resource("/posts/page/{page_number}").route(web::get().to(new_common_page_controller)))
             // .service(web::resource("/posts/"))

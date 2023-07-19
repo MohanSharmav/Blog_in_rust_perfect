@@ -34,7 +34,8 @@ pub async fn pagination_display(
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
-    mut params: Option<Query<PaginationParams>>,
+    params:web::Path<i32>,
+    // mut params: Option<Query<PaginationParams>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     if user.is_none() {
         return Ok(HttpResponse::SeeOther()
@@ -53,11 +54,12 @@ pub async fn pagination_display(
     }
     let posts_per_page = posts_per_page as usize;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    let pari = params.get_or_insert(Query(PaginationParams::default()));
-    let current_pag = pari.0;
-    let current_page = current_pag.page;
-
-    let paginators = pagination_logic(params, db)
+    // let pari = params.get_or_insert(Query(PaginationParams::default()));
+    // // let current_pag = pari.0;
+    // let current_page = current_pag.page;
+     let current_page = params.clone();
+    let par=params.into_inner();
+    let paginators = pagination_logic(&par, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

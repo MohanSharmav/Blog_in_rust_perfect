@@ -46,15 +46,15 @@ pub fn paginate<T>(items: Vec<T>, _page: i32) -> Vec<T> {
 }
 
 pub async fn pagination_logic(
-    mut params: Option<Query<PaginationParams>>,
+    mut params: &i32,
     db: &Pool<Postgres>,
 ) -> Result<Vec<Posts>, anyhow::Error> {
-    let pari = params.get_or_insert(Query(PaginationParams::default()));
-    let current_pag = pari.0;
-    let page = current_pag.page;
+    // let pari = params.get_or_insert(Query(PaginationParams::default()));
+    // let current_pag = pari.0;
+    let page = params;
 
     let posts_pagination: Vec<Posts> = select_posts(db).await?;
-    let paginated_users = paginate(posts_pagination, page);
+    let paginated_users = paginate(posts_pagination, *page);
     Ok(paginated_users)
 }
 

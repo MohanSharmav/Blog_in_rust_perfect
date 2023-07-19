@@ -12,8 +12,9 @@ use handlebars::Handlebars;
 use serde_json::json;
 
 pub async fn admin_category_display(
-    path: web::Path<String>,
-    params: web::Query<PaginationParams>,
+    // path: web::Path<String>,
+    // params: web::Query<PaginationParams>,
+    info: web::Path<(String, i32)>,
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
@@ -24,7 +25,9 @@ pub async fn admin_category_display(
             .body(""));
     }
     let db = &config.database_connection;
-    let category_input: String = path.into_inner();
+    let category_input: String = info.clone().0;
+    let params =info.into_inner().1;
+    // /**/let category_input: String = path.into_inner();
     let total_posts_length = category_pagination_logic(&category_input, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -33,7 +36,7 @@ pub async fn admin_category_display(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let par=params.page;
+    // let par=params.page;
     let posts_per_page_constant = set_posts_per_page().await as i64;
     let mut posts_per_page = total_posts_length / posts_per_page_constant;
     let check_remainder = total_posts_length % posts_per_page_constant;
@@ -42,7 +45,7 @@ pub async fn admin_category_display(
         posts_per_page += 1;
     }
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    let category_postinng = category_pagination_controller_database_function(category_input, db,par )
+    let category_postinng = category_pagination_controller_database_function(category_input, db,params )
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

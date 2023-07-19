@@ -200,7 +200,7 @@ pub async fn get_category_with_pagination(
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
     let path=info.clone().0;
-    let par=info.into_inner().1 as i32;
+    let mut par=info.into_inner().1 as i32;
     // let category_input: String = path.();
      let category_input: String = path;
 

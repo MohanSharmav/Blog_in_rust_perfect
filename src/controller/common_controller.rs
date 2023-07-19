@@ -44,7 +44,7 @@ pub async fn common_page_controller(
 }
 
 pub async fn redirect_user() -> impl Responder {
-    web::Redirect::to("/posts")
+    web::Redirect::to("/posts/page/1")
 }
 
 pub async fn set_posts_per_page() -> i32 {
@@ -55,7 +55,7 @@ pub async fn set_posts_per_page() -> i32 {
 
 pub async fn new_common_page_controller(
     // mut params: Option<Query<PaginationParams>>,
-     params:web::Path<u32>,
+     params:web::Path<i32>,
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
@@ -72,7 +72,8 @@ pub async fn new_common_page_controller(
     // let pari = params.get_or_insert(Query(PaginationParams::default()));
     // let current_page = pari.clone().page;
     let param=params.into_inner();
-    let exact_posts_only = select_specific_pages_post(param as i32, &db.clone())
+    // let par=*param as i32;
+    let exact_posts_only = select_specific_pages_post(param , &db.clone())
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
