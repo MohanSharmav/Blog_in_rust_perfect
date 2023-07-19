@@ -192,17 +192,22 @@ pub async fn receive_updated_category(
 }
 
 pub async fn get_category_with_pagination(
-    path: web::Path<String>,
-    params: web::Query<PaginationParams>,
+    // path: web::Path<String>,
+    // params: web::Query<PaginationParams>,
+    info: web::Path<(String, u32)>,
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
-    let category_input: String = path.into_inner();
+    let path=info.clone().0;
+    let par=info.into_inner().1 as i32;
+    // let category_input: String = path.();
+     let category_input: String = path;
+
     let total_posts_length = category_pagination_logic(&category_input, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    let par=params.page;
+    // let par=params.page;
     let posts_per_page_constant = set_posts_per_page().await as i64;
     let mut posts_per_page = total_posts_length / posts_per_page_constant;
     let check_remainder = total_posts_length % posts_per_page_constant;
@@ -211,7 +216,7 @@ pub async fn get_category_with_pagination(
         posts_per_page += 1;
     }
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    let category_postinng = category_pagination_controller_database_function(category_input, db,par)
+    let category_postinng = category_pagination_controller_database_function(category_input.to_string(), db,par)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

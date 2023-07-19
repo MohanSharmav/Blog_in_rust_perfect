@@ -29,6 +29,12 @@ use sqlx::postgres::PgPoolOptions;
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
 
+async fn index(info: web::Path<(String, u32)>) -> Result<String> {
+    let info = info.into_inner();
+    print!("--------------------------------{:?}", info.0);
+        Ok(format!("Welcome {}! id: {}", info.0, info.1))
+}
+
 #[actix_web::main]
 async fn main() -> Result<(), anyhow::Error> {
     std::env::set_var("RUST_LOG", "debug");
@@ -57,6 +63,7 @@ async fn main() -> Result<(), anyhow::Error> {
 
     HttpServer::new(move || {
         App::new()
+
             .app_data(web::Data::new(handlebars.clone()))
             .app_data(confi.clone())
             .wrap(IdentityMiddleware::default())
@@ -122,11 +129,15 @@ async fn main() -> Result<(), anyhow::Error> {
                 web::resource(" /posts/page/{page_number}")
                     .route(web::get().to(common_page_controller)),
             )
+            // .service(
+            //     web::resource("/posts/category/{category_id}").to(get_category_with_pagination),
+            // )
             .service(
-                web::resource("/posts/category/{category_id}").to(get_category_with_pagination),
+                web::resource("/posts/category/{category_id}/{page_number}").to(get_category_with_pagination),
             )
-
         .service(web::resource("/posts/page/{page_number}").route(web::get().to(new_common_page_controller)))
+            // .service(web::resource("/posts/"))
+            // .service(web::resource("/{username}/{id}").route(web::get().to(index)))
     })
     .bind("127.0.0.1:8080")?
     .run()
