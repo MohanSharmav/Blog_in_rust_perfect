@@ -9,7 +9,7 @@ use crate::controller::category_controller::{
     delete_category, get_all_categories_controller, get_category_with_pagination, get_new_category,
     page_to_update_category, receive_new_category, receive_updated_category,
 };
-use crate::controller::common_controller::{common_page_controller, redirect_user};
+use crate::controller::common_controller::{common_page_controller, new_common_page_controller, redirect_user};
 use crate::controller::constants::ConfigurationConstants;
 use crate::controller::pagination_controller::pagination_display;
 use crate::controller::posts_controller::{
@@ -115,7 +115,7 @@ async fn main() -> Result<(), anyhow::Error> {
                     .route(web::get().to(get_register_page))
                     .route(web::post().to(get_data_from_register_page)),
             )
-            .service(web::resource("/posts").route(web::get().to(common_page_controller)))
+            // .service(web::resource("/posts").route(web::get().to(common_page_controller)))
             .service(web::resource("/posts/{post_id}").route(web::get().to(get_single_post)))
             //below two is not working
             .service(
@@ -126,7 +126,7 @@ async fn main() -> Result<(), anyhow::Error> {
                 web::resource("/posts/category/{category_id}").to(get_category_with_pagination),
             )
 
-        // .service(web::resource("/posts/page/2").route(web::get().to())
+        .service(web::resource("/posts/page/{page_number}").route(web::get().to(new_common_page_controller)))
     })
     .bind("127.0.0.1:8080")?
     .run()
