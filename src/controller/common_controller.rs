@@ -31,7 +31,7 @@ pub async fn common_page_controller(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let all_category = get_all_categories_database(db, )
+    let all_category = get_all_categories_database(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -51,11 +51,9 @@ pub async fn set_posts_per_page() -> i32 {
     3
 }
 
-
-
 pub async fn new_common_page_controller(
     // mut params: Option<Query<PaginationParams>>,
-     params:web::Path<i32>,
+    params: web::Path<i32>,
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
@@ -71,13 +69,13 @@ pub async fn new_common_page_controller(
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     // let pari = params.get_or_insert(Query(PaginationParams::default()));
     // let current_page = pari.clone().page;
-    let param=params.into_inner();
+    let param = params.into_inner();
     // let par=*param as i32;
-    let exact_posts_only = select_specific_pages_post(param , &db.clone())
+    let exact_posts_only = select_specific_pages_post(param, &db.clone())
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let all_category = get_all_categories_database(db, )
+    let all_category = get_all_categories_database(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

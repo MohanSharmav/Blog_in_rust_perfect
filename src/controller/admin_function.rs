@@ -26,13 +26,13 @@ pub async fn admin_category_display(
     }
     let db = &config.database_connection;
     let category_input: String = info.clone().0;
-    let params =info.into_inner().1;
+    let params = info.into_inner().1;
     // /**/let category_input: String = path.into_inner();
     let total_posts_length = category_pagination_logic(&category_input, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let all_category = get_all_categories_database(db, )
+    let all_category = get_all_categories_database(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -40,14 +40,18 @@ pub async fn admin_category_display(
     let posts_per_page_constant = set_posts_per_page().await as i64;
     let mut posts_per_page = total_posts_length / posts_per_page_constant;
     let check_remainder = total_posts_length % posts_per_page_constant;
-
     if check_remainder != 0 {
         posts_per_page += 1;
     }
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    let category_postinng = category_pagination_controller_database_function(category_input, db,params )
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
+    let category_postinng = category_pagination_controller_database_function(
+        category_input,
+        db,
+        params,
+        posts_per_page,
+    )
+    .await
+    .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
         .render(
@@ -72,7 +76,7 @@ pub async fn admin_unique_posts_display(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let all_category = get_all_categories_database(db, )
+    let all_category = get_all_categories_database(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

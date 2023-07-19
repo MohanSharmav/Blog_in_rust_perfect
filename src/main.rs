@@ -9,7 +9,9 @@ use crate::controller::category_controller::{
     delete_category, get_all_categories_controller, get_category_with_pagination, get_new_category,
     page_to_update_category, receive_new_category, receive_updated_category,
 };
-use crate::controller::common_controller::{common_page_controller, new_common_page_controller, redirect_user};
+use crate::controller::common_controller::{
+    common_page_controller, new_common_page_controller, redirect_user,
+};
 use crate::controller::constants::ConfigurationConstants;
 use crate::controller::pagination_controller::pagination_display;
 use crate::controller::posts_controller::{
@@ -32,7 +34,7 @@ pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
 async fn index(info: web::Path<(String, u32)>) -> Result<String> {
     let info = info.into_inner();
     print!("--------------------------------{:?}", info.0);
-        Ok(format!("Welcome {}! id: {}", info.0, info.1))
+    Ok(format!("Welcome {}! id: {}", info.0, info.1))
 }
 
 #[actix_web::main]
@@ -63,7 +65,6 @@ async fn main() -> Result<(), anyhow::Error> {
 
     HttpServer::new(move || {
         App::new()
-
             .app_data(web::Data::new(handlebars.clone()))
             .app_data(confi.clone())
             .wrap(IdentityMiddleware::default())
@@ -106,7 +107,10 @@ async fn main() -> Result<(), anyhow::Error> {
             .service(
                 web::resource("/admin/post/{post_id}/delete").route(web::get().to(delete_post)),
             )
-            .service(web::resource("/admin/categories/{category_id}/page/{page_number}").to(admin_category_display))
+            .service(
+                web::resource("/admin/categories/{category_id}/page/{page_number}")
+                    .to(admin_category_display),
+            )
             .service(
                 web::resource("/admin/category/{name}/delete")
                     .route(web::get().to(delete_category)),
@@ -133,11 +137,15 @@ async fn main() -> Result<(), anyhow::Error> {
             //     web::resource("/posts/category/{category_id}").to(get_category_with_pagination),
             // )
             .service(
-                web::resource("/posts/category/{category_id}/page/{page_number}").to(get_category_with_pagination),
+                web::resource("/posts/category/{category_id}/page/{page_number}")
+                    .to(get_category_with_pagination),
             )
-        .service(web::resource("/posts/page/{page_number}").route(web::get().to(new_common_page_controller)))
-            // .service(web::resource("/posts/"))
-            // .service(web::resource("/{username}/{id}").route(web::get().to(index)))
+            .service(
+                web::resource("/posts/page/{page_number}")
+                    .route(web::get().to(new_common_page_controller)),
+            )
+        // .service(web::resource("/posts/"))
+        // .service(web::resource("/{username}/{id}").route(web::get().to(index)))
     })
     .bind("127.0.0.1:8080")?
     .run()

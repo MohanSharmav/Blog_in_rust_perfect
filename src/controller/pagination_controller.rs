@@ -34,7 +34,7 @@ pub async fn pagination_display(
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
-    params:web::Path<i32>,
+    params: web::Path<i32>,
     // mut params: Option<Query<PaginationParams>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     if user.is_none() {
@@ -57,8 +57,8 @@ pub async fn pagination_display(
     // let pari = params.get_or_insert(Query(PaginationParams::default()));
     // // let current_pag = pari.0;
     // let current_page = current_pag.page;
-     let current_page = params.clone();
-    let par=params.into_inner();
+    let current_page = params.clone();
+    let par = params.into_inner();
     let paginators = pagination_logic(&par, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -67,7 +67,7 @@ pub async fn pagination_display(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let all_category = get_all_categories_database(db, )
+    let all_category = get_all_categories_database(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

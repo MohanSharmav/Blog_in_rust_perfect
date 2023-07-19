@@ -61,19 +61,20 @@ pub async fn category_pagination_controller_database_function(
     category_id: String,
     db: &Pool<Postgres>,
     par: i32,
+    posts_per_page: i64,
 ) -> Result<Vec<PostsCategories>, anyhow::Error> {
     let category_id = category_id.parse::<i32>()?;
     let category_posts = sqlx::query_as::<_, PostsCategories>(
-        "select posts.title,posts.id,posts.description,categories.name from posts,categories_posts,categories where categories_posts.post_id=posts.id and categories.id=categories_posts.category_id and categories_posts.category_id=$1 limit 3 offset($2-1)*3"
+        "select posts.title,posts.id,posts.description,categories.name from posts,categories_posts,categories where categories_posts.post_id=posts.id and categories.id=categories_posts.category_id and categories_posts.category_id=$1 limit $3 offset($2-1)*$3"
     )
      .bind(category_id)
         .bind(par)
+        .bind(posts_per_page)
     .fetch_all(db)
     .await?;
 
     Ok(category_posts)
 }
-
 
 //
 // pub async fn get_all_categories_database_with_pagination_display(
