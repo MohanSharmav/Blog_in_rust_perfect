@@ -6,7 +6,7 @@ use crate::model::database::Categories;
 use crate::model::pagination_database::{category_pagination_logic, PaginationParams};
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
-use actix_web::web::Query;
+use actix_web::web::{Query, Redirect};
 use actix_web::{http, web, HttpResponse};
 use anyhow::Result;
 use handlebars::Handlebars;
@@ -96,26 +96,20 @@ pub async fn receive_new_category(
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
-) -> Result<HttpResponse, actix_web::Error> {
-    if user.is_none() {
-        return Ok(HttpResponse::SeeOther()
-            .insert_header((http::header::LOCATION, "/"))
-            .body(""));
-    }
+) -> Result<Redirect, actix_web::Error> {
+    // if user.is_none() {
+    //     return Ok(HttpResponse::SeeOther()
+    //         .insert_header((http::header::LOCATION, "/"))
+    //         .body(""));
+    // }
     let name = &form.name;
     let id = &form.id;
     let db = &config.database_connection;
     create_new_category_database(db, name, id)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    let success_message = "the categories created successfully";
-    let html = handlebars
-        .render("message_display", &json!({ "message": success_message }))
-        .map_err(actix_web::error::ErrorInternalServerError)?;
+    Ok(Redirect::to("/admin/posts/page/1"))
 
-    Ok(HttpResponse::Ok()
-        .content_type(ContentType::html())
-        .body(html))
 }
 
 pub async fn delete_category(
@@ -123,26 +117,28 @@ pub async fn delete_category(
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
-) -> Result<HttpResponse, actix_web::Error> {
-    if user.is_none() {
-        return Ok(HttpResponse::SeeOther()
-            .insert_header((http::header::LOCATION, "/"))
-            .body(""));
-    }
+) -> Result<Redirect, actix_web::Error> {
+    // if user.is_none() {
+    //     return Ok(HttpResponse::SeeOther()
+    //         .insert_header((http::header::LOCATION, "/"))
+    //         .body(""));
+    // }
     let to_delete_category = &id.into_inner();
     let db = &config.database_connection;
     delete_category_database(db, to_delete_category)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
+    Ok(Redirect::to("/admin/posts/page/1"))
 
-    let success_message = "the category deleted successfully";
-    let html = handlebars
-        .render("message_display", &json!({ "message": success_message }))
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    Ok(HttpResponse::Ok()
-        .content_type(ContentType::html())
-        .body(html))
+    //
+    // let success_message = "the category deleted successfully";
+    // let html = handlebars
+    //     .render("message_display", &json!({ "message": success_message }))
+    //     .map_err(actix_web::error::ErrorInternalServerError)?;
+    //
+    // Ok(HttpResponse::Ok()
+    //     .content_type(ContentType::html())
+    //     .body(html))
 }
 
 pub async fn page_to_update_category(
@@ -179,7 +175,7 @@ pub async fn receive_updated_category(
     current_category_name: web::Path<String>,
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
-) -> Result<HttpResponse, actix_web::Error> {
+) -> Result<Redirect, actix_web::Error> {
     let db = &config.database_connection;
     let _current_post_name = &current_category_name.into_inner();
     let name = &form.name;
@@ -187,14 +183,15 @@ pub async fn receive_updated_category(
     update_category_database(name, id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    let success_message = "the post created successfully";
-    let html = handlebars
-        .render("message_display", &json!({ "message": success_message }))
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    Ok(HttpResponse::Ok()
-        .content_type(ContentType::html())
-        .body(html))
+    Ok(Redirect::to("/admin/posts/page/1"))
+    // let success_message = "the post created successfully";
+    // let html = handlebars
+    //     .render("message_display", &json!({ "message": success_message }))
+    //     .map_err(actix_web::error::ErrorInternalServerError)?;
+    //
+    // Ok(HttpResponse::Ok()
+    //     .content_type(ContentType::html())
+    //     .body(html))
 }
 
 pub async fn get_category_with_pagination(

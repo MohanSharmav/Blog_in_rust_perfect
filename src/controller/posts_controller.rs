@@ -54,7 +54,7 @@ pub async fn receive_new_posts(
     create_post_database(title.clone(), description.clone(), &category_id.clone(),db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    Ok(Redirect::to("/admin/page/1"))
+    Ok(Redirect::to("/admin/posts/page/1"))
 
     // let success_message = "the post created successfully";
     // let html = handlebars
@@ -77,7 +77,7 @@ pub async fn delete_post(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    Ok(Redirect::to("/admin/pos"))
+    Ok(Redirect::to("/admin/posts/page/1"))
     // let success_message = "the post deleted successfully";
     // let html = handlebars
     //     .render("message_display", &json!({ "message": success_message }))
@@ -121,7 +121,7 @@ pub async fn receive_updated_post(
     _current_post_name: web::Path<String>,
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
-) -> Result<HttpResponse, actix_web::Error> {
+) -> Result<Redirect, actix_web::Error> {
     let db = &config.database_connection;
     let id = &form.id;
     let title = &form.title;
@@ -130,13 +130,14 @@ pub async fn receive_updated_post(
     update_post_database(title, description, &id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
+    Ok(Redirect::to("/admin/posts/page/1"))
 
-    let success_message = "the post created successfully";
-    let html = handlebars
-        .render("message_display", &json!({ "message": success_message }))
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    Ok(HttpResponse::Ok()
-        .content_type(ContentType::html())
-        .body(html))
+    // let success_message = "the post created successfully";
+    // let html = handlebars
+    //     .render("message_display", &json!({ "message": success_message }))
+    //     .map_err(actix_web::error::ErrorInternalServerError)?;
+    //
+    // Ok(HttpResponse::Ok()
+    //     .content_type(ContentType::html())
+    //     .body(html))
 }
