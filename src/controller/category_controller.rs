@@ -1,8 +1,12 @@
 use crate::controller::common_controller::set_posts_per_page;
 use crate::controller::constants::ConfigurationConstants;
 use crate::controller::pagination_controller::get_pagination_for_all_categories_list;
-use crate::model::category_database::{category_pagination_controller_database_function, create_new_category_database, delete_category_database, get_all_categories_database, get_all_categories_database_with_pagination_display, update_category_database};
-use crate::model::database::Categories;
+use crate::model::category_database::{
+    category_pagination_controller_database_function, create_new_category_database,
+    delete_category_database, get_all_categories_database,
+    get_all_categories_database_with_pagination_display, update_category_database,
+};
+use crate::model::database::{Categories, CreateNewCategory};
 use crate::model::pagination_database::{category_pagination_logic, PaginationParams};
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
@@ -42,8 +46,8 @@ pub async fn get_all_categories_controller(
 
     // let par=params.unwrap_or_else(1);
     // let parii=par.page;
-    let posts_per_page_constant=set_posts_per_page().await;
-    let param= params.into_inner();
+    let posts_per_page_constant = set_posts_per_page().await;
+    let param = params.into_inner();
     let all_category = get_all_categories_database(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -51,9 +55,10 @@ pub async fn get_all_categories_controller(
     // let all_categories = get_all_categories_database(db,)
     //     .await
     //     .map_err(actix_web::error::ErrorInternalServerError)?;
-    let all_categories = get_all_categories_database_with_pagination_display(db,param,posts_per_page_constant)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
+    let all_categories =
+        get_all_categories_database_with_pagination_display(db, param, posts_per_page_constant)
+            .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
         .render(
@@ -92,7 +97,7 @@ pub async fn get_new_category(
 }
 
 pub async fn receive_new_category(
-    form: web::Form<Categories>,
+    form: web::Form<CreateNewCategory>,
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
@@ -103,13 +108,11 @@ pub async fn receive_new_category(
     //         .body(""));
     // }
     let name = &form.name;
-    let id = &form.id;
     let db = &config.database_connection;
-    create_new_category_database(db, name, id)
+    create_new_category_database(db, name)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     Ok(Redirect::to("/admin/posts/page/1"))
-
 }
 
 pub async fn delete_category(

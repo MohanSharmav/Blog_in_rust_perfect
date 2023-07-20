@@ -38,7 +38,6 @@ pub struct CreatePost {
     pub category_id: i32,
 }
 
-
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
 pub struct CreateNewPost {
     pub title: String,
@@ -47,7 +46,11 @@ pub struct CreateNewPost {
 }
 
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
-pub struct GetId{
+pub struct CreateNewCategory {
+    pub(crate) name: String,
+}
+#[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
+pub struct GetId {
     pub id: i32,
 }
 

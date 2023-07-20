@@ -46,10 +46,10 @@ pub async fn get_data_from_login_page(
     if result == y {
         Identity::login(&req.extensions(), username.to_string())
             .map_err(actix_web::error::ErrorInternalServerError)?;
-        Ok(web::Redirect::to("/admin/page/1"))
+        Ok(web::Redirect::to("/admin/posts/page/1"))
     } else {
         // HttpResponse::Unauthorized().body("Invalid username or password");
-        Ok(web::Redirect::to("/posts"))
+        Ok(web::Redirect::to("/posts/page/1"))
     }
 }
 
@@ -60,7 +60,7 @@ pub async fn logout(id: Identity) -> impl Responder {
 
 pub async fn check_user(user: Option<Identity>) -> impl Responder {
     if let Some(_user) = user {
-        web::Redirect::to("/admin?page=1&limit=2")
+        web::Redirect::to("/admin/posts/page/1")
     } else {
         web::Redirect::to("/")
     }

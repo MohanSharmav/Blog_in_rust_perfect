@@ -6,8 +6,8 @@ use crate::model::posts_database::{
 };
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
-use actix_web::{http, web, HttpResponse};
 use actix_web::web::Redirect;
+use actix_web::{http, web, HttpResponse};
 use handlebars::Handlebars;
 use serde_json::json;
 
@@ -46,12 +46,11 @@ pub async fn receive_new_posts(
     handlebars: web::Data<Handlebars<'_>>,
     config: web::Data<ConfigurationConstants>,
 ) -> Result<Redirect, actix_web::Error> {
-
     let db = &config.database_connection;
     let title = &form.title;
     let description = &form.description;
     let category_id = &form.category_id;
-    create_post_database(title.clone(), description.clone(), &category_id.clone(),db)
+    create_post_database(title.clone(), description.clone(), &category_id.clone(), db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     Ok(Redirect::to("/admin/posts/page/1"))
