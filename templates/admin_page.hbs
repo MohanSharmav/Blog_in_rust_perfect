@@ -239,7 +239,7 @@ function myFunctionForDelete(){
 <body>
 <div class="sidebars">
     <a class="active" href="/admin">Home</a>
-    <a href="/admin/categories">Manage Categories</a>
+    <a href="/admin/categories/page/1">Manage Categories</a>
     <div class="dropdown">
         <a href="#">Categories</a>
         <div class="dropdown-contenting">
@@ -277,9 +277,9 @@ function myFunctionForDelete(){
                 {{#each  tiger}}
                     <td {{this.id}}>{{this.id}}</td>
 
-                    <td> <a href="admin/posts/{{this.id}}"> {{this.title}}</td>
+                    <td> <a href="/admin/posts/{{this.id}}"> {{this.title}}</td>
 
-                    <td> <a href="admin/posts/{{this.id}}"> {{this.description}}</td>
+                    <td> <a href="/admin/posts/{{this.id}}"> {{this.description}}</td>
 
                     <td> <a  onclick="return confirm('Are you sure?')" href="/admin/post/{{this.id}}/delete"> Delete</a>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     </a>
                         <a href="/admin/posts/{{this.id}}/edit"> update </a>
