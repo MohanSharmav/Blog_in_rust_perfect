@@ -10,6 +10,7 @@ use actix_web::web::Redirect;
 use actix_web::{http, web, HttpResponse};
 use handlebars::Handlebars;
 use serde_json::json;
+use crate::model::single_posts_database::query_single_post_in_struct;
 
 pub async fn get_new_post(
     config: web::Data<ConfigurationConstants>,
@@ -88,6 +89,7 @@ pub async fn delete_post(
 }
 
 pub async fn page_to_update_post(
+    id: web::Path<i32>,
     config: web::Data<ConfigurationConstants>,
     to_be_updated_post: web::Path<String>,
     handlebars: web::Data<Handlebars<'_>>,
@@ -99,11 +101,16 @@ pub async fn page_to_update_post(
     let all_category = get_all_categories_database(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
+    let post_id=id.into_inner();
+
+    let single_post_struct = query_single_post_in_struct(post_id, db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
         .render(
             "update_post",
-            &json!({ "to_be_updated_post": &to_be_updated_post,"o":all_category }),
+            &json!({ "current_post":single_post_struct,"to_be_updated_post": &to_be_updated_post,"o":all_category }),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -116,17 +123,19 @@ pub async fn update_post_helper(ids: &String) -> &String {
     ids
 }
 pub async fn receive_updated_post(
-    form: web::Form<Posts>,
+    id:web::Path<i32>,
+    form: web::Form<CreateNewPost>,
     _current_post_name: web::Path<String>,
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<Redirect, actix_web::Error> {
+    let id=id.into_inner();
     let db = &config.database_connection;
-    let id = &form.id;
     let title = &form.title;
     let description = &form.description;
 
-    update_post_database(title, description, &id, db)
+    let category_id= &form.category_id;
+    update_post_database(title, description,id, category_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     Ok(Redirect::to("/admin/posts/page/1"))

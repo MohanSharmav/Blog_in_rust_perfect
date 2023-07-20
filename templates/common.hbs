@@ -146,7 +146,7 @@ function get_value(value) {
     <button class="dropbtn">Categories</button>
     <div class="dropdown-content">
         {{#each o}}
-            <a href="posts/category/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>
+            <a href="/posts/category/{{this.id}}/page/1"><strong>{{this.name}}</strong></a>
         {{/each}}
     </div>
 </div>
@@ -180,7 +180,7 @@ function get_value(value) {
         <nav aria-label="Page navigation example">
             <ul class="pagination">
                 {{#each pages_count }}
-                    <li class="page-item"><a class="page-link" href="?page={{this}}">{{this}}</a></li>
+                    <li class="page-item"><a class="page-link" href="{{this}}">{{this}}</a></li>
                 {{/each}}
             </ul>
         </nav>

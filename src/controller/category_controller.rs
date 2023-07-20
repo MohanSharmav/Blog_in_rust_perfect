@@ -174,7 +174,8 @@ pub async fn page_to_update_category(
 }
 
 pub async fn receive_updated_category(
-    form: web::Form<Categories>,
+    id: web::Path<i32>,
+    form: web::Form<CreateNewCategory>,
     current_category_name: web::Path<String>,
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
@@ -182,8 +183,8 @@ pub async fn receive_updated_category(
     let db = &config.database_connection;
     let _current_post_name = &current_category_name.into_inner();
     let name = &form.name;
-    let id = &form.id;
-    update_category_database(name, id, db)
+    let category_id = id.into_inner();
+    update_category_database(name, category_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     Ok(Redirect::to("/admin/posts/page/1"))

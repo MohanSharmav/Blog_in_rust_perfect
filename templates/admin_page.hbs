@@ -244,7 +244,7 @@ function myFunctionForDelete(){
         <a href="#">Categories</a>
         <div class="dropdown-contenting">
             {{#each o}}
-                <a href="admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>
+                <a href="/admin/categories/{{this.id}}/page/1"><strong>{{this.name}}</strong></a>
             {{/each}}
         </div>
     </div>
@@ -259,25 +259,6 @@ function myFunctionForDelete(){
     </div>
     <!--    <h1>copy everything till here</h1>-->
     <p>
-        <button type="button" class="btn btn-success">    <a href="admin/posts/new">Create new post</a> </button>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        <button type="button" class="btn btn-success"><a href="admin/categories/new">Create new category</a></button>
-    </p>
-
-
-
-    <div class="dropdowns">
-        <button onclick="myFunctions()" class="dropbtns">Categories list</button>
-        <div id="myDropdowns" class="dropdown-contents">
-            {{#each o}}
-                <a href="admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>
-            {{/each}}
-        </div>
-    </div>
-    <br>
-    <h3>Categories are:-</h3><br>
-    {{#each o}}
-        <a href="admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>  &nbsp;&nbsp;&nbsp;     <a  onclick="return confirm('Are you sure?')"  href="admin/category/{{this.id}}/delete">Delete</a>  &nbsp;   <a href="admin/category/{{this.id}}/edit">Update </a></p>
-    {{/each}}
 
 
     <div class="row">
@@ -285,24 +266,25 @@ function myFunctionForDelete(){
             <table class="table table-bordered">
                 <thead>
                 <tr>
+                    <th scope="col">Id</th>
                     <th scope="col">Title</th>
                     <th scope="col" >Description</th>
                     <th scope="col">Option</th>
-                    <th scope="col">Id</th>
                 </tr>
                 </thead>
                 <tbody>
 
                 {{#each  tiger}}
+                    <td {{this.id}}>{{this.id}}</td>
 
                     <td> <a href="admin/posts/{{this.id}}"> {{this.title}}</td>
 
                     <td> <a href="admin/posts/{{this.id}}"> {{this.description}}</td>
-                    <td> <a  onclick="return confirm('Are you sure?')" href="admin/post/{{this.id}}/delete"> Delete</a>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     </a>
-                        <a href="admin/posts/{{this.id}}/edit"> update </a>
+
+                    <td> <a  onclick="return confirm('Are you sure?')" href="/admin/post/{{this.id}}/delete"> Delete</a>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     </a>
+                        <a href="/admin/posts/{{this.id}}/edit"> update </a>
 
                     </td>
-                    <td {{this.id}}>{{this.id}}</td>
                     </a>
                     </tr>
                 {{/each}}
@@ -313,7 +295,7 @@ function myFunctionForDelete(){
             <nav aria-label="Page navigation example">
                 <ul class="pagination">
                     {{#each pages_count }}
-                        <li class="page-item"><a class="page-link" href="?page={{this}}">{{this}}</a></li>
+                        <li class="page-item"><a class="page-link" href="{{this}}">{{this}}</a></li>
                     {{/each}}
                 </ul>
             </nav>

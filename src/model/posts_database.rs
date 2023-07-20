@@ -23,7 +23,8 @@ pub async fn delete_post_database(
 pub async fn update_post_database(
     title: &String,
     description: &String,
-    id: &&i32,
+    id: i32,
+    category_id: &i32,
     db: &Pool<Postgres>,
 ) -> Result<(), anyhow::Error> {
     sqlx::query("update posts set title=$1 ,description=$2 where id=$3")
@@ -32,6 +33,14 @@ pub async fn update_post_database(
         .bind(id)
         .execute(db)
         .await?;
+
+    sqlx::query("update categories_posts set category_id=$2 where post_id=$1")
+        .bind(id)
+        .bind(category_id)
+        .fetch_all(db)
+        .await?;
+
+
     Ok(())
 }
 
