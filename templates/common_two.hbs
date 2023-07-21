@@ -10844,6 +10844,22 @@ header.masthead .post-heading .meta a {
 .dropdown:hover .dropbtn {background-color: #42aaf5;}
 
 
+        .bossing
+          {
+  float: right;
+  width: 20%;
+  height: 500px; /* only for demonstration, should be removed */
+  padding: 20px;
+}
+
+
+article {
+  float: center;
+  padding: 20px;
+  width: 70%;
+  height: 300px; /* only for demonstration, should be removed */
+}
+
       </style>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
@@ -10889,38 +10905,43 @@ header.masthead .post-heading .meta a {
         </div>
     </div>
 </header>
+
+<!--nav-->
+<nav class="bossing">
+    <h3>Categories are:-</h3>
+    <ul>
+        <li><a href="#">London</a></li>
+        <li><a href="#">Paris</a></li>
+        <li><a href="#">Tokyo</a></li>
+    </ul>
+</nav>
+
 <!-- Main Content-->
+<article>
 <div class="container px-4 px-lg-5">
-    <div class="dropdown">
-        <button class="dropbtn">Dropdown</button>
 
-        <div class="dropdown-content">
-              {{#each o}}
-            <a href="/posts/category/{{this.id}}/page/1"><strong>{{this.name}}</strong></a>
-        {{/each}}
-        </div>
-    </div>
+<!--    <div class="container px-8 px-lg-8">-->
 
-<div class="container px-4 px-lg-5">
-    <div class="row gx-4 gx-lg-5 justify-content-center">
-        <div class="col-md-10 col-lg-8 col-xl-7">
-            <!-- Post preview-->
-            {{#each tiger}}
+    <div class="container px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5 justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+                <!-- Post preview-->
+                {{#each tiger}}
 
-            <div class="post-preview">
-                <a href="post.html">
+                    <div class="post-preview">
+                        <a href="post.html">
 
 
-                    <h2 class="post-title"> {{this.title}}</h2>
-                    <h3 class="post-subtitle">{{this.description}}</h3>
-                </a>
+                            <h1 class="post-title"> {{this.title}}</h1>
+                            <h3 class="post-subtitle">{{this.description}}</h3>
+                        </a>
+                    </div>
+
+                    <!-- Divider-->
+                    <hr class="my-4" />
+                {{/each}}
             </div>
-
-            <!-- Divider-->
-            <hr class="my-4" />
-    {{/each}}
-   </div>
-    </div>
+        </div>
 <div class="pagination_numbers">
     <nav aria-label="Page navigation example">
         <ul class="pagination">
@@ -10932,6 +10953,9 @@ header.masthead .post-heading .meta a {
 
 </div>
 </div>
+</div>
+</article>
+
     <!--&lt;!&ndash; Footer&ndash;&gt;-->
 <!--<footer class="border-top">-->
 <!--    <div class="container px-4 px-lg-5">-->
