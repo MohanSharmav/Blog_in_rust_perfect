@@ -4,6 +4,7 @@ use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
 use handlebars::Handlebars;
 use serde_json::json;
+use crate::model::category_database::get_all_categories_database;
 
 pub async fn get_single_post(
     path: web::Path<String>,
@@ -20,10 +21,14 @@ pub async fn get_single_post(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
+    let all_category = get_all_categories_database(db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
     let html = handlebars
         .render(
             "single",
-            &json!({"o":&single_post,"single_post":single_post_struct}),
+            &json!({"o":&single_post,"single_post":single_post_struct,"o":all_category}),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
