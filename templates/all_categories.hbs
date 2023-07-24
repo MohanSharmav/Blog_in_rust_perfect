@@ -1,299 +1,758 @@
 
-
-
-<html>
+<!DOCTYPE html>
+<!-- Designined by CodingLab | www.youtube.com/codinglabyt -->
+<html lang="en" dir="ltr">
 <head>
+    <meta charset="UTF-8">
+    <title> Drop Down Sidebar Menu | CodingLab </title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Boxiocns CDN Link -->
+    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
+</head>
 
 
-body {
-  margin: 0;
-  font-family: "Lato", sans-serif;
-}
 
-.sidebar {
+<style>
+   /* Google Fonts Import Link */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+*{
   margin: 0;
   padding: 0;
-  width: 200px;
-  background-color: #f1f1f1;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+body{
+  overflow: hidden;
+}
+.sidebar{
   position: fixed;
+  top: 0;
+  left: 0;
   height: 100%;
+  width: 260px;
+  background: #11101d;
+  z-index: 100;
+  transition: all 0.5s ease;
+}
+.sidebar.close{
+  width: 78px;
+}
+.sidebar .logo-details{
+  height: 60px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+.sidebar .logo-details i{
+  font-size: 30px;
+  color: #fff;
+  height: 50px;
+  min-width: 78px;
+  text-align: center;
+  line-height: 50px;
+}
+.sidebar .logo-details .logo_name{
+  font-size: 22px;
+  color: #fff;
+  font-weight: 600;
+  transition: 0.3s ease;
+  transition-delay: 0.1s;
+}
+.sidebar.close .logo-details .logo_name{
+  transition-delay: 0s;
+  opacity: 0;
+  pointer-events: none;
+}
+.sidebar .nav-links{
+  height: 100%;
+  padding: 30px 0 150px 0;
   overflow: auto;
 }
-
-.sidebar a {
-  display: block;
-  color: black;
-  padding: 16px;
-  text-decoration: none;
+.sidebar.close .nav-links{
+  overflow: visible;
 }
-
-.sidebar a.active {
-  background-color: #04AA6D;
-  color: white;
-}
-
-.sidebar a:hover:not(.active) {
-  background-color: #555;
-  color: white;
-}
-
-div.content {
-  margin-left: 200px;
-  padding: 1px 16px;
-  height: 1000px;
-}
-
-@media screen and (max-width: 700px) {
-  .sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
-  }
-  .sidebar a {float: left;}
-  div.content {margin-left: 0;}
-}
-
-@media screen and (max-width: 400px) {
-  .sidebar a {
-    text-align: center;
-    float: none;
-  }
-}
-
-
-.dropbtn:hover, .dropbtn:focus {
-  background-color: #2980B9;
-}
-
-.dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-.dropdown-content {
+.sidebar .nav-links::-webkit-scrollbar{
   display: none;
-  position: absolute;
-  background-color: #f1f1f1;
-  min-width: 160px;
-  overflow: auto;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  z-index: 1;
 }
-
-.dropdown-content a {
-  color: black;
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
+.sidebar .nav-links li{
+  position: relative;
+  list-style: none;
+  transition: all 0.4s ease;
 }
-
-.dropdown a:hover {background-color: #ddd;}
-
-.show {display: block;}
-
-
-.dropbtns {
-  background-color: #3498DB;
-  color: white;
-  padding: 16px;
-  font-size: 16px;
-  border: none;
+.sidebar .nav-links li:hover{
+  background: #1d1b31;
+}
+.sidebar .nav-links li .iocn-link{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sidebar.close .nav-links li .iocn-link{
+  display: block
+}
+.sidebar .nav-links li i{
+  height: 50px;
+  min-width: 78px;
+  text-align: center;
+  line-height: 50px;
+  color: #fff;
+  font-size: 20px;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
-
-.dropbtns:hover, .dropbtn:focus {
-  background-color: #2980B9;
+.sidebar .nav-links li.showMenu i.arrow{
+  transform: rotate(-180deg);
 }
-
-.dropdowns {
-  position: relative;
-  display: inline-block;
-}
-
-.dropdown-contents {
+.sidebar.close .nav-links i.arrow{
   display: none;
-  position: absolute;
-  background-color: #f1f1f1;
-  min-width: 160px;
-  overflow: auto;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  z-index: 1;
 }
-
-.dropdown-contents a {
-  color: black;
-  padding: 12px 16px;
+.sidebar .nav-links li a{
+  display: flex;
+  align-items: center;
   text-decoration: none;
+}
+.sidebar .nav-links li a .link_name{
+  font-size: 18px;
+  font-weight: 400;
+  color: #fff;
+  transition: all 0.4s ease;
+}
+.sidebar.close .nav-links li a .link_name{
+  opacity: 0;
+  pointer-events: none;
+}
+.sidebar .nav-links li .sub-menu{
+  padding: 6px 6px 14px 80px;
+  margin-top: -10px;
+  background: #1d1b31;
+  display: none;
+}
+.sidebar .nav-links li.showMenu .sub-menu{
   display: block;
 }
-
-.dropdowns a:hover {background-color: #ddd;}
-
-.show {display: block;}
-
-       .sidebars {
-      width: 200px;
-      height: 100vh;
-      background-color: #f1f1f1;
-      padding: 20px;
-      float: left;
-    }
-
-    /* Sidebar links */
-    .sidebars a {
-      display: block;
-      color: #000;
-      padding: 8px 16px;
-      text-decoration: none;
-    }
-
-    /* Active link */
-    .sidebars a.active {
-      background-color: #4CAF50;
-      color: white;
-    }
-
-    /* Dropdown menu */
-    .sidebars .dropdown-contenting {
-      display: none;
-      padding-left: 20px;
-    }
-
-    .sidebars .dropdown-contenting a {
-      padding: 5px 0;
-    }
-
-    /* Show dropdown menu on hover */
-    .sidebars .dropdown:hover .dropdown-contenting {
-      display: block;
-    }
-
-    /* Content */
-    .content {
-      margin-left: 220px; /* Adjust the value to match the sidebar width */
-      padding: 20px;
-    }
-
-
-
-</style>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
-    <script>
-/* When the user clicks on the button,
-toggle between hiding and showing the dropdown content */
-function myFunction() {
-  document.getElementById("myDropdown").classList.toggle("show");
+.sidebar .nav-links li .sub-menu a{
+  color: #fff;
+  font-size: 15px;
+  padding: 5px 0;
+  white-space: nowrap;
+  opacity: 0.6;
+  transition: all 0.3s ease;
+}
+.sidebar .nav-links li .sub-menu a:hover{
+  opacity: 1;
+}
+.sidebar.close .nav-links li .sub-menu{
+  position: absolute;
+  left: 100%;
+  top: -10px;
+  margin-top: 0;
+  padding: 10px 20px;
+  border-radius: 0 6px 6px 0;
+  opacity: 0;
+  display: block;
+  pointer-events: none;
+  transition: 0s;
+}
+.sidebar.close .nav-links li:hover .sub-menu{
+  top: 0;
+  opacity: 1;
+  pointer-events: auto;
+  transition: all 0.4s ease;
+}
+.sidebar .nav-links li .sub-menu .link_name{
+  display: none;
+}
+.sidebar.close .nav-links li .sub-menu .link_name{
+  font-size: 18px;
+  opacity: 1;
+  display: block;
+}
+.sidebar .nav-links li .sub-menu.blank{
+  opacity: 1;
+  pointer-events: auto;
+  padding: 3px 20px 6px 16px;
+  opacity: 0;
+  pointer-events: none;
+}
+.sidebar .nav-links li:hover .sub-menu.blank{
+  top: 50%;
+  transform: translateY(-50%);
+}
+.sidebar .profile-details{
+  position: fixed;
+  bottom: 0;
+  width: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1d1b31;
+  padding: 12px 0;
+  transition: all 0.5s ease;
+}
+.sidebar.close .profile-details{
+  background: none;
+}
+.sidebar.close .profile-details{
+  width: 78px;
+}
+.sidebar .profile-details .profile-content{
+  display: flex;
+  align-items: center;
+}
+.sidebar .profile-details img{
+  height: 52px;
+  width: 52px;
+  object-fit: cover;
+  border-radius: 16px;
+  margin: 0 14px 0 12px;
+  background: #1d1b31;
+  transition: all 0.5s ease;
+}
+.sidebar.close .profile-details img{
+  padding: 10px;
+}
+.sidebar .profile-details .profile_name,
+.sidebar .profile-details .job{
+  color: #fff;
+  font-size: 18px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.sidebar.close .profile-details i,
+.sidebar.close .profile-details .profile_name,
+.sidebar.close .profile-details .job{
+  display: none;
+}
+.sidebar .profile-details .job{
+  font-size: 12px;
+}
+.home-section{
+  position: relative;
+  background: #E4E9F7;
+  height: 100vh;
+  left: 260px;
+  width: calc(100% - 260px);
+  transition: all 0.5s ease;
+  padding: 12px;
+}
+.sidebar.close ~ .home-section{
+  left: 78px;
+  width: calc(100% - 78px);
+}
+.home-content{
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.home-section .home-content .bx-menu,
+.home-section .home-content .text{
+  color: #11101d;
+  font-size: 35px;
+}
+.home-section .home-content .bx-menu{
+  cursor: pointer;
+  margin-right: 10px;
+}
+.home-section .home-content .text{
+  font-size: 26px;
+  font-weight: 600;
 }
 
-// Close the dropdown if the user clicks outside of it
-window.onclick = function(event) {
-  if (!event.target.matches('.dropbtn')) {
-    var dropdowns = document.getElementsByClassName("dropdown-content");
-    var i;
-    for (i = 0; i < dropdowns.length; i++) {
-      var openDropdown = dropdowns[i];
-      if (openDropdown.classList.contains('show')) {
-        openDropdown.classList.remove('show');
-      }
-    }
+@media screen and (max-width: 400px){
+  .sidebar{
+    width: 240px;
+  }
+  .sidebar.close{
+    width: 78px;
+  }
+  .sidebar .profile-details{
+    width: 240px;
+  }
+  .sidebar.close .profile-details{
+    background: none;
+  }
+  .sidebar.close .profile-details{
+    width: 78px;
+  }
+  .home-section{
+    left: 240px;
+    width: calc(100% - 240px);
+  }
+  .sidebar.close ~ .home-section{
+    left: 78px;
+    width: calc(100% - 78px);
   }
 }
-
-function myFunctions() {
-  document.getElementById("myDropdowns").classList.toggle("show");
-}
-
-// Close the dropdown if the user clicks outside of it
-window.onclick = function(event) {
-  if (!event.target.matches('.dropbtns')) {
-    var dropdowns = document.getElementsByClassName("dropdown-contents");
-    var i;
-    for (i = 0; i < dropdowns.length; i++) {
-      var openDropdown = dropdowns[i];
-      if (openDropdown.classList.contains('show')) {
-        openDropdown.classList.remove('show');
-      }
-    }
-  }
-}
-
-function myFunctionForDelete(){
- confirm("Do want to delete the post!");
-  window.location.assign("http:/localhost:8080/admin/post/delete/{{this.id}}/edit")
-
+.header {
+ text-align :  center;
+ padding : 20px;
+ height : 80px;
+ background: #11101d;
+ color : white;
 }
 
 
 
+  table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
 
-</script>
-</head>
+td, th {
+font-size: 20px;
+  border: 1px solid #dddddd;
+  text-align: Center;
+  padding: 8px;
+}
+
+
+
+
+  .pagination {
+  display: inline-block;
+  float:center;
+}
+
+.pagination a {
+  color: black;
+  float: left;
+  padding: 8px 16px;
+  text-decoration: none;
+  transition: background-color .3s;
+  border: 1px solid #ddd;
+  font-size: 22px;
+}
+
+
+
+.pagination a:hover:not(.active) {background-color: #ddd;}
+
+.all_pagination{
+float: inherit;
+}
+.texts{
+font-size:70px;
+}
+
+   </style>
+
+
 <body>
-<div class="sidebars">
-    <a class="active" href="/admin">Home</a>
-    <a href="/admin/categories">Manage Categories</a>
-    <div class="dropdown">
-        <a href="#">Categories</a>
-        <div class="dropdown-contenting">
-            {{#each o}}
-                <a href="http://localhost:8080/admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>
+<header>
+    <a href="/admin/posts/page/1">    <h2 class="header" style="color:white">Admin Panel  </h2></a>
+</header>
+<div class="sidebar close">
+    <div class="logo-details">
+
+    </div>
+    <ul class="nav-links">
+
+        <li>
+            <div class="iocn-link">
+                <a href="#">
+                    <i class='bx bx-collection' ></i>
+                    <span class="link_name">Category</span>
+                </a>
+                <i class='bx bxs-chevron-down arrow' ></i>
+            </div>
+            <ul class="sub-menu">
+                <li><a class="link_name" href="/admin/categories/page/1">Manege Category</a></li>
+                <li><a href="/admin/categories/new">Create New Category</a></li>
+                <!--                                 <li><a href="#">Manage Category</a></li>
+                 -->
+            </ul>
+        </li>
+        <li>
+            <div class="iocn-link">
+                <a href="#">
+                    <i class='bx bx-book-alt' ></i>
+                    <span class="link_name">Posts</span>
+                </a>
+                <i class='bx bxs-chevron-down arrow' ></i>
+            </div>
+            <ul class="sub-menu">
+                <li><a class="link_name" href="/admin/posts/page/1">Manage Posts</a></li>
+                <li><a href="/admin/posts/new">Create New post</a></li>
+
+            </ul>
+        </li>
+
+        <ul class="sub-menu blank">
+            <li><a class="link_name" href="/logout"  style="color:white">Logout</a></li>
+        </ul>
+        </li>
+        <li>
+            <div class="profile-details">
+                <div class="profile-content">
+
+                </div>
+            </div>
+        </li>
+    </ul>
+</div>
+
+
+<section class="home-section">
+    <div class="home-content">
+        <span class="text"></span>
+    </div>
+
+
+
+
+    <table >
+        <tr>
+            <th>Id</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th> Option</th>
+        </tr>
+    <tr>
+
+        {{#each  z}}
+            <td {{this.id}}>{{this.id}}</td>
+
+            <td> <a href="/admin/posts/{{this.id}}" style="color:black"> {{this.title}}</td>
+
+            <td> <a href="/admin/posts/{{this.id}}" style="color:black"> {{this.description}}</td>
+
+            <td> <a  onclick="return confirm('Are you sure?')" href="/admin/post/{{this.id}}/delete" style="color:black"> Delete</a>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     </a>
+                <a href="/admin/posts/{{this.id}}/edit" style="color:black"> update </a>
+
+            </td>
+            </a>
+        </tr>
+        {{/each}}
+
+
+    </table>
+    <br>
+
+    <div class="all_pagination">
+        <div class="pagination">
+            <!--            <li class="page-item"><a class="page-link" href="{{this}}">{{this}}</a></li>-->
+            {{#each pages_count }}
+
+                <a href="{{this}}">{{this}}</a>
             {{/each}}
+
         </div>
     </div>
-    &nbsp;&nbsp;&nbsp;<button type="button" class="btn btn-danger" class="btn btn-default btn-sm">
-    <a href="/logout">
-        <span class="glyphicon glyphicon-log-out"></span> Log out</a></button>
-</div>
 
-<div class="content">
-    <div class="jumbotron text-center">
-        <a href="/admin"><h1>Blog</h1></a>
-    </div>
-    <div class="row">
-        <div class="col-4">
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                    <th scope="col">Categories</th>
-                    <th scope="col" >Option</th>
-                </tr>
-                </thead>
-                <tbody>
-                {{#each z}}
-                    <td> <a href="categories/{{this.id}}?page=1">{{this.name}}</td>     &nbsp;
-                    &nbsp;  <td><a  onclick="return confirm('Are you sure?')"  href="category/{{this.id}}/delete">Delete</a> &nbsp
-                        <a href="admin/category/{{this.id}}/edit">Update </a> &nbsp;  </td>
-                    </tr>
-                {{/each}}
-
-                </tbody>
-            </table>
-
-
-
-
-            <nav aria-label="Page navigation example">
-                <ul class="pagination">
-                    {{#each pages_count }}
-                        <li class="page-item"><a class="page-link" href="{{this}}">{{this}}</a></li>
-                    {{/each}}
-                </ul>
-            </nav>
-</div>
-
-    </div>
-</div>
+</section>
+<script>
+  let arrow = document.querySelectorAll(".arrow");
+  for (var i = 0; i < arrow.length; i++) {
+    arrow[i].addEventListener("click", (e)=>{
+   let arrowParent = e.target.parentElement.parentElement;//selecting main parent of arrow
+   arrowParent.classList.toggle("showMenu");
+    });
+  }
+  let sidebar = document.querySelector(".sidebar");
+  let sidebarBtn = document.querySelector(".bx-menu");
+  console.log(sidebarBtn);
+  sidebarBtn.addEventListener("click", ()=>{
+    sidebar.classList.toggle("close");
+  });
+  </script>
 </body>
 </html>
+
+<!--<html>-->
+<!--<head>-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <style>-->
+
+
+<!--body {-->
+<!--  margin: 0;-->
+<!--  font-family: "Lato", sans-serif;-->
+<!--}-->
+
+<!--.sidebar {-->
+<!--  margin: 0;-->
+<!--  padding: 0;-->
+<!--  width: 200px;-->
+<!--  background-color: #f1f1f1;-->
+<!--  position: fixed;-->
+<!--  height: 100%;-->
+<!--  overflow: auto;-->
+<!--}-->
+
+<!--.sidebar a {-->
+<!--  display: block;-->
+<!--  color: black;-->
+<!--  padding: 16px;-->
+<!--  text-decoration: none;-->
+<!--}-->
+
+<!--.sidebar a.active {-->
+<!--  background-color: #04AA6D;-->
+<!--  color: white;-->
+<!--}-->
+
+<!--.sidebar a:hover:not(.active) {-->
+<!--  background-color: #555;-->
+<!--  color: white;-->
+<!--}-->
+
+<!--div.content {-->
+<!--  margin-left: 200px;-->
+<!--  padding: 1px 16px;-->
+<!--  height: 1000px;-->
+<!--}-->
+
+<!--@media screen and (max-width: 700px) {-->
+<!--  .sidebar {-->
+<!--    width: 100%;-->
+<!--    height: auto;-->
+<!--    position: relative;-->
+<!--  }-->
+<!--  .sidebar a {float: left;}-->
+<!--  div.content {margin-left: 0;}-->
+<!--}-->
+
+<!--@media screen and (max-width: 400px) {-->
+<!--  .sidebar a {-->
+<!--    text-align: center;-->
+<!--    float: none;-->
+<!--  }-->
+<!--}-->
+
+
+<!--.dropbtn:hover, .dropbtn:focus {-->
+<!--  background-color: #2980B9;-->
+<!--}-->
+
+<!--.dropdown {-->
+<!--  position: relative;-->
+<!--  display: inline-block;-->
+<!--}-->
+
+<!--.dropdown-content {-->
+<!--  display: none;-->
+<!--  position: absolute;-->
+<!--  background-color: #f1f1f1;-->
+<!--  min-width: 160px;-->
+<!--  overflow: auto;-->
+<!--  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);-->
+<!--  z-index: 1;-->
+<!--}-->
+
+<!--.dropdown-content a {-->
+<!--  color: black;-->
+<!--  padding: 12px 16px;-->
+<!--  text-decoration: none;-->
+<!--  display: block;-->
+<!--}-->
+
+<!--.dropdown a:hover {background-color: #ddd;}-->
+
+<!--.show {display: block;}-->
+
+
+<!--.dropbtns {-->
+<!--  background-color: #3498DB;-->
+<!--  color: white;-->
+<!--  padding: 16px;-->
+<!--  font-size: 16px;-->
+<!--  border: none;-->
+<!--  cursor: pointer;-->
+<!--}-->
+
+<!--.dropbtns:hover, .dropbtn:focus {-->
+<!--  background-color: #2980B9;-->
+<!--}-->
+
+<!--.dropdowns {-->
+<!--  position: relative;-->
+<!--  display: inline-block;-->
+<!--}-->
+
+<!--.dropdown-contents {-->
+<!--  display: none;-->
+<!--  position: absolute;-->
+<!--  background-color: #f1f1f1;-->
+<!--  min-width: 160px;-->
+<!--  overflow: auto;-->
+<!--  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);-->
+<!--  z-index: 1;-->
+<!--}-->
+
+<!--.dropdown-contents a {-->
+<!--  color: black;-->
+<!--  padding: 12px 16px;-->
+<!--  text-decoration: none;-->
+<!--  display: block;-->
+<!--}-->
+
+<!--.dropdowns a:hover {background-color: #ddd;}-->
+
+<!--.show {display: block;}-->
+
+<!--       .sidebars {-->
+<!--      width: 200px;-->
+<!--      height: 100vh;-->
+<!--      background-color: #f1f1f1;-->
+<!--      padding: 20px;-->
+<!--      float: left;-->
+<!--    }-->
+
+<!--    /* Sidebar links */-->
+<!--    .sidebars a {-->
+<!--      display: block;-->
+<!--      color: #000;-->
+<!--      padding: 8px 16px;-->
+<!--      text-decoration: none;-->
+<!--    }-->
+
+<!--    /* Active link */-->
+<!--    .sidebars a.active {-->
+<!--      background-color: #4CAF50;-->
+<!--      color: white;-->
+<!--    }-->
+
+<!--    /* Dropdown menu */-->
+<!--    .sidebars .dropdown-contenting {-->
+<!--      display: none;-->
+<!--      padding-left: 20px;-->
+<!--    }-->
+
+<!--    .sidebars .dropdown-contenting a {-->
+<!--      padding: 5px 0;-->
+<!--    }-->
+
+<!--    /* Show dropdown menu on hover */-->
+<!--    .sidebars .dropdown:hover .dropdown-contenting {-->
+<!--      display: block;-->
+<!--    }-->
+
+<!--    /* Content */-->
+<!--    .content {-->
+<!--      margin-left: 220px; /* Adjust the value to match the sidebar width */-->
+<!--      padding: 20px;-->
+<!--    }-->
+
+
+
+<!--</style>-->
+<!--    <meta charset="utf-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1">-->
+<!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">-->
+<!--    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>-->
+<!--    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>-->
+
+<!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">-->
+<!--    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>-->
+<!--    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>-->
+
+<!--    <script>-->
+<!--/* When the user clicks on the button,-->
+<!--toggle between hiding and showing the dropdown content */-->
+<!--function myFunction() {-->
+<!--  document.getElementById("myDropdown").classList.toggle("show");-->
+<!--}-->
+
+<!--// Close the dropdown if the user clicks outside of it-->
+<!--window.onclick = function(event) {-->
+<!--  if (!event.target.matches('.dropbtn')) {-->
+<!--    var dropdowns = document.getElementsByClassName("dropdown-content");-->
+<!--    var i;-->
+<!--    for (i = 0; i < dropdowns.length; i++) {-->
+<!--      var openDropdown = dropdowns[i];-->
+<!--      if (openDropdown.classList.contains('show')) {-->
+<!--        openDropdown.classList.remove('show');-->
+<!--      }-->
+<!--    }-->
+<!--  }-->
+<!--}-->
+
+<!--function myFunctions() {-->
+<!--  document.getElementById("myDropdowns").classList.toggle("show");-->
+<!--}-->
+
+<!--// Close the dropdown if the user clicks outside of it-->
+<!--window.onclick = function(event) {-->
+<!--  if (!event.target.matches('.dropbtns')) {-->
+<!--    var dropdowns = document.getElementsByClassName("dropdown-contents");-->
+<!--    var i;-->
+<!--    for (i = 0; i < dropdowns.length; i++) {-->
+<!--      var openDropdown = dropdowns[i];-->
+<!--      if (openDropdown.classList.contains('show')) {-->
+<!--        openDropdown.classList.remove('show');-->
+<!--      }-->
+<!--    }-->
+<!--  }-->
+<!--}-->
+
+<!--function myFunctionForDelete(){-->
+<!-- confirm("Do want to delete the post!");-->
+<!--  window.location.assign("http:/localhost:8080/admin/post/delete/{{this.id}}/edit")-->
+
+<!--}-->
+
+
+
+
+<!--</script>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="sidebars">-->
+<!--    <a class="active" href="/admin">Home</a>-->
+<!--    <a href="/admin/categories">Manage Categories</a>-->
+<!--    <div class="dropdown">-->
+<!--        <a href="#">Categories</a>-->
+<!--        <div class="dropdown-contenting">-->
+<!--            {{#each o}}-->
+<!--                <a href="http://localhost:8080/admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>-->
+<!--            {{/each}}-->
+<!--        </div>-->
+<!--    </div>-->
+<!--    &nbsp;&nbsp;&nbsp;<button type="button" class="btn btn-danger" class="btn btn-default btn-sm">-->
+<!--    <a href="/logout">-->
+<!--        <span class="glyphicon glyphicon-log-out"></span> Log out</a></button>-->
+<!--</div>-->
+
+<!--<div class="content">-->
+<!--    <div class="jumbotron text-center">-->
+<!--        <a href="/admin"><h1>Blog</h1></a>-->
+<!--    </div>-->
+<!--    <div class="row">-->
+<!--        <div class="col-4">-->
+<!--            <table class="table table-bordered">-->
+<!--                <thead>-->
+<!--                <tr>-->
+<!--                    <th scope="col">Categories</th>-->
+<!--                    <th scope="col" >Option</th>-->
+<!--                </tr>-->
+<!--                </thead>-->
+<!--                <tbody>-->
+<!--                {{#each z}}-->
+<!--                    <td> <a href="categories/{{this.id}}?page=1">{{this.name}}</td>     &nbsp;-->
+<!--                    &nbsp;  <td><a  onclick="return confirm('Are you sure?')"  href="category/{{this.id}}/delete">Delete</a> &nbsp-->
+<!--                        <a href="admin/category/{{this.id}}/edit">Update </a> &nbsp;  </td>-->
+<!--                    </tr>-->
+<!--                {{/each}}-->
+
+<!--                </tbody>-->
+<!--            </table>-->
+
+
+
+
+<!--            <nav aria-label="Page navigation example">-->
+<!--                <ul class="pagination">-->
+<!--                    {{#each pages_count }}-->
+<!--                        <li class="page-item"><a class="page-link" href="{{this}}">{{this}}</a></li>-->
+<!--                    {{/each}}-->
+<!--                </ul>-->
+<!--            </nav>-->
+<!--</div>-->
+
+<!--    </div>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
 

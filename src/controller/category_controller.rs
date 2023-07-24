@@ -232,10 +232,14 @@ pub async fn get_category_with_pagination(
     .await
     .map_err(actix_web::error::ErrorInternalServerError)?;
 
+    let all_category = get_all_categories_database(db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
     let html = handlebars
         .render(
             "category",
-            &json!({"tiger":&category_postinng,"pages_count":&pages_count}),
+            &json!({"tiger":&category_postinng,"pages_count":&pages_count,"o":all_category}),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

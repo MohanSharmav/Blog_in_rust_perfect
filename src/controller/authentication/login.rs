@@ -55,7 +55,7 @@ pub async fn get_data_from_login_page(
 
 pub async fn logout(id: Identity) -> impl Responder {
     id.logout();
-    web::Redirect::to("/?page=1")
+    web::Redirect::to("/")
 }
 
 pub async fn check_user(user: Option<Identity>) -> impl Responder {

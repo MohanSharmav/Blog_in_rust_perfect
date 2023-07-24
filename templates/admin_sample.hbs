@@ -332,37 +332,8 @@ font-size: 20px;
 float: inherit;
 }
 .texts{
+
 font-size:70px;
-}
-
-
-
-input[type=text], select {
-  width: 100%;
-  padding: 12px 20px;
-  margin: 8px 0;
-  display: inline-block;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
-input[type=submit] {
-  width: 100%;
-  background-color: #4CAF50;
-  color: white;
-  padding: 14px 20px;
-  margin: 8px 0;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-
-.forming {
-  border-radius: 5px;
-  background-color: #f2f2f2;
-  padding: 20px;
 }
 
    </style>
@@ -387,8 +358,8 @@ input[type=submit] {
                 <i class='bx bxs-chevron-down arrow' ></i>
             </div>
             <ul class="sub-menu">
-                <li><a class="link_name" href="/admin/categories/page/1">Manege Category</a></li>
-                <li><a href="/admin/categories/new">Create New Category</a></li>
+                <li><a class="link_name" href="#">Manege Category</a></li>
+                <li><a href="#">Create New Category</a></li>
                 <!--                                 <li><a href="#">Manage Category</a></li>
                  -->
             </ul>
@@ -402,14 +373,14 @@ input[type=submit] {
                 <i class='bx bxs-chevron-down arrow' ></i>
             </div>
             <ul class="sub-menu">
-                <li><a class="link_name" href="/admin/posts/page/1">Manage Posts</a></li>
-                <li><a href="/admin/posts/new">Create New post</a></li>
+                <li><a class="link_name" href="#">Manage Posts</a></li>
+                <li><a href="#">Create New post</a></li>
 
             </ul>
         </li>
 
         <ul class="sub-menu blank">
-            <li><a class="link_name" href="/logout"  style="color:white">Logout</a></li>
+            <li><a class="link_name" href="#"  style="color:white">Logout</a></li>
         </ul>
         </li>
         <li>
@@ -421,23 +392,70 @@ input[type=submit] {
         </li>
     </ul>
 </div>
+
+
 <section class="home-section">
-<div class="home-content">
-    <span class="text"></span>
+    <div class="home-content">
+        <span class="text"></span>
+    </div>
+
+
+
+
+    <table >
+        <tr>
+            <th>Id</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th> Option</th>
+        </tr>
+        <tr>
+
+        {{#each  tiger}}
+            <td {{this.id}}>{{this.id}}</td>
+
+            <td> <a href="/admin/posts/{{this.id}}" style="color:black"> {{this.title}}</td>
+
+            <td> <a href="/admin/posts/{{this.id}}" style="color:black"> {{this.description}}</td>
+
+            <td> <a  onclick="return confirm('Are you sure?')" href="/admin/post/{{this.id}}/delete" style="color:black"> Delete</a>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     </a>
+                <a href="/admin/posts/{{this.id}}/edit" style="color:black"> update </a>
+
+            </td>
+            </a>
+            </tr>
+        {{/each}}
+
+
+    </table>
+<br>
+
+<div class="all_pagination">
+    <div class="pagination">
+<!--            <li class="page-item"><a class="page-link" href="{{this}}">{{this}}</a></li>-->
+    {{#each pages_count }}
+
+        <a href="{{this}}">{{this}}</a>
+    {{/each}}
+
+    </div>
 </div>
 
-<div class="forming">
-    <form action="http://localhost:8080/admin/categories/new" method="post">
-<label> Enter New Category Name</label>
-        <input type="text" name="name" placeholder="name" class="form-control"><br>
-
-    <input type="submit" value="Create New category">
-</form>
-
-</div>
-
-</div>
 </section>
-
+<script>
+  let arrow = document.querySelectorAll(".arrow");
+  for (var i = 0; i < arrow.length; i++) {
+    arrow[i].addEventListener("click", (e)=>{
+   let arrowParent = e.target.parentElement.parentElement;//selecting main parent of arrow
+   arrowParent.classList.toggle("showMenu");
+    });
+  }
+  let sidebar = document.querySelector(".sidebar");
+  let sidebarBtn = document.querySelector(".bx-menu");
+  console.log(sidebarBtn);
+  sidebarBtn.addEventListener("click", ()=>{
+    sidebar.classList.toggle("close");
+  });
+  </script>
 </body>
 </html>

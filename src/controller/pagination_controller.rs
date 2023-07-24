@@ -134,3 +134,53 @@ pub async fn get_pagination_for_all_categories_list(
 
     Ok(*b)
 }
+
+
+pub async fn pagination_display_check(
+    config: web::Data<ConfigurationConstants>,
+    handlebars: web::Data<Handlebars<'_>>,
+    user: Option<Identity>,
+    params: web::Path<i32>,
+    // mut params: Option<Query<PaginationParams>>,
+) -> Result<HttpResponse, actix_web::Error> {
+    if user.is_none() {
+        return Ok(HttpResponse::SeeOther()
+            .insert_header((http::header::LOCATION, "/"))
+            .body(""));
+    }
+    let db = &config.database_connection;
+    let total_posts_length = perfect_pagination_logic(db).await?;
+
+    let posts_per_page_constant = set_posts_per_page().await as i64;
+    let mut posts_per_page = total_posts_length / posts_per_page_constant;
+    let check_remainder = total_posts_length % posts_per_page_constant;
+
+    if check_remainder != 0 {
+        posts_per_page += 1;
+    }
+    let posts_per_page = posts_per_page as usize;
+    let pages_count: Vec<_> = (1..=posts_per_page).collect();
+    // let pari = params.get_or_insert(Query(PaginationParams::default()));
+    // // let current_pag = pari.0;
+    // let current_page = current_pag.page;
+    let current_page = params.clone();
+    let par = params.into_inner();
+    let paginators = pagination_logic(&par, db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    let exact_posts_only = select_specific_pages_post(current_page, db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    let all_category = get_all_categories_database(db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    let htmls = handlebars.render("admin_sample", &json!({"a":&paginators,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category}))
+        .map_err( actix_web::error::ErrorInternalServerError)?;
+
+    Ok(HttpResponse::Ok()
+        .content_type(ContentType::html())
+        .body(htmls))
+}
