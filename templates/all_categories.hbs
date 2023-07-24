@@ -405,26 +405,20 @@ font-size:70px;
     <table >
         <tr>
             <th>Id</th>
-            <th>Title</th>
-            <th>Description</th>
+            <th>Name</th>
             <th> Option</th>
         </tr>
     <tr>
+                        {{#each z}}
+                            <a href="/admin/categories/{{this.id}}/page/1">   <td >{{this.id}}</td></a>
 
-        {{#each  z}}
-            <td {{this.id}}>{{this.id}}</td>
 
-            <td> <a href="/admin/posts/{{this.id}}" style="color:black"> {{this.title}}</td>
-
-            <td> <a href="/admin/posts/{{this.id}}" style="color:black"> {{this.description}}</td>
-
-            <td> <a  onclick="return confirm('Are you sure?')" href="/admin/post/{{this.id}}/delete" style="color:black"> Delete</a>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     </a>
-                <a href="/admin/posts/{{this.id}}/edit" style="color:black"> update </a>
-
-            </td>
-            </a>
-        </tr>
-        {{/each}}
+                                <td>
+                                    <a href="/admin/categories/{{this.id}}/page/1">{{this.name}}</td>     &nbsp;
+                                &nbsp;  <td><a  onclick="return confirm('Are you sure?')"  href="category/{{this.id}}/delete">Delete</a> &nbsp
+                                    <a href="/admin/category/{{this.id}}/edit">Update </a> &nbsp;  </td>
+                                </tr>
+                        {{/each}}
 
 
     </table>

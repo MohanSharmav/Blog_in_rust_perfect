@@ -1,11 +1,7 @@
 use crate::controller::common_controller::set_posts_per_page;
 use crate::controller::constants::ConfigurationConstants;
 use crate::controller::pagination_controller::get_pagination_for_all_categories_list;
-use crate::model::category_database::{
-    category_pagination_controller_database_function, create_new_category_database,
-    delete_category_database, get_all_categories_database,
-    get_all_categories_database_with_pagination_display, update_category_database,
-};
+use crate::model::category_database::{category_pagination_controller_database_function, create_new_category_database, delete_category_database, get_all_categories_database, get_all_categories_database_with_pagination_display, get_all_specific_category_database, update_category_database};
 use crate::model::database::{Categories, CreateNewCategory};
 use crate::model::pagination_database::{category_pagination_logic, PaginationParams};
 use actix_identity::Identity;
@@ -146,7 +142,7 @@ pub async fn delete_category(
 
 pub async fn page_to_update_category(
     config: web::Data<ConfigurationConstants>,
-    to_be_updated_category: web::Path<String>,
+    to_be_updated_category: web::Path<i32>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
 ) -> Result<HttpResponse, actix_web::Error> {
@@ -155,16 +151,21 @@ pub async fn page_to_update_category(
             .insert_header((http::header::LOCATION, "/"))
             .body(""));
     }
+
     let db = &config.database_connection;
     let all_category = get_all_categories_database(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let to_be_updated_category = to_be_updated_category.clone();
+
+    let x=get_all_specific_category_database(to_be_updated_category,db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
     let html = handlebars
         .render(
             "update_category",
-            &json!({ "to_be_updated_post": &to_be_updated_category ,"o":all_category}),
+            &json!({ "to_be_updated_post": &to_be_updated_category ,"o":all_category,"category_old_name":x}),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
