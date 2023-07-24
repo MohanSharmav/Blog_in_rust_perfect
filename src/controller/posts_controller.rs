@@ -1,16 +1,16 @@
 use crate::controller::constants::ConfigurationConstants;
 use crate::model::category_database::get_all_categories_database;
-use crate::model::database::{CreateNewPost, CreatePost, Posts};
+use crate::model::database::CreateNewPost;
 use crate::model::posts_database::{
     create_post_database, delete_post_database, update_post_database,
 };
+use crate::model::single_posts_database::query_single_post_in_struct;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
 use actix_web::web::Redirect;
 use actix_web::{http, web, HttpResponse};
 use handlebars::Handlebars;
 use serde_json::json;
-use crate::model::single_posts_database::query_single_post_in_struct;
 
 pub async fn get_new_post(
     config: web::Data<ConfigurationConstants>,
@@ -44,7 +44,6 @@ pub async fn get_new_post(
 }
 pub async fn receive_new_posts(
     form: web::Form<CreateNewPost>,
-    handlebars: web::Data<Handlebars<'_>>,
     config: web::Data<ConfigurationConstants>,
 ) -> Result<Redirect, actix_web::Error> {
     let db = &config.database_connection;
@@ -69,7 +68,6 @@ pub async fn receive_new_posts(
 pub async fn delete_post(
     to_delete: web::Path<String>,
     config: web::Data<ConfigurationConstants>,
-    handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<Redirect, actix_web::Error> {
     let db = &config.database_connection;
     let to_delete = to_delete.into_inner();
@@ -101,7 +99,7 @@ pub async fn page_to_update_post(
     let all_category = get_all_categories_database(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    let post_id=id.into_inner();
+    let post_id = id.into_inner();
 
     let single_post_struct = query_single_post_in_struct(post_id, db)
         .await
@@ -123,19 +121,18 @@ pub async fn update_post_helper(ids: &String) -> &String {
     ids
 }
 pub async fn receive_updated_post(
-    id:web::Path<i32>,
+    id: web::Path<i32>,
     form: web::Form<CreateNewPost>,
     _current_post_name: web::Path<String>,
     config: web::Data<ConfigurationConstants>,
-    handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<Redirect, actix_web::Error> {
-    let id=id.into_inner();
+    let id = id.into_inner();
     let db = &config.database_connection;
     let title = &form.title;
     let description = &form.description;
 
-    let category_id= &form.category_id;
-    update_post_database(title, description,id, category_id, db)
+    let category_id = &form.category_id;
+    update_post_database(title, description, id, category_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     Ok(Redirect::to("/admin/posts/page/1"))

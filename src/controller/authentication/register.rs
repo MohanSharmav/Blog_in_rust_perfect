@@ -22,7 +22,6 @@ pub async fn get_register_page(
 
 pub async fn get_data_from_register_page(
     form: web::Form<User>,
-    handlebars: web::Data<Handlebars<'_>>,
     config: web::Data<ConfigurationConstants>,
 ) -> Result<Redirect, actix_web::Error> {
     let user = &form.username;
@@ -34,7 +33,7 @@ pub async fn get_data_from_register_page(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     println!("--------------------------------😀");
-    Ok(web::Redirect::to("/login"))
+    Ok(web::Redirect::to("/posts/page/1"))
 
     // let success_message = "user successfully authenticated";
     // let html = handlebars

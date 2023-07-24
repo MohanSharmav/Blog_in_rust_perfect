@@ -1,5 +1,4 @@
 use crate::model::database::{select_posts, Posts};
-use actix_web::web::Query;
 use actix_web::Error as ActixError;
 use anyhow::anyhow;
 use serde::Deserialize;
@@ -46,7 +45,7 @@ pub fn paginate<T>(items: Vec<T>, _page: i32) -> Vec<T> {
 }
 
 pub async fn pagination_logic(
-    mut params: &i32,
+    params: &i32,
     db: &Pool<Postgres>,
 ) -> Result<Vec<Posts>, anyhow::Error> {
     // let pari = params.get_or_insert(Query(PaginationParams::default()));

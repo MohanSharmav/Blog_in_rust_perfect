@@ -1,12 +1,17 @@
 use crate::controller::common_controller::set_posts_per_page;
 use crate::controller::constants::ConfigurationConstants;
 use crate::controller::pagination_controller::get_pagination_for_all_categories_list;
-use crate::model::category_database::{category_pagination_controller_database_function, create_new_category_database, delete_category_database, get_all_categories_database, get_all_categories_database_with_pagination_display, get_all_specific_category_database, update_category_database};
-use crate::model::database::{Categories, CreateNewCategory};
-use crate::model::pagination_database::{category_pagination_logic, PaginationParams};
+use crate::model::category_database::{
+    category_pagination_controller_database_function, create_new_category_database,
+    delete_category_database, get_all_categories_database,
+    get_all_categories_database_with_pagination_display, get_all_specific_category_database,
+    update_category_database,
+};
+use crate::model::database::CreateNewCategory;
+use crate::model::pagination_database::category_pagination_logic;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
-use actix_web::web::{Query, Redirect};
+use actix_web::web::Redirect;
 use actix_web::{http, web, HttpResponse};
 use anyhow::Result;
 use handlebars::Handlebars;
@@ -95,8 +100,6 @@ pub async fn get_new_category(
 pub async fn receive_new_category(
     form: web::Form<CreateNewCategory>,
     config: web::Data<ConfigurationConstants>,
-    handlebars: web::Data<Handlebars<'_>>,
-    user: Option<Identity>,
 ) -> Result<Redirect, actix_web::Error> {
     // if user.is_none() {
     //     return Ok(HttpResponse::SeeOther()
@@ -114,8 +117,6 @@ pub async fn receive_new_category(
 pub async fn delete_category(
     id: web::Path<String>,
     config: web::Data<ConfigurationConstants>,
-    handlebars: web::Data<Handlebars<'_>>,
-    user: Option<Identity>,
 ) -> Result<Redirect, actix_web::Error> {
     // if user.is_none() {
     //     return Ok(HttpResponse::SeeOther()
@@ -159,7 +160,7 @@ pub async fn page_to_update_category(
 
     let to_be_updated_category = to_be_updated_category.clone();
 
-    let x=get_all_specific_category_database(to_be_updated_category,db)
+    let x = get_all_specific_category_database(to_be_updated_category, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     let html = handlebars
@@ -179,7 +180,6 @@ pub async fn receive_updated_category(
     form: web::Form<CreateNewCategory>,
     current_category_name: web::Path<String>,
     config: web::Data<ConfigurationConstants>,
-    handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<Redirect, actix_web::Error> {
     let db = &config.database_connection;
     let _current_post_name = &current_category_name.into_inner();
@@ -208,7 +208,7 @@ pub async fn get_category_with_pagination(
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
     let path = info.clone().0;
-    let mut par = info.into_inner().1 as i32;
+    let par = info.into_inner().1 as i32;
     // let category_input: String = path.();
     let category_input: String = path;
 

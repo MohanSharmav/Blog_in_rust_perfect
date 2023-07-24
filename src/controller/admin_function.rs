@@ -3,7 +3,7 @@ use crate::controller::constants::ConfigurationConstants;
 use crate::model::category_database::{
     category_pagination_controller_database_function, get_all_categories_database,
 };
-use crate::model::pagination_database::{category_pagination_logic, PaginationParams};
+use crate::model::pagination_database::category_pagination_logic;
 use crate::model::single_posts_database::{query_single_post, query_single_post_in_struct};
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;

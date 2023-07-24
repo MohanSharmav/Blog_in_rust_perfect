@@ -9,9 +9,11 @@ use crate::controller::category_controller::{
     delete_category, get_all_categories_controller, get_category_with_pagination, get_new_category,
     page_to_update_category, receive_new_category, receive_updated_category,
 };
-use crate::controller::common_controller::{common_page_controller, new_common_page_controller, new_common_page_controller_test, redirect_user};
+use crate::controller::common_controller::{
+    new_common_page_controller, new_common_page_controller_test, redirect_user,
+};
 use crate::controller::constants::ConfigurationConstants;
-use crate::controller::pagination_controller::{pagination_display, pagination_display_check};
+use crate::controller::pagination_controller::pagination_display;
 use crate::controller::posts_controller::{
     delete_post, get_new_post, page_to_update_post, receive_new_posts, receive_updated_post,
 };
@@ -28,12 +30,6 @@ use sqlx::postgres::PgPoolOptions;
 
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
-
-async fn index(info: web::Path<(String, u32)>) -> Result<String> {
-    let info = info.into_inner();
-    print!("--------------------------------{:?}", info.0);
-    Ok(format!("Welcome {}! id: {}", info.0, info.1))
-}
 
 #[actix_web::main]
 async fn main() -> Result<(), anyhow::Error> {
@@ -77,7 +73,6 @@ async fn main() -> Result<(), anyhow::Error> {
             .service(web::resource("/check").to(check_user))
             // perfect admin url
             .service(web::resource("/admin/posts/page/{page_number}").to(pagination_display))
-
             // //test
             //
             // .service(web::resource("/admins/posts/page/{page_number}").to(pagination_display_check))
@@ -102,7 +97,6 @@ async fn main() -> Result<(), anyhow::Error> {
             .service(web::resource("/admin/posts/new").to(get_new_post))
             .service(web::resource("/admin/posts").route(web::post().to(receive_new_posts)))
             .service(
-
                 web::resource("/admin/posts/{post_id}")
                     .route(web::get().to(admin_unique_posts_display)), // .route(web::delete().to(delete_post))
             )
@@ -135,7 +129,6 @@ async fn main() -> Result<(), anyhow::Error> {
             )
             // .service(web::resource("/posts").route(web::get().to(common_page_controller)))
             .service(web::resource("/posts/{post_id}").route(web::get().to(get_single_post)))
-
             .service(
                 web::resource("/posts/category/{category_id}/page/{page_number}")
                     .to(get_category_with_pagination),

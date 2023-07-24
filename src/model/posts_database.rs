@@ -1,8 +1,5 @@
 use crate::model::database::GetId;
-use hmac::digest::impl_oid_carrier;
-use sqlx::postgres::PgQueryResult;
 use sqlx::{Pool, Postgres};
-use std::process::id;
 
 pub async fn delete_post_database(
     to_delete: String,
@@ -39,7 +36,6 @@ pub async fn update_post_database(
         .bind(category_id)
         .fetch_all(db)
         .await?;
-
 
     Ok(())
 }
