@@ -1,3 +1,5 @@
+use actix_http::header::LOCATION;
+use actix_http::StatusCode;
 use crate::controller::constants::ConfigurationConstants;
 use crate::model::authentication::login_database::{login_database, LoginCheck};
 use actix_identity::Identity;
@@ -32,7 +34,7 @@ pub async fn get_data_from_login_page(
     req: HttpRequest,
     _user: Option<Identity>,
     config: web::Data<ConfigurationConstants>,
-) -> Result<Redirect, actix_web::Error> {
+) -> Result<HttpResponse, actix_web::Error> {
     let username = &form.username;
     let password = &form.password.to_string();
     let mcrypt = &config.magic_key;
@@ -46,10 +48,19 @@ pub async fn get_data_from_login_page(
     if result == y {
         Identity::login(&req.extensions(), username.to_string())
             .map_err(actix_web::error::ErrorInternalServerError)?;
-        Ok(web::Redirect::to("/admin/posts/page/1"))
-    } else {
+        Ok(HttpResponse::SeeOther()
+            .insert_header((LOCATION, "/admin/posts/page/1"))
+            .finish())    }
+    else {
         // HttpResponse::Unauthorized().body("Invalid username or password");
-        Ok(web::Redirect::to("/posts/page/1"))
+        // let  c=HttpResponse::SeeOther()
+        //     .insert_header((LOCATION, "/login"))
+        //         .status(StatusCode::TEMPORARY_REDIRECT)
+        //     .finish();
+        // Ok(c)
+        Ok(HttpResponse::SeeOther()
+            .insert_header((LOCATION, "/login"))
+            .finish())
     }
 }
 
@@ -60,6 +71,7 @@ pub async fn logout(id: Identity) -> impl Responder {
 
 pub async fn check_user(user: Option<Identity>) -> impl Responder {
     if let Some(_user) = user {
+
         web::Redirect::to("/admin/posts/page/1")
     } else {
         web::Redirect::to("/")

@@ -63,10 +63,28 @@ pub async fn new_common_page_controller(
         posts_per_page += 1;
     }
     let posts_per_page = posts_per_page as usize;
+    // let pages_count: Vec<_> = (1..=posts_per_page).collect();
+    let param = params.into_inner();
+let current_page =param as usize;
+
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
+println!("---------------0----------------😀{:?}",pages_count);
+
+    let mut sample: Vec<_> = (1..=posts_per_page).collect();
+    let mut c=0 ;
+     for i in sample.clone().into_iter() {
+        if i == current_page {
+            c=i;
+            sample.remove(i);
+        }
+
+    }
+    println!("---------------0----------------👹{:?}",sample);
+
+    println!("--------------------------------🥵{:?}",c);
+
     // let pari = params.get_or_insert(Query(PaginationParams::default()));
     // let current_page = pari.clone().page;
-    let param = params.into_inner();
     // let par=*param as i32;
     let exact_posts_only = select_specific_pages_post(param, &db.clone())
         .await
@@ -76,7 +94,7 @@ pub async fn new_common_page_controller(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let htmls = handlebars.render("common", &json!({"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category}))
+    let htmls = handlebars.render("common", &json!({"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category,"current_page":param}))
         .map_err( actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()

@@ -438,9 +438,12 @@ Post to be updated: {{to_be_updated_post}}
 <form action="http://localhost:8080/admin/posts/{{to_be_updated_post}}/edit" method="post">
 <!--    <input type="text" name="title" value="{{to_be_updated_post}}" placeholder="title"><br>-->
 {{#each current_post}}
+    <label>Enter Title</label><br>
     <input type="text" name="title" placeholder="title"  class="form-control" value="{{this.title}}"><br>
+    <label>Enter Title</label><br>
     <input type="text" name="description" placeholder="description"  class="form-control" value="{{this.description}}"><br>
     {{/each}}
+    <label>Select Category</label><br>
     <select id="category_id" name="category_id">
 <!--    <input type="text" name="category_id" placeholder="category_id"  class="form-control"><br>-->
     {{#each o}}

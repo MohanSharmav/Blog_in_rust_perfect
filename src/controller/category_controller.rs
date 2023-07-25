@@ -128,7 +128,7 @@ pub async fn delete_category(
     delete_category_database(db, to_delete_category)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    Ok(Redirect::to("/admin/posts/page/1"))
+    Ok(Redirect::to("/admin/categories/page/1"))
 
     //
     // let success_message = "the category deleted successfully";
@@ -188,7 +188,7 @@ pub async fn receive_updated_category(
     update_category_database(name, category_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    Ok(Redirect::to("/admin/posts/page/1"))
+    Ok(Redirect::to("/admin/categories/page/1"))
     // let success_message = "the post created successfully";
     // let html = handlebars
     //     .render("message_display", &json!({ "message": success_message }))

@@ -3,6 +3,13 @@
 <head>
 
     <style>
+
+
+    .active, .btn:hover {
+  background-color: #666;
+  color: white;
+}
+
         @charset "UTF-8";
 /*!
 * Start Bootstrap - Clean Blog v6.0.9 (https://startbootstrap.com/theme/clean-blog)
@@ -10910,9 +10917,9 @@ article {
 <nav class="bossing">
     <h3>Categories </h3>
     <ul>
-{{#each o}}
-        <li><a href="/posts/category/{{this.id}}/page/1">{{this.name}}</a></li>
-    {{/each}}
+        {{#each o}}
+            <li><a href="/posts/category/{{this.id}}/page/1">{{this.name}}</a></li>
+        {{/each}}
     </ul>
 
 </nav>
@@ -10933,7 +10940,7 @@ article {
                             <a href="post.html">
 
 
-                             <a href="/posts/{{this.id}}">  <h1 class="post-title"> {{this.title}}</h1></a>
+                                <a href="/posts/{{this.id}}">  <h1 class="post-title"> {{this.title}}</h1></a>
                                 <a href="/posts/{{this.id}}">  <h3 class="post-subtitle">{{this.description}}</h3></a>
                             </a>
                         </div>
@@ -10947,11 +10954,19 @@ article {
                 <nav aria-label="Page navigation example">
                     <ul class="pagination">
                         {{#each pages_count}}
-                            <li class="page-item"><a class="page-link" href="{{this}}">{{this}}</a></li>
+
+                            <li class="page-item "><a class="page-link" href="{{this}}">
+                                {{#if (eq this 2)}}
+                                    <ul class="page-item " ><button class="page-item active">xxx{{this}}</button></ul>
+                                {{else}}
+                                    <button class="page-item">{{this}}</button>
+                                {{/if}}
+                            </a></li>
                         {{/each}}
                     </ul>
                 </nav>
             </div>
+{{current_page}}
         </div>
     </div>
 </article>

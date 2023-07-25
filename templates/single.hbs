@@ -10854,13 +10854,13 @@ header.masthead .post-heading .meta a {
 
 
 article {
-  float: center;
+  float: left;
   padding: 20px;
   width: 70%;
   height: 300px; /* only for demonstration, should be removed */
 }
 .Post_data{
-text-align-center;
+text-align:left;
 float:center;
 }
 
@@ -10929,10 +10929,10 @@ float:center;
     </div>
 
     <div class="Post_data">
-        <h3 style=" text-align: center;font-size:40px">
+        <h3 style="text-align:left;font-size:40px">
             {{#each single_post}}<br/>
-                Post Title: {{this.title}}<br>
-                Post Description: {{this.description}}
+               <h1 style="text-align: left;font-size:80px"> {{this.title}}</h1>
+               <p style="text-align: left;font-size:35px"> &nbsp; {{this.description}}</p>
             {{/each}}
         </h3>
 
