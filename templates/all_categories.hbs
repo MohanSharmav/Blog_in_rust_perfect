@@ -347,7 +347,11 @@ font-size:70px;
   float: right;
   background-color: #11101d
 }
-   </style>
+.cattt{
+  float: left;
+    font-size: 30px;
+  }
+  </style>
 
 
 <body>
@@ -409,8 +413,8 @@ font-size:70px;
     <div class="home-content">
         <span class="text"></span>
     </div>
-
-    <a href="/admin/categories/new"> <button class=" button1">Create New Category</button></a>
+    <div class="cattt" > Categories</div>
+    <a href="/admin/categories/new"> <button class=" button1"> New</button></a>
 
     <br>
     <br><br>
@@ -420,19 +424,19 @@ font-size:70px;
         <tr>
             <th>Id</th>
             <th>Name</th>
-            <th> Option</th>
+            <th>Actions</th>
         </tr>
     <tr>
-                        {{#each z}}
-                            <a href="/admin/categories/{{this.id}}/page/1">   <td >{{this.id}}</td></a>
+        {{#each z}}
+            <a href="/admin/categories/{{this.id}}/page/1">   <td >{{this.id}}</td></a>
 
 
-                                <td>
-                                    <a href="/admin/categories/{{this.id}}/page/1">{{this.name}}</td>     &nbsp;
-                                &nbsp;  <td><a  onclick="return confirm('Are you sure?')"  href="/admin/category/{{this.id}}/delete">Delete</a> &nbsp
-                                    <a href="/admin/category/{{this.id}}/edit">Update </a> &nbsp;  </td>
-                                </tr>
-                        {{/each}}
+            <td>
+                <a href="/admin/categories/{{this.id}}/page/1">{{this.name}}</td>     &nbsp;
+            &nbsp;  <td><a  onclick="return confirm('Are you sure?')"  href="/admin/category/{{this.id}}/delete">Delete</a> &nbsp
+            <a href="/admin/category/{{this.id}}/edit">Update </a> &nbsp;  </td>
+        </tr>
+        {{/each}}
 
 
     </table>
@@ -713,9 +717,9 @@ font-size:70px;
 <!--    <div class="dropdown">-->
 <!--        <a href="#">Categories</a>-->
 <!--        <div class="dropdown-contenting">-->
-<!--            {{#each o}}-->
+        <!--            {{#each o}}-->
 <!--                <a href="http://localhost:8080/admin/categories/{{this.id}}?page=1"><strong>{{this.name}}</strong></a>-->
-<!--            {{/each}}-->
+        <!--            {{/each}}-->
 <!--        </div>-->
 <!--    </div>-->
 <!--    &nbsp;&nbsp;&nbsp;<button type="button" class="btn btn-danger" class="btn btn-default btn-sm">-->
@@ -737,12 +741,12 @@ font-size:70px;
 <!--                </tr>-->
 <!--                </thead>-->
 <!--                <tbody>-->
-<!--                {{#each z}}-->
+        <!--                {{#each z}}-->
 <!--                    <td> <a href="categories/{{this.id}}?page=1">{{this.name}}</td>     &nbsp;-->
 <!--                    &nbsp;  <td><a  onclick="return confirm('Are you sure?')"  href="category/{{this.id}}/delete">Delete</a> &nbsp-->
 <!--                        <a href="admin/category/{{this.id}}/edit">Update </a> &nbsp;  </td>-->
 <!--                    </tr>-->
-<!--                {{/each}}-->
+        <!--                {{/each}}-->
 
 <!--                </tbody>-->
 <!--            </table>-->
@@ -752,9 +756,9 @@ font-size:70px;
 
 <!--            <nav aria-label="Page navigation example">-->
 <!--                <ul class="pagination">-->
-<!--                    {{#each pages_count }}-->
+        <!--                    {{#each pages_count }}-->
 <!--                        <li class="page-item"><a class="page-link" href="{{this}}">{{this}}</a></li>-->
-<!--                    {{/each}}-->
+        <!--                    {{/each}}-->
 <!--                </ul>-->
 <!--            </nav>-->
 <!--</div>-->

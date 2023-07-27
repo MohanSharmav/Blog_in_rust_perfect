@@ -10866,7 +10866,20 @@ article {
   width: 70%;
   height: 300px; /* only for demonstration, should be removed */
 }
+.btning{
+  border: none;
+  outline: none;
+  padding: 10px 16px;
+  background-color: #f1f1f1;
+  cursor: pointer;
+  font-size: 18px;
+}
 
+/* Style the active class, and buttons on mouse-over */
+.active, .btning:hover {
+  background-color: #ced5f5;
+  color: white;
+}
       </style>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
@@ -10882,6 +10895,19 @@ article {
     <!-- Core theme CSS (includes Bootstrap)-->
     <link href="css/styles.css" rel="stylesheet" />
 
+
+    <script>
+// Add active class to the current button (highlight it)
+var header = document.getElementById("myDIV");
+var btns = header.getElementsByClassName("btn");
+for (var i = 0; i < btns.length; i++) {
+  btns[i].addEventListener("click", function() {
+  var current = document.getElementsByClassName("active");
+  current[0].className = current[0].className.replace(" active", "");
+  this.className += " active";
+  });
+}
+</script>
 </head>
 <body>
 <!-- Navigation-->
@@ -10946,7 +10972,8 @@ article {
                             </a>
                         </div>
 
-                        <!-- Divider-->
+                        <!--
+                         Divider-->
                         <hr class="my-4" />
                     {{/each}}
                 </div>
@@ -10957,7 +10984,8 @@ article {
 <!--                        {{#each pages_count}}-->
 
 <!--                            <li class="page-item "><a class="page-link" href="{{this}}">-->
-<!--                                {{#if (eq this 1)}}-->
+<!--                                {{#if (eq current_page this )}}-->
+
 <!--                                    <ul class="page-item " ><button class="page-item active">xxsdasdsssx{{this}}</button></ul>-->
 
 <!--                                    {{current_page}}-->
@@ -10971,22 +10999,44 @@ article {
 <!--            </div>-->
             <div class="pagination_numbers">
                 <nav aria-label="Page navigation example">
-                    <ul class="pagination">
+                    <ul class="pagination" id="myDIV">
+
                         {{#each pages_count }}
-                            <li class="page-item"><a class="page-link" href="{{this}}">{{this}}</a></li>
+                            <li class="page-item"><a class="page-link" href="{{this}}" id="btning">{{this}}</a></li>
                         {{/each}}
                     </ul>
                 </nav>
             </div>
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination" onload="pagination_function()">
-                        {{#each new_pagination }}
-                            <li class="page-item"><a class="page-link" id="okay" href="{{this}}">{{this}}</a></li>
+<!--                <nav aria-label="Page navigation example">-->
+<!--                    <ul class="pagination" onload="pagination_function()">-->
+<!--                        {{#each new_pagination }}-->
+<!--                            <li class="page-item"><a class="page-link" id="okay" href="{{this}}">{{this}}</a></li>-->
+<!--                        {{/each}}-->
+<!--                    </ul>-->
+<!--                </nav>-->
+<!--              <p id="okay" onload="pagination_function()"> Current Page is {{current_page}}</p>-->
+<!--           xxxx {{{data.colored_text}}}-->
+
+           <div class="pagination_numbers">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination" id="myDIV">
+{{#each final_pagination}}
+  <a href="{{this}}">current_page: {{ this }},</a>
+
+{{/each}}
+
+
+                    {{#each page_map}}
+                            Key: {{ @key }}, Value: {{ this }}<br>
+                        {{#if (eq @key 100 )}}
+                              ---------------------  current page: {{ @key }}, Value: {{ this }}<br>
+                        {{/if}}
                         {{/each}}
-                    </ul>
-                </nav>
-              <p id="okay" onload="pagination_function()"> Current Page is {{current_page}}</p>
-           xxxx {{{data.colored_text}}}
+                </ul>
+            </nav>
+        </div>
+
+
         </div>
     </div>
     </div>

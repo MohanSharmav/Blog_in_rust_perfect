@@ -406,7 +406,7 @@ font-size:70px;
             <th>Id</th>
             <th>Title</th>
             <th>Description</th>
-            <th> Option</th>
+            <th> Actions</th>
         </tr>
     <tr>
 
@@ -418,7 +418,7 @@ font-size:70px;
             <td> <a href="/admin/posts/{{this.id}}" style="color:black"> {{this.description}}</td>
 
             <td> <a  onclick="return confirm('Are you sure?')" href="/admin/post/{{this.id}}/delete" style="color:black"> Delete</a>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     </a>
-                <a href="/admin/posts/{{this.id}}/edit" style="color:black"> update </a>
+                <a href="/admin/posts/{{this.id}}/edit" style="color:black"> Update </a>
 
             </td>
             </a>

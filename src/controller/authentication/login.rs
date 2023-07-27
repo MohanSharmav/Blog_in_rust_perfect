@@ -1,13 +1,11 @@
 use crate::controller::constants::ConfigurationConstants;
 use crate::model::authentication::login_database::{login_database, LoginCheck};
 use actix_http::header::LOCATION;
-use actix_http::StatusCode;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
-use actix_web::web::Redirect;
-use actix_web::{http, web, HttpResponse};
+use actix_web::{ web, HttpResponse};
 use actix_web::{HttpMessage as _, HttpRequest, Responder};
-use std::collections::HashMap;
+// use std::collections::HashMap;
 // use actix_web_lab::FlashMessage;
 use actix_web_flash_messages::{FlashMessage, Level};
 use handlebars::Handlebars;

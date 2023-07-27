@@ -7,6 +7,12 @@ pub struct DataForFrontEnd {
     pub colored_text: String,
 }
 
+#[derive(Serialize,Clone)]
+pub struct Pagination {
+    pub current_page: i32,
+pub other_pages: Vec<usize>,
+}
+
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
 pub struct Categories {
     pub(crate) id: i32,
@@ -68,6 +74,8 @@ pub struct CreateNewCategory {
 pub struct GetId {
     pub id: i32,
 }
+
+
 
 pub async fn select_posts(db: &Pool<Postgres>) -> Result<Vec<Posts>, anyhow::Error> {
     let postsing = sqlx::query_as::<_, Posts>("select id, title, description from posts")
