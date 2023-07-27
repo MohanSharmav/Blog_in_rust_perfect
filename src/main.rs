@@ -1,5 +1,6 @@
 mod controller;
 mod model;
+
 use crate::controller::admin_function::{admin_category_display, admin_unique_posts_display};
 use crate::controller::authentication::login::{
     check_user, get_data_from_login_page, get_login_page, logout,
@@ -10,7 +11,7 @@ use crate::controller::category_controller::{
     page_to_update_category, receive_new_category, receive_updated_category,
 };
 use crate::controller::common_controller::{
-    new_common_page_controller, new_common_page_controller_test, redirect_user,
+    new_common_page_controller, new_common_page_controller_test, redirect_user, Main_page,
 };
 use crate::controller::constants::ConfigurationConstants;
 use crate::controller::pagination_controller::pagination_display;
@@ -18,15 +19,20 @@ use crate::controller::posts_controller::{
     delete_post, get_new_post, page_to_update_post, receive_new_posts, receive_updated_post,
 };
 use crate::controller::single_post_controller::get_single_post;
+use actix::Response;
 use actix_identity::IdentityMiddleware;
 use actix_session::config::PersistentSession;
 use actix_session::storage::CookieSessionStore;
 use actix_session::SessionMiddleware;
 use actix_web::cookie::Key;
-use actix_web::{web, App, HttpServer, Result};
+use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer, Responder, Result};
+// use actix_web_flash_messages::FlashMessagesFramework;
 use handlebars::Handlebars;
 use magic_crypt::new_magic_crypt;
 use sqlx::postgres::PgPoolOptions;
+
+use actix_web_flash_messages::storage::CookieMessageStore;
+use actix_web_flash_messages::{FlashMessagesFramework, FlashMessagesMiddleware};
 
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
@@ -42,6 +48,7 @@ async fn main() -> Result<(), anyhow::Error> {
     let cookie_secure = true;
     let mut handlebars = Handlebars::new();
     handlebars.register_templates_directory(".hbs", "./templates/")?;
+
     dotenv::dotenv()?;
     let value = std::env::var("MAGIC_KEY")?;
     let mcrypt = new_magic_crypt!(value, 256); //Creates an instance of the magic crypt library/crate.
@@ -56,12 +63,25 @@ async fn main() -> Result<(), anyhow::Error> {
         database_connection: pool,
     };
     let confi = web::Data::new(config.clone());
+    let message_store = CookieMessageStore::builder(secret_key.clone()).build();
+
+    let message_store = CookieMessageStore::builder(secret_key.clone()).build();
+    let message_framework = FlashMessagesFramework::builder(message_store).build();
+    //
+    // let signing_key = Key::generate(); // This will usually come from configuration!
+    // let message_store = CookieMessageStore::builder(signing_key).build();
+    // let message_framework = FlashMessagesFramework::builder(message_store).build();
+    //
 
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(handlebars.clone()))
             .app_data(confi.clone())
+            .wrap(message_framework.clone())
             .wrap(IdentityMiddleware::default())
+
+           // .wrap(FlashMiddleware::default())
+            // .wrap(message_framework.clone())
             .wrap(
                 SessionMiddleware::builder(CookieSessionStore::default(), secret_key.clone())
                     .cookie_name("adf-obdd-service-auth".to_owned())
@@ -69,6 +89,7 @@ async fn main() -> Result<(), anyhow::Error> {
                     .session_lifecycle(PersistentSession::default().session_ttl(COOKIE_DURATION))
                     .build(),
             )
+            .service(web::resource("/posts").to(Main_page))
             .service(web::resource("/").to(redirect_user))
             .service(web::resource("/check").to(check_user))
             // perfect admin url
@@ -95,6 +116,7 @@ async fn main() -> Result<(), anyhow::Error> {
                     .route(web::get().to(get_all_categories_controller)),
             )
             .service(web::resource("/admin/posts/new").to(get_new_post))
+            // .service(web::resource("/admin/posts/new").to(receive_new_posts_with_no_category))
             .service(web::resource("/admin/posts").route(web::post().to(receive_new_posts)))
             .service(
                 web::resource("/admin/posts/{post_id}")

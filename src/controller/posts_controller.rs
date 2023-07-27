@@ -1,16 +1,21 @@
 use crate::controller::constants::ConfigurationConstants;
 use crate::model::category_database::get_all_categories_database;
-use crate::model::database::CreateNewPost;
+use crate::model::database::{
+    CreateNewPost, CreateNewPostWithNullCategory, CreateNewPostWithoutCategory,
+};
 use crate::model::posts_database::{
-    create_post_database, delete_post_database, update_post_database,
+    create_post_database, create_post_without_category_database, delete_post_database,
+    update_post_database,
 };
 use crate::model::single_posts_database::query_single_post_in_struct;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
-use actix_web::web::Redirect;
+use actix_web::web::{Query, Redirect};
 use actix_web::{http, web, HttpResponse};
 use handlebars::Handlebars;
+// use serde::de::Unexpected::Option;
 use serde_json::json;
+// use core::option::Option;
 
 pub async fn get_new_post(
     config: web::Data<ConfigurationConstants>,
@@ -50,11 +55,15 @@ pub async fn receive_new_posts(
     let title = &form.title;
     let description = &form.description;
     let category_id = &form.category_id;
-    create_post_database(title.clone(), description.clone(), &category_id.clone(), db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-    Ok(Redirect::to("/admin/posts/page/1"))
-
+    if category_id.clone() == 0_i32 {
+        create_post_without_category_database(title.clone(), description.clone(), db);
+        Ok(Redirect::to("/admin/posts/page/1"))
+    } else {
+        create_post_database(title.clone(), description.clone(), &category_id.clone(), db)
+            .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
+        Ok(Redirect::to("/admin/posts/page/1"))
+    }
     // let success_message = "the post created successfully";
     // let html = handlebars
     //     .render("message_display", &json!({ "message": success_message }))
@@ -64,6 +73,25 @@ pub async fn receive_new_posts(
     //     .content_type(ContentType::html())
     //     .body(html))
 }
+// pub async fn receive_new_posts_with_no_category(
+//     form: web::Form<CreateNewPostWithoutCategory>,
+//      // fo: web::Form<CreateNewPostWithNullCategory>,
+//      fo: Option<Query<CreateNewPostWithNullCategory>>,
+//     config: web::Data<ConfigurationConstants>,
+// ) -> Result<Redirect, actix_web::Error> {
+//     let db = &config.database_connection;
+//     let title = &form.title;
+//     let description = &form.description;
+//     if fo.is_none(){
+//         create_post_without_category_database(title.clone(), description.clone(), db);
+//     }
+//
+//     let category_id = fo.category_id;
+//     create_post_database(title.clone(), description.clone(), &category_id.clone(), db)
+//         .await
+//         .map_err(actix_web::error::ErrorInternalServerError)?;
+//     Ok(Redirect::to("/admin/posts/page/1"))
+// }
 
 pub async fn delete_post(
     to_delete: web::Path<String>,

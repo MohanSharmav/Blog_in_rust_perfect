@@ -2,6 +2,11 @@ use serde::Deserialize;
 use serde::Serialize;
 use sqlx::{Pool, Postgres};
 
+#[derive(Serialize)]
+pub struct DataForFrontEnd {
+    pub colored_text: String,
+}
+
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
 pub struct Categories {
     pub(crate) id: i32,
@@ -45,6 +50,16 @@ pub struct CreateNewPost {
     pub category_id: i32,
 }
 
+#[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
+pub struct CreateNewPostWithoutCategory {
+    pub title: String,
+    pub description: String,
+}
+
+#[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
+pub struct CreateNewPostWithNullCategory {
+    pub category_id: i32,
+}
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
 pub struct CreateNewCategory {
     pub(crate) name: String,

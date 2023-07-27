@@ -112,7 +112,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1224c9f9593dc27c9077b233ce04adedc1d7febcfc35ee9f53ea3c24df180bec"
 dependencies = [
  "actix-service",
- "actix-session",
+ "actix-session 0.7.2",
  "actix-utils",
  "actix-web",
  "anyhow",
@@ -181,6 +181,24 @@ dependencies = [
  "futures-core",
  "paste",
  "pin-project-lite",
+]
+
+[[package]]
+name = "actix-session"
+version = "0.6.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0c9138a66462f1e65da829f9c0de81b44a96dfe193a4f19bfea32ee2be312368"
+dependencies = [
+ "actix-service",
+ "actix-utils",
+ "actix-web",
+ "anyhow",
+ "async-trait",
+ "derive_more",
+ "serde",
+ "serde_json",
+ "time 0.3.20",
+ "tracing",
 ]
 
 [[package]]
@@ -261,6 +279,23 @@ dependencies = [
  "proc-macro2 1.0.56",
  "quote 1.0.26",
  "syn 1.0.109",
+]
+
+[[package]]
+name = "actix-web-flash-messages"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "300b8100fc09e9eb5036775f7d1e67f643c25fe6e796e7dbdeb8423c39482106"
+dependencies = [
+ "actix-session 0.6.2",
+ "actix-web",
+ "anyhow",
+ "percent-encoding 2.2.0",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "time 0.3.20",
+ "tokio",
 ]
 
 [[package]]
@@ -910,9 +945,11 @@ dependencies = [
  "actix-files",
  "actix-http",
  "actix-identity",
- "actix-session",
+ "actix-session 0.7.2",
  "actix-web",
+ "actix-web-flash-messages",
  "actix-web-lab",
+ "ansi_term",
  "anyhow",
  "argon2",
  "argonautica",

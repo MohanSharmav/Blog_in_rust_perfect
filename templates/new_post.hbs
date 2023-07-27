@@ -432,6 +432,7 @@ input[type=submit] {
     <input type="text" name="description" placeholder="description"  class="form-control" ><br>
 <!--<input type="text" name="category_id" placeholder="category_id"  class="form-control" ><br>-->
     <select id="category_id" name="category_id">
+        <option value="0" >No category</option>
  {{#each o}}
         <option value="{{this.id}}">{{this.name}}</option>
 {{/each}}

@@ -105,14 +105,22 @@ body {
 </head>
 <body>
 <div class="login-page">
+
     <div class="form">
         <form class="login-from" action="http://localhost:8080/login" method="post">
+            <label>{{hello}}</label>
             <input type="text" placeholder="Enter Username" name="username"  class="form-control"  required><br>
             <input type="password" placeholder="Enter Password" name="password"  class="form-control" required><br>
             <button>login</button>
             <p class="message">Not registered? <a href="/register">Create an account</a></p>
+<!--            {{#if flash_message}}-->
+<!--                <div class="flash-message {{flash_category}}">-->
+<!--                    {{flash_message}}-->
+<!--                </div>-->
+<!--            {{/if}}-->
         </form>
     </div>
+    {{flash_message}}
 </div>
     </div>
 </div>

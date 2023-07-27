@@ -75,3 +75,17 @@ pub async fn create_post_database(
 
     Ok(())
 }
+
+pub async fn create_post_without_category_database(
+    title: String,
+    description: String,
+    db: &Pool<Postgres>,
+) -> Result<(), anyhow::Error> {
+    sqlx::query("insert into posts(title,description) values ($1,$2)")
+        .bind(title)
+        .bind(description)
+        .fetch_all(db)
+        .await?;
+
+    Ok(())
+}

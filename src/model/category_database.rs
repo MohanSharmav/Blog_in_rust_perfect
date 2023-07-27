@@ -80,12 +80,13 @@ pub async fn get_all_categories_database_with_pagination_display(
     parii: i32,
     posts_per_page_constant: i32,
 ) -> Result<Vec<Categories>, anyhow::Error> {
-    let all_categories =
-        sqlx::query_as::<_, Categories>("select name,id  from categories Order By id Asc limit $2 offset ($1-1)*$2")
-            .bind(parii)
-            .bind(posts_per_page_constant)
-            .fetch_all(db)
-            .await?;
+    let all_categories = sqlx::query_as::<_, Categories>(
+        "select name,id  from categories Order By id Asc limit $2 offset ($1-1)*$2",
+    )
+    .bind(parii)
+    .bind(posts_per_page_constant)
+    .fetch_all(db)
+    .await?;
 
     Ok(all_categories)
 }

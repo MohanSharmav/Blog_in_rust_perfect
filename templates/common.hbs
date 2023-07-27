@@ -10881,6 +10881,7 @@ article {
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css" />
     <!-- Core theme CSS (includes Bootstrap)-->
     <link href="css/styles.css" rel="stylesheet" />
+
 </head>
 <body>
 <!-- Navigation-->
@@ -10950,24 +10951,44 @@ article {
                     {{/each}}
                 </div>
             </div>
+<!--            <div class="pagination_numbers">-->
+<!--                <nav aria-label="Page navigation example">-->
+<!--                    <ul class="pagination">-->
+<!--                        {{#each pages_count}}-->
+
+<!--                            <li class="page-item "><a class="page-link" href="{{this}}">-->
+<!--                                {{#if (eq this 1)}}-->
+<!--                                    <ul class="page-item " ><button class="page-item active">xxsdasdsssx{{this}}</button></ul>-->
+
+<!--                                    {{current_page}}-->
+<!--                                {{else}}-->
+<!--                                    <button class="page-item">sss{{this}}</button>-->
+<!--                                {{/if}}-->
+<!--                            </a></li>-->
+<!--                        {{/each}}-->
+<!--                    </ul>-->
+<!--                </nav>-->
+<!--            </div>-->
             <div class="pagination_numbers">
                 <nav aria-label="Page navigation example">
                     <ul class="pagination">
-                        {{#each pages_count}}
-
-                            <li class="page-item "><a class="page-link" href="{{this}}">
-                                {{#if (eq this 2)}}
-                                    <ul class="page-item " ><button class="page-item active">xxx{{this}}</button></ul>
-                                {{else}}
-                                    <button class="page-item">{{this}}</button>
-                                {{/if}}
-                            </a></li>
+                        {{#each pages_count }}
+                            <li class="page-item"><a class="page-link" href="{{this}}">{{this}}</a></li>
                         {{/each}}
                     </ul>
                 </nav>
             </div>
-{{current_page}}
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination" onload="pagination_function()">
+                        {{#each new_pagination }}
+                            <li class="page-item"><a class="page-link" id="okay" href="{{this}}">{{this}}</a></li>
+                        {{/each}}
+                    </ul>
+                </nav>
+              <p id="okay" onload="pagination_function()"> Current Page is {{current_page}}</p>
+           xxxx {{{data.colored_text}}}
         </div>
+    </div>
     </div>
 </article>
 
