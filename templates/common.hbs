@@ -10897,19 +10897,31 @@ article {
 
 .paginations a {
   color: black;
-  float: center;
+  float: left;
   padding: 8px 16px;
   text-decoration: none;
+  transition: background-color .3s;
+  border: 1px solid #ddd;
+  font-size: 22px;
 }
 
 .paginations a.active {
   background-color: #11101d;
   color: white;
+    border: 1px solid #4CAF50;
+
 }
 
 .all_pagination
 {
 float:center;
+}
+.pagination
+{
+float:center;
+}
+.pagi{
+float:left;
 }
       </style>
     <meta charset="utf-8" />
@@ -11001,42 +11013,19 @@ float:center;
                 </div>
             </div>
 
-<!--                        <div class="pagination_numbers">-->
-<!--                            <nav aria-label="Page navigation example">-->
-<!--                                <ul class="pagination">-->
-<!--                                        {{#each pages_count}}-->
 
-<!--                                        <li class="page-item "><a class="page-link" href="{{this}}">-->
-<!--                                                {{#if (eq cp this )}}-->
-
-<!--                                                    <ul class="page-item " ><button class="page-item active">xxsdasdsssx{{this}}</button></ul>-->
-
-<!--                                                    {{current_page}}-->
-<!--                                                    {{else}}-->
-<!--                                                    <button class="page-item">sss{{this}}</button>-->
-<!--                                                    {{/if}}-->
-<!--                                        </a></li>-->
-<!--                                        {{/each}}-->
-<!--                                </ul>-->
-<!--                            </nav>-->
-
-<!--            <h1>Active Button</h1>-->
-<!--            <p>Highlight the active/current (pressed) button.</p>-->
-
-<!--            <div id="myDIV">-->
-<!--                <button class="btn active">1</button>-->
-
-<!--            {{#each pages_count_without_first}}-->
-
-<!--            <a  href="{{this}}"> <button class="btn">{{this}}</button></a>-->
-<!--{{/each}}-->
+<!--            <div class="all_pagination ">-->
+<!--                <div class="pagination ">-->
+<!--                    {{{pagination}}}-->
+<!--                </div>-->
 <!--            </div>-->
+            <div class="pagi">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp     &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp  &nbsp&nbsp&nbsp&nbsp&nbsp {{{pagination}}}
 
-
-            <div class="all_pagination ">
-                <div class="pagination ">
-                    {{{pagination}}}
-                </div>
+                </ul>
+            </nav>
             </div>
     </div>
     </div>
@@ -11044,18 +11033,7 @@ float:center;
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-// Add active class to the current button (highlight it)
-var header = document.getElementById("myDIV");
-var btns = header.getElementsByClassName("btn");
-for (var i = 0; i < btns.length; i++) {
-  btns[i].addEventListener("click", function() {
-  var current = document.getElementsByClassName("active");
-  current[0].className = current[0].className.replace(" active", "");
-  this.className += " active";
-  });
-}
-</script>
+<
 <script src="js/scripts.js"></script>
 </body>
 </html>

@@ -70,6 +70,8 @@ pub async fn new_common_page_controller(
     }
     let posts_per_page = posts_per_page as usize;
     // let pages_count: Vec<_> = (1..=posts_per_page).collect();
+
+
     let param = params.into_inner();
     let current_page = param as usize;
 let cp="3".to_html_string();
@@ -95,7 +97,7 @@ let cp="3".to_html_string();
     {
         if i == cp
         {
-            let tag_and_url = r#"<a class="active" href="/posts/page/"#;
+            let tag_and_url = r#"<a class="active"  href="/posts/page/"#;
             pagination_final_string.push_str(tag_and_url);
             let href_link = i.to_string();
             pagination_final_string.push_str(&*href_link);
@@ -109,7 +111,7 @@ let cp="3".to_html_string();
 
         } else {
 
-            let tag_and_url=r#"<a href="/posts/page/"#;
+            let tag_and_url=r#"<a style="margin: 0 4px;" href="/posts/page/"#;
             pagination_final_string.push_str(tag_and_url);
             let href_link = i.to_string();
             pagination_final_string.push_str(&*href_link);

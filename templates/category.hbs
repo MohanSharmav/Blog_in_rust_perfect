@@ -10859,6 +10859,64 @@ article {
   width: 70%;
   height: 300px; /* only for demonstration, should be removed */
 }
+.btning{
+  border: none;
+  outline: none;
+  padding: 10px 16px;
+  background-color: #f1f1f1;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+
+/* Style the active class, and buttons on mouse-over */
+.active, .btning:hover {
+  background-color: #ced5f5;
+  color: white;
+}
+
+      .btn {
+  border: none;
+  outline: none;
+  padding: 10px 16px;
+  background-color: #5d84c2;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+/* Style the active class, and buttons on mouse-over */
+ .paginations {
+  display: inline-block;
+}
+
+.paginations a {
+  color: black;
+  float: left;
+  padding: 8px 16px;
+  text-decoration: none;
+  transition: background-color .3s;
+  border: 1px solid #ddd;
+  font-size: 22px;
+}
+
+.paginations a.active {
+  background-color: #11101d;
+  color: white;
+    border: 1px solid #4CAF50;
+
+}
+
+.all_pagination
+{
+float:center;
+}
+.pagination
+{
+float:center;
+}
+.pagi{
+float:left;
+}
 
       </style>
     <meta charset="utf-8" />
@@ -10943,15 +11001,23 @@ article {
                     {{/each}}
                 </div>
             </div>
-            <div class="pagination_numbers">
+<!--            <div class="pagination_numbers">-->
+<!--                <nav aria-label="Page navigation example">-->
+<!--                    <ul class="pagination">-->
+<!--                        {{#each pages_count }}-->
+<!--                            <li class="page-item"><a class="page-link" href="{{this}}">{{this}}</a></li>-->
+<!--                        {{/each}}-->
+<!--                    </ul>-->
+<!--                </nav>-->
+
+<!--            </div>-->
+            <div class="pagi">
                 <nav aria-label="Page navigation example">
                     <ul class="pagination">
-                        {{#each pages_count }}
-                            <li class="page-item"><a class="page-link" href="{{this}}">{{this}}</a></li>
-                        {{/each}}
+                        &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp     &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp  &nbsp&nbsp&nbsp&nbsp&nbsp {{{pagination}}}
+
                     </ul>
                 </nav>
-
             </div>
         </div>
     </div>
