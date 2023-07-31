@@ -14,7 +14,7 @@ use crate::controller::common_controller::{
     new_common_page_controller, new_common_page_controller_test, redirect_user, Main_page,
 };
 use crate::controller::constants::ConfigurationConstants;
-use crate::controller::pagination_controller::pagination_display;
+use crate::controller::pagination_controller::admin_pagination_display;
 use crate::controller::posts_controller::{
     delete_post, get_new_post, page_to_update_post, receive_new_posts, receive_updated_post,
 };
@@ -94,7 +94,7 @@ async fn main() -> Result<(), anyhow::Error> {
             .service(web::resource("/").to(redirect_user))
             .service(web::resource("/check").to(check_user))
             // perfect admin url
-            .service(web::resource("/admin/posts/page/{page_number}").to(pagination_display))
+            .service(web::resource("/admin/posts/page/{page_number}").to(admin_pagination_display))
             // //test
             //
             // .service(web::resource("/admins/posts/page/{page_number}").to(pagination_display_check))
