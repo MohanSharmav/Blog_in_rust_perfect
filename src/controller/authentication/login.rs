@@ -27,6 +27,7 @@ pub struct User {
 pub async fn get_login_page(
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
+
     let html = handlebars
         .render("login", &json!({"yy":"uuihiuhuihiuhuih"}))
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -98,7 +99,7 @@ pub async fn get_data_from_login_page(
 
         let login_fail_message = "Wrong Id Or Password".to_string();
         let html = handlebars
-            .render("login", &json!({ "flash_message": login_fail_message }))
+            .render("login", &json!({ "flash_message": login_fail_message ,"hello": "world"}))
             .map_err(actix_web::error::ErrorInternalServerError)?;
         // println!("--------------------------------😀");
         Ok(HttpResponse::SeeOther()

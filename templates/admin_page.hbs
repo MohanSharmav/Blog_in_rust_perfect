@@ -341,7 +341,7 @@ font-size:70px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  font-size: 16px;
+  font-size: 20px;
   margin: 4px 2px;
   cursor: pointer;
   float: right;
@@ -350,8 +350,12 @@ font-size:70px;
 
 .cattt{
   float: left;
-    font-size: 30px;
-
+    font-size: 40px;
+    padding: 30 px;
+  }
+  .active {
+  background-color: #4CAF50;
+  color: white;
   }
    </style>
 
@@ -450,12 +454,12 @@ font-size:70px;
     </table>
     <br>
 
-    <div class="all_pagination">
-        <div class="pagination">
+    <div class="all_pagination ">
+        <div class="pagination ">
             <!--            <li class="page-item"><a class="page-link" href="{{this}}">{{this}}</a></li>-->
             {{#each pages_count }}
 
-                <a href="{{this}}">{{this}}</a>
+                <a  class="{{this}} active" href="{{this}}">{{this}}</a>
             {{/each}}
 
         </div>

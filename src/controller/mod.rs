@@ -6,3 +6,4 @@ pub(crate) mod constants;
 pub(crate) mod pagination_controller;
 pub(crate) mod posts_controller;
 pub(crate) mod single_post_controller;
+pub(crate) mod new;

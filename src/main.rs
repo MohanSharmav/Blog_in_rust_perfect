@@ -1,7 +1,7 @@
 mod controller;
 mod model;
 
-use crate::controller::admin_function::{admin_category_display, admin_unique_posts_display};
+use crate::controller::admin_function::{admin_category_display, admin_unique_posts_display, new_test};
 use crate::controller::authentication::login::{
     check_user, get_data_from_login_page, get_login_page, logout,
 };
@@ -33,6 +33,7 @@ use sqlx::postgres::PgPoolOptions;
 
 use actix_web_flash_messages::storage::CookieMessageStore;
 use actix_web_flash_messages::{FlashMessagesFramework, FlashMessagesMiddleware};
+use warp::service;
 
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
@@ -163,6 +164,8 @@ async fn main() -> Result<(), anyhow::Error> {
                 web::resource("/posts/ben/{page_number}")
                     .route(web::get().to(new_common_page_controller_test)),
             )
+            .service(web::resource("/test")
+                         .route(web::get().to(new_test)))
         // .service(web::resource("/posts/"))
         // .service(web::resource("/{username}/{id}").route(web::get().to(index)))
     })
