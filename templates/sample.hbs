@@ -439,6 +439,24 @@ font-size:70px;
     <br><br>
 
 
+    <label for="blog">Filter by category:</label>
+    <select onchange="getval(this);" id="category" name="blog" id="blog">
+        <option id="category_name_gen">All</option>
+{{#each all_category}}
+
+    <option value="{{this.id}}">{{this.name}}</option>
+
+{{/each}}
+    </select>
+
+    <script>
+            function getval(sel){
+                var selected_category = sel.value;
+                alert(selected_category);
+                window.location.replace("http://0.0.0.0:4000/posts/category/"+selected_category);
+            }
+        </script>
+
     <table >
         <tr>
             <th>Id</th>

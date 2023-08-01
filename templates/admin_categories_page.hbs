@@ -335,6 +335,10 @@ float: inherit;
 font-size:70px;
 }
 
+.active {
+  background-color:  #bcd3f7;
+  }
+
    </style>
 
 
@@ -432,10 +436,7 @@ font-size:70px;
     <div class="all_pagination">
         <div class="pagination">
             <!--            <li class="page-item"><a class="page-link" href="{{this}}">{{this}}</a></li>-->
-            {{#each pages_count }}
-
-                <a href="{{this}}">{{this}}</a>
-            {{/each}}
+            {{{pagination}}}
 
         </div>
     </div>

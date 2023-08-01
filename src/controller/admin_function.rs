@@ -1,21 +1,17 @@
 use crate::controller::common_controller::set_posts_per_page;
 use crate::controller::constants::ConfigurationConstants;
+use crate::controller::pagination_controller::perfect_pagination_logic;
 use crate::model::category_database::{
     category_pagination_controller_database_function, get_all_categories_database,
 };
 use crate::model::pagination_database::{category_pagination_logic, pagination_logic};
+use crate::model::pagination_logic::select_specific_pages_post;
 use crate::model::single_posts_database::{query_single_post, query_single_post_in_struct};
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
 use actix_web::{http, web, HttpResponse};
-use askama::mime;
-use build_html::{Container, ContainerType, Html, HtmlContainer, HtmlPage};
 use handlebars::Handlebars;
 use serde_json::json;
-use html_parser::Dom;
-use warp::path::param;
-use crate::controller::pagination_controller::perfect_pagination_logic;
-use crate::model::pagination_logic::select_specific_pages_post;
 
 pub async fn admin_category_display(
     // path: web::Path<String>,
@@ -50,6 +46,55 @@ pub async fn admin_category_display(
         posts_per_page += 1;
     }
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
+
+    let x1 = r#"
+    <br>
+<div class="paginations">
+ "#;
+
+    let y = pages_count.len();
+
+    let cp: usize = params.clone() as usize;
+
+    let mut pagination_final_string = String::new();
+    pagination_final_string.push_str(x1);
+    for i in 1..y + 1 {
+        if i == cp {
+            //admin/categories/1/page/1
+            let tag_and_url = r#"<a class="active"  href="/admin/categories/"#;
+            pagination_final_string.push_str(tag_and_url);
+            let category_id = category_input.clone();
+            pagination_final_string.push_str(&*category_id);
+            let static_keyword_page = r#"/page/"#;
+            pagination_final_string.push_str(&*static_keyword_page);
+            let href_link = i.to_string();
+            pagination_final_string.push_str(&*href_link);
+            let end_of_tag = r#"">"#;
+            pagination_final_string.push_str(end_of_tag);
+            let text_inside_tag = i.to_string();
+            pagination_final_string.push_str(&*text_inside_tag);
+
+            let close_tag = r#"</a>"#;
+            pagination_final_string.push_str(close_tag);
+        } else {
+            let tag_and_url = r#"<a style="margin: 0 4px;" href="/admin/categories/"#;
+            pagination_final_string.push_str(tag_and_url);
+            let category_id = category_input.clone();
+            pagination_final_string.push_str(&*category_id);
+            let static_keyword_page = r#"/page/"#;
+            pagination_final_string.push_str(&*static_keyword_page);
+            let href_link = i.to_string();
+            pagination_final_string.push_str(&*href_link);
+            let end_of_tag = r#"">"#;
+            pagination_final_string.push_str(end_of_tag);
+            let text_inside_tag = i.to_string();
+            pagination_final_string.push_str(&*text_inside_tag);
+
+            let close_tag = r#"</a>"#;
+            pagination_final_string.push_str(close_tag);
+        }
+    }
+
     let category_postinng = category_pagination_controller_database_function(
         category_input,
         db,
@@ -62,7 +107,7 @@ pub async fn admin_category_display(
     let html = handlebars
         .render(
             "admin_categories_page",
-            &json!({"tiger":&category_postinng,"pages_count":&pages_count,"o":all_category}),
+            &json!({"pagination":pagination_final_string,"tiger":&category_postinng,"pages_count":&pages_count,"o":all_category}),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -106,7 +151,7 @@ pub async fn new_test(
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
-let params = 4;
+    let params = 4;
     let db = &config.database_connection;
     let total_posts_length = perfect_pagination_logic(db).await?;
 
@@ -132,10 +177,9 @@ let params = 4;
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let all_category = get_all_categories_database(db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
+    // let all_category = get_all_categories_database(db)
+    //     .await
+    //     .map_err(actix_web::error::ErrorInternalServerError)?;
 
     // let x2: String = HtmlPage::new()
     //     .with_title("My Page")
@@ -149,59 +193,55 @@ let params = 4;
     //     .to_html_string();
     // let x= 1;
 
-// println!("--------------------------------{:?}", html);
+    // println!("--------------------------------{:?}", html);
     let x1 = r#"
     <br>
 <div class="paginations">
  "#;
 
-    let y=pages_count.len();
-// println!("--------------------------------😂{:?}",y);
-// let cp=par
+    let y = pages_count.len();
+    // println!("--------------------------------😂{:?}",y);
+    // let cp=par
     let cp: usize = par as usize;
     // let mut act ="r#<a href="/">bosss</a>"#;
-//     let  act = r#"
-//     <br>
-// <div class="paginations">
-//   <a  >3</a>
-//   <a class="active">1000</a>
-//   <a >500</a>"#;
-// // let x4=String::new();
-   let mut x4 =String::new();
+    //     let  act = r#"
+    //     <br>
+    // <div class="paginations">
+    //   <a  >3</a>
+    //   <a class="active">1000</a>
+    //   <a >500</a>"#;
+    // // let x4=String::new();
+    let mut x4 = String::new();
     x4.push_str(x1);
-    for i in 1..y+1
-    {
-    // println!("--------------------------------😍{:?}",i);
+    for i in 1..y + 1 {
+        // println!("--------------------------------😍{:?}",i);
 
-    if i == cp
-    {
-        // let x2=r#"<a href="/">i</a>"#;
-        //
-        // println!("active{:?}",x2);
-//       let on=  r#"<a href="/">bosss</a>"#;
-//        let z= act.clone().to_string();
-// act= &*(z.to_owned() + &on);
+        if i == cp {
+            // let x2=r#"<a href="/">i</a>"#;
+            //
+            // println!("active{:?}",x2);
+            //       let on=  r#"<a href="/">bosss</a>"#;
+            //        let z= act.clone().to_string();
+            // act= &*(z.to_owned() + &on);
 
-        // let x2=r#"<a href="/">one</a>"#;
-        let x5=r#"<a class="active" href="/posts/page/"#;
-        x4.push_str(x5);
-        let x9=i.to_string();
-        x4.push_str(&*x9);
-        let x10=r#"">"#;
-        x4.push_str(x10);
-        let x6=i.to_string();
-        x4.push_str(&*x6);
+            // let x2=r#"<a href="/">one</a>"#;
+            let x5 = r#"<a class="active" href="/posts/page/"#;
+            x4.push_str(x5);
+            let x9 = i.to_string();
+            x4.push_str(&*x9);
+            let x10 = r#"">"#;
+            x4.push_str(x10);
+            let x6 = i.to_string();
+            x4.push_str(&*x6);
 
-        let x7=r#"</a>"#;
-        x4.push_str(x7);
+            let x7 = r#"</a>"#;
+            x4.push_str(x7);
 
-        // let x2=x5.clone().to_owned()+ &*x6 +x7;
-        // let x3=x1.clone().to_string();
-         // x4= x1.to_owned() + &*x2.clone();
-       // x4= x4.push_str(&*x2)
-
-}
-        else{
+            // let x2=x5.clone().to_owned()+ &*x6 +x7;
+            // let x3=x1.clone().to_string();
+            // x4= x1.to_owned() + &*x2.clone();
+            // x4= x4.push_str(&*x2)
+        } else {
             // let x5=r#"<a href="/">"#;
             // x4.push_str(x5);
             // let x6=i.to_string();
@@ -209,64 +249,67 @@ let params = 4;
             //
             // let x7=r#"</a>"#;
             // x4.push_str(x7);
-            let x5=r#"<a href="/posts/page/"#;
+            let x5 = r#"<a href="/posts/page/"#;
             x4.push_str(x5);
-            let x9=i.to_string();
+            let x9 = i.to_string();
             x4.push_str(&*x9);
-            let x10=r#"">"#;
+            let x10 = r#"">"#;
             x4.push_str(x10);
-            let x6=i.to_string();
+            let x6 = i.to_string();
             x4.push_str(&*x6);
 
-            let x7=r#"</a>"#;
+            let x7 = r#"</a>"#;
             x4.push_str(x7);
         }
-//   {
-//         // let x2=r#"<a href="/">i</a>"#;
-//         //
-//         // println!("not active{:?}",x2);
-// // let x2=r#"<a href="/">one</a>"#;
-//         let x5=r#"<a href="/">"#;
-//         let x6=69798.to_string();
-//         let x7=r#"</a>"#;
-//         let x2=x5.clone().to_owned()+ &*x6 +x7;
-//         let x3=x1.clone().to_string();
-//         x4= x1.to_owned() + &*x2.clone();
-//
-//     }
-}
-//
-//     let  x2 = r#"
-//     <br>
-// <div class="paginations">
-//   <a  >3</a>
-//   <a class="active">4</a>
-//   <a >5</a>
-//   <a >6</a>
-// </div>"#;
-// //
-//     let x2=r#"
-//     <br>
-// <div class="paginations">
-//   <a  >3</a>
-//   <a class="active">4</a>
-//   <a >5</a>
-//   <a >6</a>
-// </div>"#.to_string();
-//     let x2=r#"<a href="/">one</a>"#;
-//     let x3=x1.clone().to_string();
-//     let x4=x1.to_owned()+ &*x2.clone();
-// let fin=x4.to_owned()+x1;
+        //   {
+        //         // let x2=r#"<a href="/">i</a>"#;
+        //         //
+        //         // println!("not active{:?}",x2);
+        // // let x2=r#"<a href="/">one</a>"#;
+        //         let x5=r#"<a href="/">"#;
+        //         let x6=69798.to_string();
+        //         let x7=r#"</a>"#;
+        //         let x2=x5.clone().to_owned()+ &*x6 +x7;
+        //         let x3=x1.clone().to_string();
+        //         x4= x1.to_owned() + &*x2.clone();
+        //
+        //     }
+    }
+    //
+    //     let  x2 = r#"
+    //     <br>
+    // <div class="paginations">
+    //   <a  >3</a>
+    //   <a class="active">4</a>
+    //   <a >5</a>
+    //   <a >6</a>
+    // </div>"#;
+    // //
+    //     let x2=r#"
+    //     <br>
+    // <div class="paginations">
+    //   <a  >3</a>
+    //   <a class="active">4</a>
+    //   <a >5</a>
+    //   <a >6</a>
+    // </div>"#.to_string();
+    //     let x2=r#"<a href="/">one</a>"#;
+    //     let x3=x1.clone().to_string();
+    //     let x4=x1.to_owned()+ &*x2.clone();
+    // let fin=x4.to_owned()+x1;
+
+    let all_category = get_all_categories_database(db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
     let html = handlebars
         .render(
             "sample",
-            &json!({"x1":x4,"a":&paginators,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category}),
+            &json!({"all_category":all_category,"x1":x4,"a":&paginators,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category}),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
         .content_type(ContentType::html())
-        .body(html)
-      )
-
+        .body(html))
 }

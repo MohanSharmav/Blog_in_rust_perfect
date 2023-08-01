@@ -41,14 +41,57 @@ pub async fn get_all_categories_controller(
     }
     let posts_per_page = posts_per_page as usize;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
+
+    let posts_per_page_constant = set_posts_per_page().await;
+    let param = params.into_inner();
+
+    let x1 = r#"
+    <br>
+<div class="paginations">
+ "#;
+
+    let y = pages_count.len();
+
+    let cp: usize = param.clone() as usize;
+
+    let mut pagination_final_string = String::new();
+    pagination_final_string.push_str(x1);
+    for i in 1..y + 1 {
+        if i == cp {
+            // /admin/categories/page/{page_number}")
+            let tag_and_url = r#"<a class="active"  href="/admin/categories/page/"#;
+            pagination_final_string.push_str(tag_and_url);
+            let href_link = i.to_string();
+            pagination_final_string.push_str(&*href_link);
+            let end_of_tag = r#"">"#;
+            pagination_final_string.push_str(end_of_tag);
+            let text_inside_tag = i.to_string();
+            pagination_final_string.push_str(&*text_inside_tag);
+
+            let close_tag = r#"</a>"#;
+            pagination_final_string.push_str(close_tag);
+        } else {
+            let tag_and_url = r#"<a style="margin: 0 4px;" href="/admin/categories/page/"#;
+            pagination_final_string.push_str(tag_and_url);
+            let href_link = i.to_string();
+            pagination_final_string.push_str(&*href_link);
+            let end_of_tag = r#"">"#;
+            pagination_final_string.push_str(end_of_tag);
+            let text_inside_tag = i.to_string();
+            pagination_final_string.push_str(&*text_inside_tag);
+
+            let close_tag = r#"</a>"#;
+            pagination_final_string.push_str(close_tag);
+        }
+    }
+
     // let pari = params.get_or_insert(Query(PaginationParams::default()));
     // let current_pag = pari.0;
     // let _current_page = current_pag.page;
 
     // let par=params.unwrap_or_else(1);
     // let parii=par.page;
-    let posts_per_page_constant = set_posts_per_page().await;
-    let param = params.into_inner();
+
     let all_category = get_all_categories_database(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -64,7 +107,7 @@ pub async fn get_all_categories_controller(
     let html = handlebars
         .render(
             "all_categories",
-            &json!({ "z": &all_categories,"o":all_category,"pages_count":pages_count}),
+            &json!({ "pagination":pagination_final_string,"z": &all_categories,"o":all_category,"pages_count":pages_count}),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -225,28 +268,25 @@ pub async fn get_category_with_pagination(
     }
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
 
-
     let x1 = r#"
     <br>
 <div class="paginations">
  "#;
 
-    let y=pages_count.len();
+    let y = pages_count.len();
 
     let cp: usize = par.clone() as usize;
 
-    let mut pagination_final_string =String::new();
+    let mut pagination_final_string = String::new();
     pagination_final_string.push_str(x1);
-    for i in 1..y+1
-    {
-        if i == cp
-        {
+    for i in 1..y + 1 {
+        if i == cp {
             //"/posts/category/{category_id}/page/{page_number}"
             let tag_and_url = r#"<a class="active"  href="/posts/category/"#;
             pagination_final_string.push_str(tag_and_url);
-            let category_id=category_input.clone();
+            let category_id = category_input.clone();
             pagination_final_string.push_str(&*category_id);
-            let static_keyword_page= r#"/page/"#;
+            let static_keyword_page = r#"/page/"#;
             pagination_final_string.push_str(&*static_keyword_page);
             let href_link = i.to_string();
             pagination_final_string.push_str(&*href_link);
@@ -257,14 +297,12 @@ pub async fn get_category_with_pagination(
 
             let close_tag = r#"</a>"#;
             pagination_final_string.push_str(close_tag);
-
         } else {
-
-            let tag_and_url=r#"<a style="margin: 0 4px;" href="/posts/category/"#;
+            let tag_and_url = r#"<a style="margin: 0 4px;" href="/posts/category/"#;
             pagination_final_string.push_str(tag_and_url);
-            let category_id=category_input.clone();
+            let category_id = category_input.clone();
             pagination_final_string.push_str(&*category_id);
-            let static_keyword_page= r#"/page/"#;
+            let static_keyword_page = r#"/page/"#;
             pagination_final_string.push_str(&*static_keyword_page);
             let href_link = i.to_string();
             pagination_final_string.push_str(&*href_link);
@@ -275,12 +313,8 @@ pub async fn get_category_with_pagination(
 
             let close_tag = r#"</a>"#;
             pagination_final_string.push_str(close_tag);
-
         }
     }
-
-
-
 
     let category_postinng = category_pagination_controller_database_function(
         category_input.to_string(),

@@ -352,6 +352,10 @@ font-size:70px;
     font-size: 30px;
 
   }
+   .active {
+  background-color:  #bcd3f7;
+  color: white;
+  }
   </style>
 
 
@@ -446,11 +450,12 @@ font-size:70px;
     <div class="all_pagination">
         <div class="pagination">
             <!--            <li class="page-item"><a class="page-link" href="{{this}}">{{this}}</a></li>-->
-            {{#each pages_count }}
+<!--            {{#each pages_count }}-->
 
-                <a href="{{this}}">{{this}}</a>
-            {{/each}}
+<!--                <a href="{{this}}">{{this}}</a>-->
+<!--            {{/each}}-->
 
+            {{{pagination}}}
         </div>
     </div>
 

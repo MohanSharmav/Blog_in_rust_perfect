@@ -3,18 +3,12 @@ use crate::model::authentication::login_database::{login_database, LoginCheck};
 use actix_http::header::LOCATION;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
-use actix_web::{ web, HttpResponse};
+use actix_web::{web, HttpResponse};
 use actix_web::{HttpMessage as _, HttpRequest, Responder};
-// use std::collections::HashMap;
-// use actix_web_lab::FlashMessage;
-use actix_web_flash_messages::{FlashMessage, Level};
 use handlebars::Handlebars;
 use magic_crypt::MagicCryptTrait;
 use serde::Deserialize;
 use serde_json::json;
-
-
-use actix_web_flash_messages::FlashMessagesMiddleware;
 
 // use actix_web_flash::{FlashResponse};
 // use actix_web_flash_messages::{
@@ -27,7 +21,6 @@ pub struct User {
 pub async fn get_login_page(
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
-
     let html = handlebars
         .render("login", &json!({"yy":"uuihiuhuihiuhuih"}))
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -42,7 +35,6 @@ pub async fn get_data_from_login_page(
     req: HttpRequest,
     _user: Option<Identity>,
     config: web::Data<ConfigurationConstants>,
-    handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let username = &form.username;
     let password = &form.password.to_string();
@@ -97,14 +89,14 @@ pub async fn get_data_from_login_page(
         //
         // FlashMessagesMiddleware::add_message(&req, "failure", "Form submitted successfully");
 
-        let login_fail_message = "Wrong Id Or Password".to_string();
-        let html = handlebars
-            .render("login", &json!({ "flash_message": login_fail_message ,"hello": "world"}))
-            .map_err(actix_web::error::ErrorInternalServerError)?;
+        // let login_fail_message = "Wrong Id Or Password".to_string();
+        // let html = handlebars
+        //     .render("login", &json!({ "flash_message": login_fail_message ,"hello": "world"}))
+        //     .map_err(actix_web::error::ErrorInternalServerError)?;
         // println!("--------------------------------😀");
         Ok(HttpResponse::SeeOther()
             // .insert_header(http::header::LOCATION, "/login")
-            .insert_header((LOCATION, "/login"))
+            .insert_header((LOCATION, "/llogin"))
             .content_type(ContentType::html())
             .finish())
         // Ok(HttpResponse::SeeOther()
@@ -124,4 +116,17 @@ pub async fn check_user(user: Option<Identity>) -> impl Responder {
     } else {
         web::Redirect::to("/")
     }
+}
+
+pub async fn failed_login_page(
+    handlebars: web::Data<Handlebars<'_>>,
+) -> Result<HttpResponse, actix_web::Error> {
+    println!("----------------------------------------------------");
+    let html = handlebars
+        .render("llogin", &json!({"yy":"uuihiuhuihiuhuih"}))
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    Ok(HttpResponse::Ok()
+        .content_type(ContentType::html())
+        .body(html))
 }

@@ -1,9 +1,11 @@
 mod controller;
 mod model;
 
-use crate::controller::admin_function::{admin_category_display, admin_unique_posts_display, new_test};
+use crate::controller::admin_function::{
+    admin_category_display, admin_unique_posts_display, new_test,
+};
 use crate::controller::authentication::login::{
-    check_user, get_data_from_login_page, get_login_page, logout,
+    check_user, failed_login_page, get_data_from_login_page, get_login_page, logout,
 };
 use crate::controller::authentication::register::{get_data_from_register_page, get_register_page};
 use crate::controller::category_controller::{
@@ -11,7 +13,7 @@ use crate::controller::category_controller::{
     page_to_update_category, receive_new_category, receive_updated_category,
 };
 use crate::controller::common_controller::{
-    new_common_page_controller, new_common_page_controller_test, redirect_user, Main_page,
+    main_page, new_common_page_controller, new_common_page_controller_test, redirect_user,
 };
 use crate::controller::constants::ConfigurationConstants;
 use crate::controller::pagination_controller::admin_pagination_display;
@@ -19,21 +21,17 @@ use crate::controller::posts_controller::{
     delete_post, get_new_post, page_to_update_post, receive_new_posts, receive_updated_post,
 };
 use crate::controller::single_post_controller::get_single_post;
-use actix::Response;
 use actix_identity::IdentityMiddleware;
 use actix_session::config::PersistentSession;
 use actix_session::storage::CookieSessionStore;
 use actix_session::SessionMiddleware;
 use actix_web::cookie::Key;
-use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer, Responder, Result};
-// use actix_web_flash_messages::FlashMessagesFramework;
+use actix_web::{web, App, HttpServer, Result};
+use actix_web_flash_messages::storage::CookieMessageStore;
+use actix_web_flash_messages::FlashMessagesFramework;
 use handlebars::Handlebars;
 use magic_crypt::new_magic_crypt;
 use sqlx::postgres::PgPoolOptions;
-
-use actix_web_flash_messages::storage::CookieMessageStore;
-use actix_web_flash_messages::{FlashMessagesFramework, FlashMessagesMiddleware};
-use warp::service;
 
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
@@ -64,7 +62,7 @@ async fn main() -> Result<(), anyhow::Error> {
         database_connection: pool,
     };
     let confi = web::Data::new(config.clone());
-    let message_store = CookieMessageStore::builder(secret_key.clone()).build();
+    // let message_store = CookieMessageStore::builder(secret_key.clone()).build();
 
     let message_store = CookieMessageStore::builder(secret_key.clone()).build();
     let message_framework = FlashMessagesFramework::builder(message_store).build();
@@ -80,8 +78,7 @@ async fn main() -> Result<(), anyhow::Error> {
             .app_data(confi.clone())
             .wrap(message_framework.clone())
             .wrap(IdentityMiddleware::default())
-
-           // .wrap(FlashMiddleware::default())
+            // .wrap(FlashMiddleware::default())
             // .wrap(message_framework.clone())
             .wrap(
                 SessionMiddleware::builder(CookieSessionStore::default(), secret_key.clone())
@@ -90,7 +87,7 @@ async fn main() -> Result<(), anyhow::Error> {
                     .session_lifecycle(PersistentSession::default().session_ttl(COOKIE_DURATION))
                     .build(),
             )
-            .service(web::resource("/posts").to(Main_page))
+            .service(web::resource("/posts").to(main_page))
             .service(web::resource("/").to(redirect_user))
             .service(web::resource("/check").to(check_user))
             // perfect admin url
@@ -144,6 +141,7 @@ async fn main() -> Result<(), anyhow::Error> {
                     .route(web::get().to(get_login_page))
                     .route(web::post().to(get_data_from_login_page)),
             )
+            .service(web::resource("/llogin").route(web::get().to(failed_login_page)))
             .service(web::resource("/logout").to(logout))
             .service(
                 web::resource("/register")
@@ -164,8 +162,7 @@ async fn main() -> Result<(), anyhow::Error> {
                 web::resource("/posts/ben/{page_number}")
                     .route(web::get().to(new_common_page_controller_test)),
             )
-            .service(web::resource("/test")
-                         .route(web::get().to(new_test)))
+            .service(web::resource("/test").route(web::get().to(new_test)))
         // .service(web::resource("/posts/"))
         // .service(web::resource("/{username}/{id}").route(web::get().to(index)))
     })

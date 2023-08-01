@@ -1,8 +1,6 @@
 use crate::controller::constants::ConfigurationConstants;
 use crate::model::category_database::get_all_categories_database;
-use crate::model::database::{
-    CreateNewPost, CreateNewPostWithNullCategory, CreateNewPostWithoutCategory,
-};
+use crate::model::database::CreateNewPost;
 use crate::model::posts_database::{
     create_post_database, create_post_without_category_database, delete_post_database,
     update_post_database,
@@ -10,7 +8,7 @@ use crate::model::posts_database::{
 use crate::model::single_posts_database::query_single_post_in_struct;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
-use actix_web::web::{Query, Redirect};
+use actix_web::web::Redirect;
 use actix_web::{http, web, HttpResponse};
 use handlebars::Handlebars;
 // use serde::de::Unexpected::Option;
@@ -56,7 +54,9 @@ pub async fn receive_new_posts(
     let description = &form.description;
     let category_id = &form.category_id;
     if category_id.clone() == 0_i32 {
-        create_post_without_category_database(title.clone(), description.clone(), db);
+        create_post_without_category_database(title.clone(), description.clone(), db)
+            .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
         Ok(Redirect::to("/admin/posts/page/1"))
     } else {
         create_post_database(title.clone(), description.clone(), &category_id.clone(), db)
