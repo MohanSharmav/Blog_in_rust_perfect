@@ -22,7 +22,6 @@ pub struct User {
 pub async fn get_login_page(
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
-
     let html = handlebars
         .render(
             "auth-login-basic",

@@ -1,9 +1,7 @@
 mod controller;
 mod model;
 
-use crate::controller::admin_function::{
-    admin_category_display, admin_unique_posts_display,
-};
+use crate::controller::admin_function::{admin_category_display, admin_unique_posts_display};
 use crate::controller::authentication::login::{
     check_user, failed_login_page, get_data_from_login_page, get_login_page, logout,
 };
@@ -16,7 +14,9 @@ use crate::controller::common_controller::{
     main_page, new_common_page_controller, new_common_page_controller_test, redirect_user,
 };
 use crate::controller::constants::ConfigurationConstants;
-use crate::controller::pagination_controller::{admin_pagination_display, england_admin_pagination_display};
+use crate::controller::pagination_controller::{
+    admin_pagination_display, england_admin_pagination_display,
+};
 use crate::controller::posts_controller::{
     delete_post, get_new_post, page_to_update_post, receive_new_posts, receive_updated_post,
 };
@@ -101,13 +101,12 @@ async fn main() -> Result<(), anyhow::Error> {
                     .session_lifecycle(PersistentSession::default().session_ttl(COOKIE_DURATION))
                     .build(),
             )
-                   .service(web::resource("/posts").to(main_page))
+            .service(web::resource("/posts").to(main_page))
             .service(web::resource("./templates/").to(redirect_user))
             .service(web::resource("/check").to(check_user))
             // perfect admin url
             // .service(web::resource("/admin/posts/page/{page_number}").to(admin_pagination_display))
             .service(web::resource("/admin/posts/page/{page_number}").to(admin_pagination_display))
-
             .service(
                 web::resource("/admin/categories/new")
                     .route(web::get().to(get_new_category))
@@ -173,30 +172,27 @@ async fn main() -> Result<(), anyhow::Error> {
             )
             // .service(web::resource("/test").route(web::get().to(new_test)))
             .service(web::resource("/ben").to(england_admin_pagination_display))
-            .service(Files::new("/sneat-1.0.0",
-                                "./templates")
-                .show_files_listing())
-            // .service(Files::new("/admin",
-            //                     "./templates")
-            //     .show_files_listing())
+            .service(Files::new("/sneat-1.0.0", "./templates").show_files_listing())
 
-            // .service(Files::new("/",
-            //                     "./templates")
-            //     .show_files_listing())
-            // .service(Files::new("/admin/assets",
-            //                     "./templates/sneat-1.0.0").show_files_listing())
-            // .service(Files::new(".../",
-            //                     "./templates/sneat-1.0.0").show_files_listing())
+        // .service(Files::new("/admin",
+        //                     "./templates")
+        //     .show_files_listing())
 
+        // .service(Files::new("/",
+        //                     "./templates")
+        //     .show_files_listing())
+        // .service(Files::new("/admin/assets",
+        //                     "./templates/sneat-1.0.0").show_files_listing())
+        // .service(Files::new(".../",
+        //                     "./templates/sneat-1.0.0").show_files_listing())
 
-            // .service(Files::new("/assets",
-            //                     "./templates")
-            //     .show_files_listing())
-            //
-            // .service(Files::new("/admin/posts",
-            //                     "./templates/sneat-1.0.0")
-            //     .show_files_listing())
-
+        // .service(Files::new("/assets",
+        //                     "./templates")
+        //     .show_files_listing())
+        //
+        // .service(Files::new("/admin/posts",
+        //                     "./templates/sneat-1.0.0")
+        //     .show_files_listing())
 
         // .service(web::resource("/posts/"))
         // .service(web::resource("/{username}/{id}").route(web::get().to(index)))

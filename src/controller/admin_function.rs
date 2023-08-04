@@ -47,53 +47,53 @@ pub async fn admin_category_display(
     }
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
 
-//     let x1 = r#"
-//     <br>
-// <div class="paginations">
-//  "#;
-//
-//     let y = pages_count.len();
-//
-//     let cp: usize = params.clone() as usize;
-//
-//     let mut pagination_final_string = String::new();
-//     pagination_final_string.push_str(x1);
-//     for i in 1..y + 1 {
-//         if i == cp {
-//             //admin/categories/1/page/1
-//             let tag_and_url = r#"<a class="active"  href="/admin/categories/"#;
-//             pagination_final_string.push_str(tag_and_url);
-//             let category_id = category_input.clone();
-//             pagination_final_string.push_str(&*category_id);
-//             let static_keyword_page = r#"/page/"#;
-//             pagination_final_string.push_str(&*static_keyword_page);
-//             let href_link = i.to_string();
-//             pagination_final_string.push_str(&*href_link);
-//             let end_of_tag = r#"">"#;
-//             pagination_final_string.push_str(end_of_tag);
-//             let text_inside_tag = i.to_string();
-//             pagination_final_string.push_str(&*text_inside_tag);
-//
-//             let close_tag = r#"</a>"#;
-//             pagination_final_string.push_str(close_tag);
-//         } else {
-//             let tag_and_url = r#"<a style="margin: 0 4px;" href="/admin/categories/"#;
-//             pagination_final_string.push_str(tag_and_url);
-//             let category_id = category_input.clone();
-//             pagination_final_string.push_str(&*category_id);
-//             let static_keyword_page = r#"/page/"#;
-//             pagination_final_string.push_str(&*static_keyword_page);
-//             let href_link = i.to_string();
-//             pagination_final_string.push_str(&*href_link);
-//             let end_of_tag = r#"">"#;
-//             pagination_final_string.push_str(end_of_tag);
-//             let text_inside_tag = i.to_string();
-//             pagination_final_string.push_str(&*text_inside_tag);
-//
-//             let close_tag = r#"</a>"#;
-//             pagination_final_string.push_str(close_tag);
-//         }
-//     }
+    //     let x1 = r#"
+    //     <br>
+    // <div class="paginations">
+    //  "#;
+    //
+    //     let y = pages_count.len();
+    //
+    //     let cp: usize = params.clone() as usize;
+    //
+    //     let mut pagination_final_string = String::new();
+    //     pagination_final_string.push_str(x1);
+    //     for i in 1..y + 1 {
+    //         if i == cp {
+    //             //admin/categories/1/page/1
+    //             let tag_and_url = r#"<a class="active"  href="/admin/categories/"#;
+    //             pagination_final_string.push_str(tag_and_url);
+    //             let category_id = category_input.clone();
+    //             pagination_final_string.push_str(&*category_id);
+    //             let static_keyword_page = r#"/page/"#;
+    //             pagination_final_string.push_str(&*static_keyword_page);
+    //             let href_link = i.to_string();
+    //             pagination_final_string.push_str(&*href_link);
+    //             let end_of_tag = r#"">"#;
+    //             pagination_final_string.push_str(end_of_tag);
+    //             let text_inside_tag = i.to_string();
+    //             pagination_final_string.push_str(&*text_inside_tag);
+    //
+    //             let close_tag = r#"</a>"#;
+    //             pagination_final_string.push_str(close_tag);
+    //         } else {
+    //             let tag_and_url = r#"<a style="margin: 0 4px;" href="/admin/categories/"#;
+    //             pagination_final_string.push_str(tag_and_url);
+    //             let category_id = category_input.clone();
+    //             pagination_final_string.push_str(&*category_id);
+    //             let static_keyword_page = r#"/page/"#;
+    //             pagination_final_string.push_str(&*static_keyword_page);
+    //             let href_link = i.to_string();
+    //             pagination_final_string.push_str(&*href_link);
+    //             let end_of_tag = r#"">"#;
+    //             pagination_final_string.push_str(end_of_tag);
+    //             let text_inside_tag = i.to_string();
+    //             pagination_final_string.push_str(&*text_inside_tag);
+    //
+    //             let close_tag = r#"</a>"#;
+    //             pagination_final_string.push_str(close_tag);
+    //         }
+    //     }
     let x1 = r#"
      <div class="card mb-4">
                                 <!-- Basic Pagination -->
@@ -158,9 +158,8 @@ pub async fn admin_category_display(
     .await
     .map_err(actix_web::error::ErrorInternalServerError)?;
 
-
     let mut test = String::new();
-    let x=r#"<p>workins</p> "#;
+    let x = r#"<p>workins</p> "#;
     test.push_str(x);
     let html = handlebars
         .render(

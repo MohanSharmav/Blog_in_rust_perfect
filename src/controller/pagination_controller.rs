@@ -65,7 +65,6 @@ pub async fn admin_pagination_display(
 
     let mut pagination_final_string = String::new();
 
-
     let paginators = pagination_logic(&par, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -78,15 +77,14 @@ pub async fn admin_pagination_display(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-
-    let test=r#"<div class="card mb-4">
+    let test = r#"<div class="card mb-4">
                                 <!-- Basic Pagination -->
                                    <!-- Basic Pagination -->
                                                 <nav aria-label="Page navigation">
                                                     <ul class="pagination">
                                             "#;
 
-pagination_final_string.push_str(test);
+    pagination_final_string.push_str(test);
     for i in 1..y + 1 {
         if i == cp {
             //"/posts/category/{category_id}/page/{page_number}"
@@ -120,7 +118,7 @@ pagination_final_string.push_str(test);
             pagination_final_string.push_str(close_tag);
         }
     }
-let v=r#"</ul>
+    let v = r#"</ul>
         </nav>"#;
     pagination_final_string.push_str(v);
     let htmls = handlebars.render("admin_post_table", &json!({"a":&paginators,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category,"pagination":pagination_final_string}))
@@ -190,12 +188,11 @@ pub async fn get_pagination_for_all_categories_list(
 pub async fn england_admin_pagination_display(
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
-
     // mut params: Option<Query<PaginationParams>>,
 ) -> Result<HttpResponse, actix_web::Error> {
-
-    let htmls = handlebars.render("admin_category_table", &json!({"SASa":"ASSA"}))
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+    let htmls = handlebars
+        .render("admin_category_table", &json!({"SASa":"ASSA"}))
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
         .content_type(ContentType::html())
