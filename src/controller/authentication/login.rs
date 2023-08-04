@@ -9,6 +9,7 @@ use handlebars::Handlebars;
 use magic_crypt::MagicCryptTrait;
 use serde::Deserialize;
 use serde_json::json;
+use std::fs;
 
 // use actix_web_flash::{FlashResponse};
 // use actix_web_flash_messages::{
@@ -21,9 +22,17 @@ pub struct User {
 pub async fn get_login_page(
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
+
     let html = handlebars
-        .render("login", &json!({"yy":"uuihiuhuihiuhuih"}))
+        .render(
+            "auth-login-basic",
+            &json!({"p":"home_pageall_posts_in_struct"}),
+        )
         .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    // let html = handlebars
+    // .render("templates/sneat-1.0.0/html/auth-login-basic.html",&json!({"yy":"uuihiuhuihiuhuih"}))
+    //     .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
         .content_type(ContentType::html())

@@ -39,6 +39,5 @@ actix-web-flash-messages = {version="0.4.2",features=["cookies","sessions"]}
 ansi_term = "0.12"
 
 build_html = "2.4.0"
+liquid = "0.26.4"
 html_parser = "0.7.0"
-
-

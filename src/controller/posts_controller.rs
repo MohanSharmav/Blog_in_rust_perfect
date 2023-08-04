@@ -6,6 +6,7 @@ use crate::model::posts_database::{
     update_post_database,
 };
 use crate::model::single_posts_database::query_single_post_in_struct;
+use actix_http::header::LOCATION;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
 use actix_web::web::Redirect;
@@ -153,7 +154,7 @@ pub async fn receive_updated_post(
     form: web::Form<CreateNewPost>,
     _current_post_name: web::Path<String>,
     config: web::Data<ConfigurationConstants>,
-) -> Result<Redirect, actix_web::Error> {
+) -> Result<HttpResponse, actix_web::Error> {
     let id = id.into_inner();
     let db = &config.database_connection;
     let title = &form.title;
@@ -163,8 +164,12 @@ pub async fn receive_updated_post(
     update_post_database(title, description, id, category_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    Ok(Redirect::to("/admin/posts/page/1"))
-
+    // Ok(Redirect::to("/admin/posts/page/1"))
+    Ok(HttpResponse::SeeOther()
+        // .insert_header(http::header::LOCATION, "/login")
+        .insert_header((LOCATION, "/admin/categories/page/1"))
+        .content_type(ContentType::html())
+        .finish())
     // let success_message = "the post created successfully";
     // let html = handlebars
     //     .render("message_display", &json!({ "message": success_message }))

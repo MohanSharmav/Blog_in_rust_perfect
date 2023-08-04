@@ -12,7 +12,7 @@ pub async fn get_register_page(
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let html = handlebars
-        .render("register", &json!({"yy":"uuihiuhuihiuhuih"}))
+        .render("auth-register-basic", &json!({"yy":"uuihiuhuihiuhuih"}))
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()

@@ -432,8 +432,9 @@ input[type=submit] {
    <label>Enter New Category Name</label>
     {{#each category_old_name}}
     <input type="text" name="name"   placeholder="name" class="form-control" value="{{this.name}}"><br>
+    {{/each}}
+
     <input type="submit" value="Update Category">
-{{/each}}
 </form>
 </section>
 </div>

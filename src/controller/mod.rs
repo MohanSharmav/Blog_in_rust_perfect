@@ -7,3 +7,4 @@ pub(crate) mod new;
 pub(crate) mod pagination_controller;
 pub(crate) mod posts_controller;
 pub(crate) mod single_post_controller;
+pub(crate) mod test_liquid;

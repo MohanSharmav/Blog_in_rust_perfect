@@ -9,10 +9,11 @@ use crate::model::category_database::{
 };
 use crate::model::database::CreateNewCategory;
 use crate::model::pagination_database::category_pagination_logic;
+use actix_http::header::LOCATION;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
 use actix_web::web::Redirect;
-use actix_web::{http, web, HttpResponse};
+use actix_web::{http, web, HttpResponse, HttpResponseBuilder};
 use anyhow::Result;
 use handlebars::Handlebars;
 use serde_json::json;
@@ -106,7 +107,7 @@ pub async fn get_all_categories_controller(
 
     let html = handlebars
         .render(
-            "all_categories",
+            "admin_category_table",
             &json!({ "pagination":pagination_final_string,"z": &all_categories,"o":all_category,"pages_count":pages_count}),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -132,7 +133,7 @@ pub async fn get_new_category(
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
-        .render("new_category", &json!({"o":"ax","o":all_category}))
+        .render("new_category_final", &json!({"o":"ax","o":all_category}))
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
@@ -154,7 +155,7 @@ pub async fn receive_new_category(
     create_new_category_database(db, name)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    Ok(Redirect::to("/admin/posts/page/1"))
+    Ok(Redirect::to("/admin/categories/page/1"))
 }
 
 pub async fn delete_category(
@@ -223,7 +224,7 @@ pub async fn receive_updated_category(
     form: web::Form<CreateNewCategory>,
     current_category_name: web::Path<String>,
     config: web::Data<ConfigurationConstants>,
-) -> Result<Redirect, actix_web::Error> {
+) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
     let _current_post_name = &current_category_name.into_inner();
     let name = &form.name;
@@ -231,7 +232,12 @@ pub async fn receive_updated_category(
     update_category_database(name, category_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    Ok(Redirect::to("/admin/categories/page/1"))
+    Ok(HttpResponse::SeeOther()
+        // .insert_header(http::header::LOCATION, "/login")
+        .insert_header((LOCATION, "/admin/categories/page/1"))
+        .content_type(ContentType::html())
+        .finish())
+    // Ok(Redirect::to("/admin/categories/page/1"))
     // let success_message = "the post created successfully";
     // let html = handlebars
     //     .render("message_display", &json!({ "message": success_message }))
