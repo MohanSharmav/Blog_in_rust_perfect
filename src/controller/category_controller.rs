@@ -46,11 +46,12 @@ pub async fn get_all_categories_controller(
     let posts_per_page_constant = set_posts_per_page().await;
     let param = params.into_inner();
 
-    let x1 = r#"
-    <br>
-<div class="paginations">
- "#;
-
+    let x1 = r#"<div class="card mb-4">
+                                <!-- Basic Pagination -->
+                                   <!-- Basic Pagination -->
+                                                <nav aria-label="Page navigation">
+                                                    <ul class="pagination">
+                                            "#;
     let y = pages_count.len();
 
     let cp: usize = param.clone() as usize;
@@ -60,27 +61,41 @@ pub async fn get_all_categories_controller(
     for i in 1..y + 1 {
         if i == cp {
             // /admin/categories/page/{page_number}")
-            let tag_and_url = r#"<a class="active"  href="/admin/categories/page/"#;
+            let tag_and_url = r#"
+
+<li class="page-item active">
+              <a class="page-link "   href="/admin/categories/"#;
+
             pagination_final_string.push_str(tag_and_url);
             let href_link = i.to_string();
             pagination_final_string.push_str(&*href_link);
-            let end_of_tag = r#"">"#;
-            pagination_final_string.push_str(end_of_tag);
+            let page_constant = r#"/page/1">"#;
+            pagination_final_string.push_str(page_constant);
+            // let text_inside_tag = i.to_string();
+            // pagination_final_string.push_str(&*text_inside_tag);
+            // let end_of_tag = r#"">"#;
+            // pagination_final_string.push_str(end_of_tag);
+
             let text_inside_tag = i.to_string();
+
             pagination_final_string.push_str(&*text_inside_tag);
 
             let close_tag = r#"</a>"#;
             pagination_final_string.push_str(close_tag);
         } else {
-            let tag_and_url = r#"<a style="margin: 0 4px;" href="/admin/categories/page/"#;
+            let tag_and_url = r#"
+
+<li class="page-item active">
+              <a class="page-link "   href="/admin/categories/"#;
+
             pagination_final_string.push_str(tag_and_url);
             let href_link = i.to_string();
             pagination_final_string.push_str(&*href_link);
-            let end_of_tag = r#"">"#;
-            pagination_final_string.push_str(end_of_tag);
+            let page_constant = r#"/page/1">"#;
+            pagination_final_string.push_str(page_constant);
             let text_inside_tag = i.to_string();
-            pagination_final_string.push_str(&*text_inside_tag);
 
+            pagination_final_string.push_str(&*text_inside_tag);
             let close_tag = r#"</a>"#;
             pagination_final_string.push_str(close_tag);
         }
