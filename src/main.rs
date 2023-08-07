@@ -50,8 +50,8 @@ async fn main() -> Result<(), anyhow::Error> {
     #[cfg(not(feature = "cors_for_local_development"))]
     let cookie_secure = true;
     let mut handlebars = Handlebars::new();
-    handlebars.register_templates_directory(".html", "./templates/sneat-1.0.0/html/")?;
-    handlebars.register_templates_directory(".hbs", "./templates/sneat-1.0.0/html/")?;
+    handlebars.register_templates_directory(".html", "./templates/html/")?;
+    handlebars.register_templates_directory(".hbs", "./templates/html/")?;
 
     dotenv::dotenv()?;
     let value = std::env::var("MAGIC_KEY")?;
@@ -172,7 +172,8 @@ async fn main() -> Result<(), anyhow::Error> {
             )
             // .service(web::resource("/test").route(web::get().to(new_test)))
             .service(web::resource("/ben").to(england_admin_pagination_display))
-            .service(Files::new("/sneat-1.0.0", "./templates").show_files_listing())
+            .service(Files::new("/",
+                                "./templates").show_files_listing())
 
         // .service(Files::new("/admin",
         //                     "./templates")
