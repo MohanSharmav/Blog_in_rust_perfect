@@ -101,6 +101,7 @@ async fn main() -> Result<(), anyhow::Error> {
                     .session_lifecycle(PersistentSession::default().session_ttl(COOKIE_DURATION))
                     .build(),
             )
+            .service(web::resource( "/").to(redirect_user))
             .service(web::resource("/posts").to(main_page))
             .service(web::resource("./templates/").to(redirect_user))
             .service(web::resource("/check").to(check_user))

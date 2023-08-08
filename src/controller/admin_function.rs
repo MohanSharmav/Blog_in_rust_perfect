@@ -47,64 +47,12 @@ pub async fn admin_category_display(
     }
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
 
-    //     let x1 = r#"
-    //     <br>
-    // <div class="paginations">
-    //  "#;
-    //
-    //     let y = pages_count.len();
-    //
-    //     let cp: usize = params.clone() as usize;
-    //
-    //     let mut pagination_final_string = String::new();
-    //     pagination_final_string.push_str(x1);
-    //     for i in 1..y + 1 {
-    //         if i == cp {
-    //             //admin/categories/1/page/1
-    //             let tag_and_url = r#"<a class="active"  href="/admin/categories/"#;
-    //             pagination_final_string.push_str(tag_and_url);
-    //             let category_id = category_input.clone();
-    //             pagination_final_string.push_str(&*category_id);
-    //             let static_keyword_page = r#"/page/"#;
-    //             pagination_final_string.push_str(&*static_keyword_page);
-    //             let href_link = i.to_string();
-    //             pagination_final_string.push_str(&*href_link);
-    //             let end_of_tag = r#"">"#;
-    //             pagination_final_string.push_str(end_of_tag);
-    //             let text_inside_tag = i.to_string();
-    //             pagination_final_string.push_str(&*text_inside_tag);
-    //
-    //             let close_tag = r#"</a>"#;
-    //             pagination_final_string.push_str(close_tag);
-    //         } else {
-    //             let tag_and_url = r#"<a style="margin: 0 4px;" href="/admin/categories/"#;
-    //             pagination_final_string.push_str(tag_and_url);
-    //             let category_id = category_input.clone();
-    //             pagination_final_string.push_str(&*category_id);
-    //             let static_keyword_page = r#"/page/"#;
-    //             pagination_final_string.push_str(&*static_keyword_page);
-    //             let href_link = i.to_string();
-    //             pagination_final_string.push_str(&*href_link);
-    //             let end_of_tag = r#"">"#;
-    //             pagination_final_string.push_str(end_of_tag);
-    //             let text_inside_tag = i.to_string();
-    //             pagination_final_string.push_str(&*text_inside_tag);
-    //
-    //             let close_tag = r#"</a>"#;
-    //             pagination_final_string.push_str(close_tag);
-    //         }
-    //     }
     let x1 = r#"
      <div class="card mb-4">
                                 <!-- Basic Pagination -->
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col">
-                                            <div class="demo-inline-spacing">
-                                                <!-- Basic Pagination -->
+                                   <!-- Basic Pagination -->
                                                 <nav aria-label="Page navigation">
                                                     <ul class="pagination">
-
  "#;
 
     let y = pages_count.len();
@@ -116,7 +64,9 @@ pub async fn admin_category_display(
     for i in 1..y + 1 {
         if i == cp {
             //admin/categories/1/page/1
-            let tag_and_url = r#"<a class="active"  href="/admin/categories/"#;
+            let tag_and_url = r#"
+            <li class="page-item active">
+              <a class="page-link "  href="/admin/categories/"#;
             pagination_final_string.push_str(tag_and_url);
             let category_id = category_input.clone();
             pagination_final_string.push_str(&*category_id);
@@ -132,7 +82,9 @@ pub async fn admin_category_display(
             let close_tag = r#"</a>"#;
             pagination_final_string.push_str(close_tag);
         } else {
-            let tag_and_url = r#"<a style="margin: 0 4px;" href="/admin/categories/"#;
+            let tag_and_url = r#"<li class="page-item">
+              <a class="page-link "   href="/admin/categories/page/"
+            "#;
             pagination_final_string.push_str(tag_and_url);
             let category_id = category_input.clone();
             pagination_final_string.push_str(&*category_id);
@@ -163,10 +115,10 @@ pub async fn admin_category_display(
     test.push_str(x);
     let html = handlebars
         .render(
-            "admin_categories_page",
+            "admin_separate_categories",
             &json!({"testiii":test,"pagination":pagination_final_string,"tiger":&category_postinng,"pages_count":&pages_count,"o":all_category}),
         )
-        .map_err(actix_web::error::ErrorInternalServerError)?;
+       .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
         .content_type(ContentType::html())
@@ -209,7 +161,7 @@ pub async fn admin_unique_posts_display(
 //     handlebars: web::Data<Handlebars<'_>>,
 // ) -> Result<HttpResponse, actix_web::Error> {
 //     let params = 4;
-//     let db = &config.database_connection;
+//     let db = &config.databasjijje_connection;
 //     let total_posts_length = perfect_pagination_logic(db).await?;
 //
 //     let posts_per_page_constant = set_posts_per_page().await as i64;

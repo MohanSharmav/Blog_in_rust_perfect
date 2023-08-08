@@ -64,37 +64,27 @@ pub async fn get_all_categories_controller(
             let tag_and_url = r#"
 
 <li class="page-item active">
-              <a class="page-link "   href="/admin/categories/"#;
-
+              <a class="page-link "   href="/admin/categories/page/"#;
             pagination_final_string.push_str(tag_and_url);
             let href_link = i.to_string();
             pagination_final_string.push_str(&*href_link);
-            let page_constant = r#"/page/1">"#;
+            let page_constant = r#"">"#;
             pagination_final_string.push_str(page_constant);
-            // let text_inside_tag = i.to_string();
-            // pagination_final_string.push_str(&*text_inside_tag);
-            // let end_of_tag = r#"">"#;
-            // pagination_final_string.push_str(end_of_tag);
-
             let text_inside_tag = i.to_string();
-
             pagination_final_string.push_str(&*text_inside_tag);
-
             let close_tag = r#"</a>"#;
             pagination_final_string.push_str(close_tag);
         } else {
             let tag_and_url = r#"
 
-<li class="page-item active">
-              <a class="page-link "   href="/admin/categories/"#;
-
+<li class="page-item">
+              <a class="page-link "   href="/admin/categories/page/"#;
             pagination_final_string.push_str(tag_and_url);
             let href_link = i.to_string();
             pagination_final_string.push_str(&*href_link);
-            let page_constant = r#"/page/1">"#;
+            let page_constant = r#"">"#;
             pagination_final_string.push_str(page_constant);
             let text_inside_tag = i.to_string();
-
             pagination_final_string.push_str(&*text_inside_tag);
             let close_tag = r#"</a>"#;
             pagination_final_string.push_str(close_tag);
@@ -148,7 +138,7 @@ pub async fn get_new_category(
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
-        .render("new_category_final", &json!({"o":"ax","o":all_category}))
+        .render("new_category", &json!({"o":"ax","o":all_category}))
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
