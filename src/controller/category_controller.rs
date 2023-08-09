@@ -22,7 +22,6 @@ pub async fn get_all_categories_controller(
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
-    // mut params: Option<Query<PaginationParams>>,
     params: web::Path<i32>,
 ) -> Result<HttpResponse, actix_web::Error> {
     if user.is_none() {
@@ -36,16 +35,13 @@ pub async fn get_all_categories_controller(
     let posts_per_page_constant = set_posts_per_page().await as i64;
     let mut posts_per_page = total_posts_length / posts_per_page_constant;
     let check_remainder = total_posts_length % posts_per_page_constant;
-
     if check_remainder != 0 {
         posts_per_page += 1;
     }
     let posts_per_page = posts_per_page as usize;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
-
     let posts_per_page_constant = set_posts_per_page().await;
     let param = params.into_inner();
-
     let x1 = r#"<div class="card mb-4">
                                 <!-- Basic Pagination -->
                                    <!-- Basic Pagination -->
@@ -53,14 +49,11 @@ pub async fn get_all_categories_controller(
                                                     <ul class="pagination">
                                             "#;
     let y = pages_count.len();
-
     let cp: usize = param.clone() as usize;
-
     let mut pagination_final_string = String::new();
     pagination_final_string.push_str(x1);
     for i in 1..y + 1 {
         if i == cp {
-            // /admin/categories/page/{page_number}")
             let tag_and_url = r#"
 
 <li class="page-item active">
@@ -91,20 +84,10 @@ pub async fn get_all_categories_controller(
         }
     }
 
-    // let pari = params.get_or_insert(Query(PaginationParams::default()));
-    // let current_pag = pari.0;
-    // let _current_page = current_pag.page;
-
-    // let par=params.unwrap_or_else(1);
-    // let parii=par.page;
-
     let all_category = get_all_categories_database(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    // get_all_categories_database
-    // let all_categories = get_all_categories_database(db,)
-    //     .await
-    //     .map_err(actix_web::error::ErrorInternalServerError)?;
+
     let all_categories =
         get_all_categories_database_with_pagination_display(db, param, posts_per_page_constant)
             .await
@@ -166,27 +149,12 @@ pub async fn delete_category(
     id: web::Path<String>,
     config: web::Data<ConfigurationConstants>,
 ) -> Result<Redirect, actix_web::Error> {
-    // if user.is_none() {
-    //     return Ok(HttpResponse::SeeOther()
-    //         .insert_header((http::header::LOCATION, "/"))
-    //         .body(""));
-    // }
     let to_delete_category = &id.into_inner();
     let db = &config.database_connection;
     delete_category_database(db, to_delete_category)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     Ok(Redirect::to("/admin/categories/page/1"))
-
-    //
-    // let success_message = "the category deleted successfully";
-    // let html = handlebars
-    //     .render("message_display", &json!({ "message": success_message }))
-    //     .map_err(actix_web::error::ErrorInternalServerError)?;
-    //
-    // Ok(HttpResponse::Ok()
-    //     .content_type(ContentType::html())
-    //     .body(html))
 }
 
 pub async fn page_to_update_category(
@@ -207,10 +175,10 @@ pub async fn page_to_update_category(
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let to_be_updated_category = to_be_updated_category.clone();
-
     let x = get_all_specific_category_database(to_be_updated_category, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
+
     let html = handlebars
         .render(
             "update_category",
@@ -241,20 +209,9 @@ pub async fn receive_updated_category(
         .insert_header((LOCATION, "/admin/categories/page/1"))
         .content_type(ContentType::html())
         .finish())
-    // Ok(Redirect::to("/admin/categories/page/1"))
-    // let success_message = "the post created successfully";
-    // let html = handlebars
-    //     .render("message_display", &json!({ "message": success_message }))
-    //     .map_err(actix_web::error::ErrorInternalServerError)?;
-    //
-    // Ok(HttpResponse::Ok()
-    //     .content_type(ContentType::html())
-    //     .body(html))
 }
 
 pub async fn get_category_with_pagination(
-    // path: web::Path<String>,
-    // params: web::Query<PaginationParams>,
     info: web::Path<(String, u32)>,
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
@@ -262,36 +219,27 @@ pub async fn get_category_with_pagination(
     let db = &config.database_connection;
     let path = info.clone().0;
     let par = info.into_inner().1 as i32;
-    // let category_input: String = path.();
     let category_input: String = path;
-
     let total_posts_length = category_pagination_logic(&category_input, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    // let par=params.page;
     let posts_per_page_constant = set_posts_per_page().await as i64;
     let mut posts_per_page = total_posts_length / posts_per_page_constant;
     let check_remainder = total_posts_length % posts_per_page_constant;
-
     if check_remainder != 0 {
         posts_per_page += 1;
     }
-    let pages_count: Vec<_> = (1..=posts_per_page).collect();
-
     let x1 = r#"
     <br>
 <div class="paginations">
  "#;
-
+    let pages_count: Vec<_> = (1..=posts_per_page).collect();
     let y = pages_count.len();
-
     let cp: usize = par.clone() as usize;
-
     let mut pagination_final_string = String::new();
     pagination_final_string.push_str(x1);
     for i in 1..y + 1 {
         if i == cp {
-            //"/posts/category/{category_id}/page/{page_number}"
             let tag_and_url = r#"<a class="active"  href="/posts/category/"#;
             pagination_final_string.push_str(tag_and_url);
             let category_id = category_input.clone();
@@ -304,7 +252,6 @@ pub async fn get_category_with_pagination(
             pagination_final_string.push_str(end_of_tag);
             let text_inside_tag = i.to_string();
             pagination_final_string.push_str(&*text_inside_tag);
-
             let close_tag = r#"</a>"#;
             pagination_final_string.push_str(close_tag);
         } else {
@@ -320,7 +267,6 @@ pub async fn get_category_with_pagination(
             pagination_final_string.push_str(end_of_tag);
             let text_inside_tag = i.to_string();
             pagination_final_string.push_str(&*text_inside_tag);
-
             let close_tag = r#"</a>"#;
             pagination_final_string.push_str(close_tag);
         }

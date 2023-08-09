@@ -34,7 +34,6 @@ pub async fn admin_pagination_display(
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
     params: web::Path<i32>,
-    // mut params: Option<Query<PaginationParams>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     if user.is_none() {
         return Ok(HttpResponse::SeeOther()
@@ -43,7 +42,6 @@ pub async fn admin_pagination_display(
     }
     let db = &config.database_connection;
     let total_posts_length = perfect_pagination_logic(db).await?;
-
     let posts_per_page_constant = set_posts_per_page().await as i64;
     let mut posts_per_page = total_posts_length / posts_per_page_constant;
     let check_remainder = total_posts_length % posts_per_page_constant;
@@ -53,16 +51,10 @@ pub async fn admin_pagination_display(
     }
     let posts_per_page = posts_per_page as usize;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    // let pari = params.get_or_insert(Query(PaginationParams::default()));
-    // // let current_pag = pari.0;
-    // let current_page = current_pag.page;
     let current_page = params.clone();
     let par = params.into_inner();
-
     let y = pages_count.len();
-
     let cp: usize = par.clone() as usize;
-
     let mut pagination_final_string = String::new();
 
     let paginators = pagination_logic(&par, db)
@@ -87,8 +79,6 @@ pub async fn admin_pagination_display(
     pagination_final_string.push_str(test);
     for i in 1..y + 1 {
         if i == cp {
-            //"/posts/category/{category_id}/page/{page_number}"
-            // "/admin/posts/page/{page_number}\
             let tag_and_url = r#"
              <li class="page-item active">
               <a class="page-link "   href="/admin/posts/page/"#;
@@ -99,7 +89,6 @@ pub async fn admin_pagination_display(
             pagination_final_string.push_str(end_of_tag);
             let text_inside_tag = i.to_string();
             pagination_final_string.push_str(&*text_inside_tag);
-
             let close_tag = r#"</a></li>"#;
             pagination_final_string.push_str(close_tag);
         } else {
@@ -113,7 +102,6 @@ pub async fn admin_pagination_display(
             pagination_final_string.push_str(end_of_tag);
             let text_inside_tag = i.to_string();
             pagination_final_string.push_str(&*text_inside_tag);
-
             let close_tag = r#"</a></li>"#;
             pagination_final_string.push_str(close_tag);
         }
@@ -188,7 +176,6 @@ pub async fn get_pagination_for_all_categories_list(
 pub async fn england_admin_pagination_display(
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
-    // mut params: Option<Query<PaginationParams>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let htmls = handlebars
         .render("admin_category_table", &json!({"SASa":"ASSA"}))

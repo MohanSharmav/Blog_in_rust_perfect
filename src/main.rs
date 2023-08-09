@@ -1,8 +1,6 @@
-mod controller;
-mod model;
 use crate::controller::admin_function::{admin_category_display, admin_unique_posts_display};
-use crate::controller::authentication::login::{
-    check_user, failed_login_page, get_data_from_login_page, get_login_page, logout,
+use crate::controller::authentication::loginn::{
+    check_user, failed_login_page, logout,
 };
 use crate::controller::authentication::register::{get_data_from_register_page, get_register_page};
 use crate::controller::category_controller::{
@@ -22,7 +20,6 @@ use crate::controller::posts_controller::{
 use crate::controller::single_post_controller::get_single_post;
 use std::fs::DirEntry;
 use std::path::Path;
-// use crate::controller::test_liquid::{liquid, visit_dirs};
 use crate::model::authentication::login_database::login_database;
 use actix_files::Files;
 use actix_identity::IdentityMiddleware;
@@ -30,12 +27,15 @@ use actix_session::config::PersistentSession;
 use actix_session::storage::CookieSessionStore;
 use actix_session::SessionMiddleware;
 use actix_web::cookie::Key;
-use actix_web::{web, App, HttpServer, Result};
+use actix_web::{App, HttpResponse, HttpServer, Result, web};
 use actix_web_flash_messages::storage::CookieMessageStore;
+use actix_web_flash_messages::FlashMessage;
 use actix_web_flash_messages::FlashMessagesFramework;
 use handlebars::Handlebars;
 use magic_crypt::new_magic_crypt;
 use sqlx::postgres::PgPoolOptions;
+use controller::authentication::login::get::get_login_page;
+use controller::authentication::login::post::get_data_from_login_page;
 
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
@@ -52,7 +52,6 @@ async fn main() -> Result<(), anyhow::Error> {
     let mut handlebars = Handlebars::new();
     handlebars.register_templates_directory(".html", "./templates/html/")?;
     handlebars.register_templates_directory(".hbs", "./templates/html/")?;
-
     dotenv::dotenv()?;
     let value = std::env::var("MAGIC_KEY")?;
     let mcrypt = new_magic_crypt!(value, 256); //Creates an instance of the magic crypt library/crate.
@@ -72,8 +71,6 @@ async fn main() -> Result<(), anyhow::Error> {
     let message_store = CookieMessageStore::builder(secret_key.clone()).build();
     let message_framework = FlashMessagesFramework::builder(message_store).build();
 
-
-
     HttpServer::new(move || {
         App::new()
             .app_data(message_framework.clone())
@@ -90,7 +87,8 @@ async fn main() -> Result<(), anyhow::Error> {
                     .session_lifecycle(PersistentSession::default().session_ttl(COOKIE_DURATION))
                     .build(),
             )
-            .service(web::resource( "/").to(redirect_user))
+            // .service(web::resource("/test").to(index))
+            .service(web::resource("/").to(redirect_user))
             .service(web::resource("/posts").to(main_page))
             .service(web::resource("./templates/").to(redirect_user))
             .service(web::resource("/check").to(check_user))
@@ -160,34 +158,7 @@ async fn main() -> Result<(), anyhow::Error> {
             )
             // .service(web::resource("/test").route(web::get().to(new_test)))
             .service(web::resource("/ben").to(england_admin_pagination_display))
-            .service(Files::new("/",
-                                "./templates").show_files_listing())
-
-        // .service(Files::new("/admin",
-        //                     "./templates")
-        //     .show_files_listing())
-
-        // .service(Files::new("/",
-        //                     "./templates")
-        //     .show_files_listing())
-        // .service(Files::new("/admin/assets",
-        //                     "./templates/sneat-1.0.0").show_files_listing())
-        // .service(Files::new(".../",
-        //                     "./templates/sneat-1.0.0").show_files_listing())
-
-        // .service(Files::new("/assets",
-        //                     "./templates")
-        //     .show_files_listing())
-        //
-        // .service(Files::new("/admin/posts",
-        //                     "./templates/sneat-1.0.0")
-        //     .show_files_listing())
-
-        // .service(web::resource("/posts/"))
-        // .service(web::resource("/{username}/{id}").route(web::get().to(index)))
-
-        // .service(web::resource("/new").to(liquid))
-        // .service(web::resource("/{*}").to(get_login_page))
+            .service(Files::new("/", "./templates").show_files_listing())
     })
     .bind("127.0.0.1:8080")?
     .run()

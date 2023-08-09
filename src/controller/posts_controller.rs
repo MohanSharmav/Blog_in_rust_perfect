@@ -1,7 +1,10 @@
 use crate::controller::constants::ConfigurationConstants;
 use crate::model::category_database::get_all_categories_database;
 use crate::model::database::CreateNewPost;
-use crate::model::posts_database::{create_post_database, create_post_without_category_database, delete_post_database, update_post_database, update_post_without_category_database};
+use crate::model::posts_database::{
+    create_post_database, create_post_without_category_database, delete_post_database,
+    update_post_database, update_post_without_category_database,
+};
 use crate::model::single_posts_database::query_single_post_in_struct;
 use actix_http::header::LOCATION;
 use actix_identity::Identity;
@@ -9,9 +12,7 @@ use actix_web::http::header::ContentType;
 use actix_web::web::Redirect;
 use actix_web::{http, web, HttpResponse};
 use handlebars::Handlebars;
-// use serde::de::Unexpected::Option;
 use serde_json::json;
-// use core::option::Option;
 
 pub async fn get_new_post(
     config: web::Data<ConfigurationConstants>,
@@ -75,7 +76,6 @@ pub async fn delete_post(
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(Redirect::to("/admin/posts/page/1"))
-
 }
 
 pub async fn page_to_update_post(
@@ -124,7 +124,7 @@ pub async fn receive_updated_post(
     let description = &form.description;
     let category_id = &form.category_id;
     if category_id.clone() == 0_i32 {
-        update_post_without_category_database(title.clone(), description.clone(),id.clone(), db)
+        update_post_without_category_database(title.clone(), description.clone(), id.clone(), db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -133,11 +133,10 @@ pub async fn receive_updated_post(
             .insert_header((LOCATION, "/admin/posts/page/1"))
             .content_type(ContentType::html())
             .finish())
-    }else {
+    } else {
         update_post_database(title, description, id, category_id, db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
-        // Ok(Redirect::to("/admin/posts/page/1"))
         Ok(HttpResponse::SeeOther()
             // .insert_header(http::header::LOCATION, "/login")
             .insert_header((LOCATION, "/admin/posts/page/1"))

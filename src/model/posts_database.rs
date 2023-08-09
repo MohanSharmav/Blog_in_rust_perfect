@@ -81,10 +81,9 @@ pub async fn create_post_without_category_database(
 pub async fn update_post_without_category_database(
     title: String,
     description: String,
-  id:i32,
+    id: i32,
     db: &Pool<Postgres>,
-
-)->Result<(),anyhow::Error>{
+) -> Result<(), anyhow::Error> {
     sqlx::query("update posts set title=$1 ,description=$2 where id=$3")
         .bind(title)
         .bind(description)
@@ -97,5 +96,5 @@ pub async fn update_post_without_category_database(
         .execute(db)
         .await?;
 
-Ok(())
+    Ok(())
 }
