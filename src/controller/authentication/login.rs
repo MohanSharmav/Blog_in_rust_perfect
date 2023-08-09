@@ -10,6 +10,10 @@ use magic_crypt::MagicCryptTrait;
 use serde::Deserialize;
 use serde_json::json;
 use std::fs;
+use actix_web::error::InternalError;
+// use actix_web_flash_messages::FlashMessagesMiddleware;
+// use actix_session::Session;
+use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages};
 
 // use actix_web_flash::{FlashResponse};
 // use actix_web_flash_messages::{
@@ -22,16 +26,20 @@ pub struct User {
 pub async fn get_login_page(
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
+
+    //
+    // let mut error_html = String::new();
+    // for m in flash_messages.iter() {
+    //     writeln!(error_html, "{}", m.content()).unwrap();
+    // }
+
     let html = handlebars
         .render(
             "auth-login-basic",
-            &json!({"p":"home_pageall_posts_in_struct"}),
+            &json!({"m":"ASs"}),
+
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    // let html = handlebars
-    // .render("templates/sneat-1.0.0/html/auth-login-basic.html",&json!({"yy":"uuihiuhuihiuhuih"}))
-    //     .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
         .content_type(ContentType::html())
@@ -61,57 +69,23 @@ pub async fn get_data_from_login_page(
             .insert_header((LOCATION, "/admin/posts/page/1"))
             .finish())
     } else {
-        // HttpResponse::Unauthorized().body("Invalid username or password");
-        // let  c=HttpResponse::SeeOther()
-        //     .insert_header((LOCATION, "/login"))
-        //         .status(StatusCode::TEMPORARY_REDIRECT)
-        //     .finish();
-        // Ok(c)
-        // FlashMessage::debug("wrong password").send();
-        // FlashMessage::new("How is it going?".to_string(), Level::Debug).send();
-        // FlashMessage::success("adasds");
-        //   FlashMessage::info("failed to login".to_string()).send();
-        // let x = FlashMessage::info("failed to login".to_string()).send();
-        // // let flash: Option<FlashMessage> = FlashMessage::extract(&req);
-        //
-        // #[derive(Serialize)]
-        // pub struct TemplateContext {
-        //     // Add any other data you want to pass to the template here
-        //   pub  flash_messages: Vec<String>,
-        // }
-        //
-        // // let mut data = HashMap::new();
-        // // if let Some(flash_msg) = flash {
-        // //     let category = flash_msg.category();
-        // //     let message = flash_msg.message();
-        // //     data.insert("flash_category", category.to_string());
-        // //     data.insert("flash_message", message);
-        // // }
-        // let flash_messages = FlashMessagesMiddleware::get_messages(&req)
-        //     .unwrap_or_else(Vec::new);
-        //
-        // let context = TemplateContext {
-        //     flash_messages,
-        // };
-        //
-        //
-        // FlashMessagesMiddleware::add_message(&req, "failure", "Form submitted successfully");
 
-        // let login_fail_message = "Wrong Id Or Password".to_string();
-        // let html = handlebars
-        //     .render("login", &json!({ "flash_message": login_fail_message ,"hello": "world"}))
-        //     .map_err(actix_web::error::ErrorInternalServerError)?;
-        // println!("--------------------------------😀");
         Ok(HttpResponse::SeeOther()
             // .insert_header(http::header::LOCATION, "/login")
-            .insert_header((LOCATION, "/llogin"))
+            .insert_header((LOCATION, "/login"))
             .content_type(ContentType::html())
             .finish())
-        // Ok(HttpResponse::SeeOther()
-        //     .insert_header((LOCATION, "/login"))
-        //     .finish())
+
     }
 }
+// async fn login_redirect() -> InternalError<actix_web::Error> {
+//     // let e=actix_web::Error {e: val };
+//     FlashMessage::error("no credential".to_string()).send();
+//     let response = HttpResponse::SeeOther()
+//         .insert_header((LOCATION, "/login"))
+//         .finish();
+//     InternalError::from_response(e, response)
+// }
 
 pub async fn logout(id: Identity) -> impl Responder {
     id.logout();

@@ -277,78 +277,69 @@
           <!-- Bootstrap Dark Table -->
           <div class="card">
             <div>
-              <h5 class="card-header"  style="float:left"> Posts</h5>
+              <h5 class="card-header"  style="float:left"> Category</h5>
             </div>
-            <form action="http://localhost:8080/admin/posts" method="post">
-
             <div class="col-md-6">
               <div class="card mb-4">
-                <h5 class="card-header"></h5>
                 <div class="card-body">
-                  <div class="mb-3">
+                  <div class="form-floating">
+                    <form action="http://localhost:8080/admin/category/{{to_be_updated_post}}/edit" method="post">
+                      <div>
+                        {{#each category_old_name}}
 
-                    <label for="exampleFormControlInput1" class="form-label">Title</label>
-                    <input
-                            type="text"
-                            class="form-control"
-                            name="title"
-                            id="exampleFormControlInput1"
-                            placeholder="Cricket"
-                    />
-                  </div>
-                  <div class="mb-3">
-                    <label for="exampleFormControlTextarea1" class="form-label">Description</label>
-                    <textarea class="form-control" name="description" id="exampleFormControlTextarea1" rows="3"></textarea>
-                  </div>
-                  <div class="mb-3">
-                    <label  class="form-label"> select category</label>
-                    <select class="form-select" id="category_id" name="category_id" aria-label="Default select example">
-                      <option value="0" >No category</option>
-                      {{#each o}}
-                      <option value="{{this.id}}">{{this.name}}</option>
-                      {{/each}}
-                    </select>
+                        <input
+                                type="text"
+                                class="form-control"
+                                name="name"
+                                id="floatingInput"
+                                placeholder="name"
+                                aria-describedby="floatingInputHelp"
+                                value="{{this.name}}"
+                        />
+                        {{/each}}
+                        <div id="floatingInputHelp" class="form-text">
+                          <button type="submit" class="btn btn-primary">
+                            <span></span>
+                            &nbsp; Create
+                          </button>
+                          <!--                                            <input type="submit" value="Create New category">-->
+
+                        </div>
+
+                      </div>
+                    </form>
                   </div>
                 </div>
-                <button type="submit" class="btn btn-primary">
-                  <span></span>
-                  &nbsp; Create
-                </button>
+
+                <!--/ Bootstrap Dark Table -->
               </div>
-
             </div>
+          </div></div>
+      </div>
+      <!-- Bootstrap Table with Header - Dark -->
 
 
-            </form>
-            <!--/ Bootstrap Dark Table -->
-          </div>
-        </div>
-      </div></div>
+      <!-- Core JS -->
+      <!-- build:js assets/vendor/js/core.js -->
+      <script src="/assets/vendor/libs/jquery/jquery.js"></script>
+      <script src="/assets/vendor/libs/popper/popper.js"></script>
+      <script src="/assets/vendor/js/bootstrap.js"></script>
+      <script src="/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+
+      <script src="/assets/vendor/js/menu.js"></script>
+      <!-- endbuild -->
+
+      <!-- Vendors JS -->
+
+      <!-- Main JS -->
+      <script src="/assets/js/main.js"></script>
+
+      <!-- Page JS -->
+
+      <!-- Place this tag in your head or just before your close body tag. -->
+      <script async defer src="https://buttons.github.io/buttons.js"></script>
+    </div>
   </div>
-  <!-- Bootstrap Table with Header - Dark -->
-
-
-  <!-- Core JS -->
-  <!-- build:js assets/vendor/js/core.js -->
-  <script src="/assets/vendor/libs/jquery/jquery.js"></script>
-  <script src="/assets/vendor/libs/popper/popper.js"></script>
-  <script src="/assets/vendor/js/bootstrap.js"></script>
-  <script src="/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-
-  <script src="/assets/vendor/js/menu.js"></script>
-  <!-- endbuild -->
-
-  <!-- Vendors JS -->
-
-  <!-- Main JS -->
-  <script src="/assets/js/main.js"></script>
-
-  <!-- Page JS -->
-
-  <!-- Place this tag in your head or just before your close body tag. -->
-  <script async defer src="https://buttons.github.io/buttons.js"></script>
-</div>
-</div>
 </div>
 </body>
 </html>

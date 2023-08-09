@@ -46,10 +46,6 @@ pub async fn create_post_database(
     category_id: &i32,
     db: &Pool<Postgres>,
 ) -> Result<(), anyhow::Error> {
-    // let id = id as i32;
-    //200
-    // sqlx::query("insert into posts values($1,$2,$3)")
-    // let post_id=sqlx::query("insert into posts(title,description) values($1,$2) returning id")
     let post_id = sqlx::query_as::<_, GetId>(
         "insert into posts(title,description) values($1,$2) returning id",
     )
@@ -57,16 +53,8 @@ pub async fn create_post_database(
     .bind(description)
     .fetch_all(db)
     .await?;
-    //get 200
-    // let post_id =post_id.into().unwrap_or_default();
     let x: &GetId = &post_id[0];
     let GetId { id } = x;
-    //     let GetId{id} =post_id;
-    //     let post_id =<PgQueryResult as Into<T>>::into(post_id).unwrap_or_default();
-
-    //get id
-
-    //send 200
     sqlx::query("insert into categories_posts values ($1,$2)")
         .bind(id)
         .bind(category_id)
@@ -88,4 +76,26 @@ pub async fn create_post_without_category_database(
         .await?;
 
     Ok(())
+}
+
+pub async fn update_post_without_category_database(
+    title: String,
+    description: String,
+  id:i32,
+    db: &Pool<Postgres>,
+
+)->Result<(),anyhow::Error>{
+    sqlx::query("update posts set title=$1 ,description=$2 where id=$3")
+        .bind(title)
+        .bind(description)
+        .bind(id)
+        .execute(db)
+        .await?;
+
+    sqlx::query("delete from categories_posts where post_id=$1")
+        .bind(id)
+        .execute(db)
+        .await?;
+
+Ok(())
 }

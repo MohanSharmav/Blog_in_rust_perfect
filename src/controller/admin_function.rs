@@ -110,6 +110,7 @@ pub async fn admin_category_display(
     .await
     .map_err(actix_web::error::ErrorInternalServerError)?;
 
+    println!("-----------------------------😀{:?}", category_postinng.clone());
     let mut test = String::new();
     let x = r#"<p>workins</p> "#;
     test.push_str(x);

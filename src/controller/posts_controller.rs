@@ -1,10 +1,7 @@
 use crate::controller::constants::ConfigurationConstants;
 use crate::model::category_database::get_all_categories_database;
 use crate::model::database::CreateNewPost;
-use crate::model::posts_database::{
-    create_post_database, create_post_without_category_database, delete_post_database,
-    update_post_database,
-};
+use crate::model::posts_database::{create_post_database, create_post_without_category_database, delete_post_database, update_post_database, update_post_without_category_database};
 use crate::model::single_posts_database::query_single_post_in_struct;
 use actix_http::header::LOCATION;
 use actix_identity::Identity;
@@ -65,34 +62,7 @@ pub async fn receive_new_posts(
             .map_err(actix_web::error::ErrorInternalServerError)?;
         Ok(Redirect::to("/admin/posts/page/1"))
     }
-    // let success_message = "the post created successfully";
-    // let html = handlebars
-    //     .render("message_display", &json!({ "message": success_message }))
-    //     .map_err(actix_web::error::ErrorInternalServerError)?;
-    //
-    // Ok(HttpResponse::Ok()
-    //     .content_type(ContentType::html())
-    //     .body(html))
 }
-// pub async fn receive_new_posts_with_no_category(
-//     form: web::Form<CreateNewPostWithoutCategory>,
-//      // fo: web::Form<CreateNewPostWithNullCategory>,
-//      fo: Option<Query<CreateNewPostWithNullCategory>>,
-//     config: web::Data<ConfigurationConstants>,
-// ) -> Result<Redirect, actix_web::Error> {
-//     let db = &config.database_connection;
-//     let title = &form.title;
-//     let description = &form.description;
-//     if fo.is_none(){
-//         create_post_without_category_database(title.clone(), description.clone(), db);
-//     }
-//
-//     let category_id = fo.category_id;
-//     create_post_database(title.clone(), description.clone(), &category_id.clone(), db)
-//         .await
-//         .map_err(actix_web::error::ErrorInternalServerError)?;
-//     Ok(Redirect::to("/admin/posts/page/1"))
-// }
 
 pub async fn delete_post(
     to_delete: web::Path<String>,
@@ -105,14 +75,7 @@ pub async fn delete_post(
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(Redirect::to("/admin/posts/page/1"))
-    // let success_message = "the post deleted successfully";
-    // let html = handlebars
-    //     .render("message_display", &json!({ "message": success_message }))
-    //     .map_err(actix_web::error::ErrorInternalServerError)?;
-    //
-    // Ok(HttpResponse::Ok()
-    //     .content_type(ContentType::html())
-    //     .body(html))
+
 }
 
 pub async fn page_to_update_post(
@@ -159,23 +122,26 @@ pub async fn receive_updated_post(
     let db = &config.database_connection;
     let title = &form.title;
     let description = &form.description;
-
     let category_id = &form.category_id;
-    update_post_database(title, description, id, category_id, db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-    // Ok(Redirect::to("/admin/posts/page/1"))
-    Ok(HttpResponse::SeeOther()
-        // .insert_header(http::header::LOCATION, "/login")
-        .insert_header((LOCATION, "/admin/categories/page/1"))
-        .content_type(ContentType::html())
-        .finish())
-    // let success_message = "the post created successfully";
-    // let html = handlebars
-    //     .render("message_display", &json!({ "message": success_message }))
-    //     .map_err(actix_web::error::ErrorInternalServerError)?;
-    //
-    // Ok(HttpResponse::Ok()
-    //     .content_type(ContentType::html())
-    //     .body(html))
+    if category_id.clone() == 0_i32 {
+        update_post_without_category_database(title.clone(), description.clone(),id.clone(), db)
+            .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
+
+        Ok(HttpResponse::SeeOther()
+            // .insert_header(http::header::LOCATION, "/login")
+            .insert_header((LOCATION, "/admin/posts/page/1"))
+            .content_type(ContentType::html())
+            .finish())
+    }else {
+        update_post_database(title, description, id, category_id, db)
+            .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
+        // Ok(Redirect::to("/admin/posts/page/1"))
+        Ok(HttpResponse::SeeOther()
+            // .insert_header(http::header::LOCATION, "/login")
+            .insert_header((LOCATION, "/admin/posts/page/1"))
+            .content_type(ContentType::html())
+            .finish())
+    }
 }

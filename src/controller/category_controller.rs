@@ -149,18 +149,17 @@ pub async fn get_new_category(
 pub async fn receive_new_category(
     form: web::Form<CreateNewCategory>,
     config: web::Data<ConfigurationConstants>,
-) -> Result<Redirect, actix_web::Error> {
-    // if user.is_none() {
-    //     return Ok(HttpResponse::SeeOther()
-    //         .insert_header((http::header::LOCATION, "/"))
-    //         .body(""));
-    // }
+) -> Result<HttpResponse, actix_web::Error> {
     let name = &form.name;
     let db = &config.database_connection;
     create_new_category_database(db, name)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    Ok(Redirect::to("/admin/categories/page/1"))
+
+    Ok(HttpResponse::SeeOther()
+        .insert_header((LOCATION, "/admin/categories/page/1"))
+        .content_type(ContentType::html())
+        .finish())
 }
 
 pub async fn delete_category(

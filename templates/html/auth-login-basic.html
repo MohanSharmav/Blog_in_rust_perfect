@@ -137,6 +137,9 @@
               <!-- /Logo -->
               <h4 class="mb-2">Welcome to Sneat! 👋</h4>
 
+              {{#if error_html}}
+              <span class="subtitle-red">{error_html}</span>
+              {{/if}}
 
 
 
@@ -199,14 +202,7 @@
 
     <!-- / Content -->
 
-    <div class="buy-now">
-      <a
-        href="https://themeselection.com/products/sneat-bootstrap-html-admin-template/"
-        target="_blank"
-        class="btn btn-danger btn-buy-now"
-        >Upgrade to Pro</a
-      >
-    </div>
+
 
     <!-- Core JS -->
     <!-- build:js assets/vendor/js/core.js -->

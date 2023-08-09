@@ -1,6 +1,5 @@
 mod controller;
 mod model;
-
 use crate::controller::admin_function::{admin_category_display, admin_unique_posts_display};
 use crate::controller::authentication::login::{
     check_user, failed_login_page, get_data_from_login_page, get_login_page, logout,
@@ -37,6 +36,7 @@ use actix_web_flash_messages::FlashMessagesFramework;
 use handlebars::Handlebars;
 use magic_crypt::new_magic_crypt;
 use sqlx::postgres::PgPoolOptions;
+
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
 
@@ -71,26 +71,15 @@ async fn main() -> Result<(), anyhow::Error> {
 
     let message_store = CookieMessageStore::builder(secret_key.clone()).build();
     let message_framework = FlashMessagesFramework::builder(message_store).build();
-    // let files = Files::new("/assets/vendor/css/pages", "./templates/sneat-1.0.0/assets/vendor/css/pages").show_files_listing();
 
-    // let path = Path::new("templates/sneat-1.0.0");
-    // let cb = |entry: &DirEntry| {
-    //     println!("{}", entry.path().display());
-    // };
-    // visit_dirs(&path, &cb).unwrap();
-    //
 
-    //
-    // let signing_key = Key::generate(); // This will usually come from configuration!
-    // let message_store = CookieMessageStore::builder(signing_key).build();
-    // let message_framework = FlashMessagesFramework::builder(message_store).build();
-    //
 
     HttpServer::new(move || {
         App::new()
+            .app_data(message_framework.clone())
             .app_data(web::Data::new(handlebars.clone()))
             .app_data(confi.clone())
-            .wrap(message_framework.clone())
+            // .wrap(message_framework.clone())
             .wrap(IdentityMiddleware::default())
             // .wrap(FlashMiddleware::default())
             // .wrap(message_framework.clone())
@@ -105,8 +94,6 @@ async fn main() -> Result<(), anyhow::Error> {
             .service(web::resource("/posts").to(main_page))
             .service(web::resource("./templates/").to(redirect_user))
             .service(web::resource("/check").to(check_user))
-            // perfect admin url
-            // .service(web::resource("/admin/posts/page/{page_number}").to(admin_pagination_display))
             .service(web::resource("/admin/posts/page/{page_number}").to(admin_pagination_display))
             .service(
                 web::resource("/admin/categories/new")
@@ -150,7 +137,7 @@ async fn main() -> Result<(), anyhow::Error> {
                     .route(web::get().to(get_login_page))
                     .route(web::post().to(get_data_from_login_page)),
             )
-            .service(web::resource("/llogin").route(web::get().to(failed_login_page)))
+            // .service(web::resource("/llogin").route(web::get().to(failed_login_page)))
             .service(web::resource("/logout").to(logout))
             .service(
                 web::resource("/register")
