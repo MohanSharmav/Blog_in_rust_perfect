@@ -27,8 +27,6 @@ pub async fn admin_category_display(
     let db = &config.database_connection;
     let category_input: String = info.clone().0;
     let params = info.into_inner().1;
-    println!("-------------------😂{}", category_input);
-    println!("-------------------😂{}", params);
 
     let total_posts_length = category_pagination_logic(&category_input, db)
         .await
@@ -55,14 +53,11 @@ pub async fn admin_category_display(
  "#;
 
     let y = pages_count.len();
-
     let cp: usize = params.clone() as usize;
-
     let mut pagination_final_string = String::new();
     pagination_final_string.push_str(x1);
     for i in 1..y + 1 {
         if i == cp {
-            //admin/categories/1/page/1
             let tag_and_url = r#"
             <li class="page-item active">
               <a class="page-link "  href="/admin/categories/"#;
@@ -95,7 +90,6 @@ pub async fn admin_category_display(
             pagination_final_string.push_str(end_of_tag);
             let text_inside_tag = i.to_string();
             pagination_final_string.push_str(&*text_inside_tag);
-
             let close_tag = r#"</a> "#;
             pagination_final_string.push_str(close_tag);
         }

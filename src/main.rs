@@ -1,6 +1,8 @@
+mod controller;
+mod model;
 use crate::controller::admin_function::{admin_category_display, admin_unique_posts_display};
-use crate::controller::authentication::loginn::{
-    check_user, failed_login_page, logout,
+use crate::controller::authentication::login::{
+    check_user, failed_login_page, get_data_from_login_page, get_login_page, logout,
 };
 use crate::controller::authentication::register::{get_data_from_register_page, get_register_page};
 use crate::controller::category_controller::{
@@ -18,24 +20,22 @@ use crate::controller::posts_controller::{
     delete_post, get_new_post, page_to_update_post, receive_new_posts, receive_updated_post,
 };
 use crate::controller::single_post_controller::get_single_post;
-use std::fs::DirEntry;
-use std::path::Path;
-use crate::model::authentication::login_database::login_database;
 use actix_files::Files;
 use actix_identity::IdentityMiddleware;
 use actix_session::config::PersistentSession;
 use actix_session::storage::CookieSessionStore;
 use actix_session::SessionMiddleware;
 use actix_web::cookie::Key;
-use actix_web::{App, HttpResponse, HttpServer, Result, web};
+use actix_web::{web, App, HttpResponse, HttpServer, Result};
 use actix_web_flash_messages::storage::CookieMessageStore;
 use actix_web_flash_messages::FlashMessage;
 use actix_web_flash_messages::FlashMessagesFramework;
 use handlebars::Handlebars;
 use magic_crypt::new_magic_crypt;
+use model::authentication::login_database::login_database;
 use sqlx::postgres::PgPoolOptions;
-use controller::authentication::login::get::get_login_page;
-use controller::authentication::login::post::get_data_from_login_page;
+use std::fs::DirEntry;
+use std::path::Path;
 
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
@@ -135,14 +135,12 @@ async fn main() -> Result<(), anyhow::Error> {
                     .route(web::get().to(get_login_page))
                     .route(web::post().to(get_data_from_login_page)),
             )
-            // .service(web::resource("/llogin").route(web::get().to(failed_login_page)))
             .service(web::resource("/logout").to(logout))
             .service(
                 web::resource("/register")
                     .route(web::get().to(get_register_page))
                     .route(web::post().to(get_data_from_register_page)),
             )
-            // .service(web::resource("/posts").route(web::get().to(common_page_controller)))
             .service(web::resource("/posts/{post_id}").route(web::get().to(get_single_post)))
             .service(
                 web::resource("/posts/category/{category_id}/page/{page_number}")

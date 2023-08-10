@@ -1,5 +1,6 @@
 use crate::model::database::GetId;
 use sqlx::{Pool, Postgres};
+use core::option::Option;
 
 pub async fn delete_post_database(
     to_delete: String,
@@ -10,6 +11,7 @@ pub async fn delete_post_database(
         .bind(to_delete)
         .execute(db)
         .await?;
+
     sqlx::query("delete from posts where id=$1")
         .bind(to_delete)
         .execute(db)
@@ -97,4 +99,19 @@ pub async fn update_post_without_category_database(
         .await?;
 
     Ok(())
+}
+
+pub async fn get_category_id_from_post_id(postid: i32, db: &Pool<Postgres>,) -> Result<Option<i32>, anyhow::Error>
+
+{
+    //todo
+    let category_id = sqlx::query_as::<_, GetId>(
+        "select category_id from categories_posts where post_id=$1")
+        .bind(postid)
+        .fetch_all(db)
+        .await?;
+    let x: &GetId = &category_id[0];
+    let GetId { id } = x;
+    // Ok(Some(*id))
+    Ok::<std::option::Option<i32>,anyhow::Error>(Some(*id))
 }

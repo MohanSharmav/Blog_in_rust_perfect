@@ -1,4 +1,4 @@
-use crate::controller::common::all_structs::User;
+use crate::controller::authentication::login::User;
 use crate::controller::constants::ConfigurationConstants;
 use crate::model::authentication::register_database::register_new_user_database;
 use actix_http::header::LOCATION;
@@ -33,6 +33,7 @@ pub async fn get_data_from_register_page(
     register_new_user_database(user, encrypted_password, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
+
     Ok(HttpResponse::SeeOther()
         .insert_header((LOCATION, "/login"))
         .finish())
