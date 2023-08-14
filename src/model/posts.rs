@@ -1,6 +1,7 @@
-use crate::model::structs::GetId;
+use crate::model::structs::{GetId, Posts};
 use core::option::Option;
 use sqlx::{Pool, Postgres};
+use crate::controller::guests::common_controller::set_posts_per_page;
 
 pub async fn delete_post_database(
     to_delete: String,
@@ -115,4 +116,21 @@ pub async fn get_category_id_from_post_id(
     let GetId { id } = x;
     // Ok(Some(*id))
     Ok::<std::option::Option<i32>, anyhow::Error>(Some(*id))
+}
+
+pub async fn select_specific_pages_post(
+    start_page: i32,
+    db: &Pool<Postgres>,
+) -> Result<Vec<Posts>, anyhow::Error> {
+    let start_page = start_page;
+    let posts_per_page = set_posts_per_page().await;
+    let perfect_posts = sqlx::query_as::<_, Posts>(
+        "select * from posts Order By id Asc limit $1 OFFSET ($2-1)*$1 ",
+    )
+    .bind(posts_per_page)
+    .bind(start_page)
+    .fetch_all(db)
+    .await?;
+
+    Ok(perfect_posts)
 }

@@ -9,7 +9,7 @@ use crate::model::category::{
     get_all_categories_database_with_pagination_display, get_all_specific_category_database,
     update_category_database,
 };
-use crate::model::pagination::category_pagination_logic;
+use crate::model::category::category_pagination_logic;
 use crate::model::structs::CreateNewCategory;
 use actix_http::header::LOCATION;
 use actix_identity::Identity;

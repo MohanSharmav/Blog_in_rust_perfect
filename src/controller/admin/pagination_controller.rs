@@ -2,8 +2,7 @@ use crate::controller::admin::admin_pagination::admin_pagination_main_page;
 use crate::controller::constants::ConfigurationConstants;
 use crate::controller::guests::common_controller::set_posts_per_page;
 use crate::model::category::get_all_categories_database;
-use crate::model::pagination::pagination_logic;
-use crate::model::posts_pagination::select_specific_pages_post;
+use crate::model::posts::select_specific_pages_post;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
 use actix_web::{http, web, HttpResponse, ResponseError};
@@ -61,9 +60,9 @@ pub async fn admin_index(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let paginators = pagination_logic(&par, db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
+    // let paginators = pagination_logic(&par, db)
+    //     .await
+    //     .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let exact_posts_only = select_specific_pages_post(current_page, db)
         .await
@@ -73,7 +72,7 @@ pub async fn admin_index(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let htmls = handlebars.render("admin_post_table", &json!({"a":&paginators,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category,"pagination":pagination_final_string}))
+    let htmls = handlebars.render("admin_post_table", &json!({"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category,"pagination":pagination_final_string}))
         .map_err( actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()

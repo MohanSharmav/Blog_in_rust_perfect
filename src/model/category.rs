@@ -1,5 +1,6 @@
 use crate::model::structs::{Categories, PostsCategories};
-use sqlx::{Pool, Postgres};
+use sqlx::{Pool, Postgres, Row};
+use anyhow::anyhow;
 
 pub async fn get_all_categories_database(
     db: &Pool<Postgres>,
@@ -101,4 +102,33 @@ pub async fn get_all_specific_category_database(
             .await?;
 
     Ok(all_categories)
+}
+
+pub async fn category_pagination_logic(
+    category_input: &str,
+    db: &Pool<Postgres>,
+) -> Result<i64, anyhow::Error> {
+    let category_id = category_input.parse::<i32>()?;
+    let rows = sqlx::query("SELECT COUNT(*) FROM categories_posts where category_id=$1")
+        .bind(category_id)
+        .fetch_all(db)
+        .await?;
+
+    let counting_final: Vec<Result<i64, anyhow::Error>> = rows
+        .into_iter()
+        .map(|row| {
+            let counting_final: i64 = row
+                .try_get("count")
+                .map_err(|_e| anyhow::Error::msg("failed"))?;
+            Ok::<i64, anyhow::Error>(counting_final)
+        })
+        .collect();
+
+    let a = counting_final.get(0).ok_or(anyhow!("{}", "error"))?;
+    let c = a
+        .as_ref()
+        .map(|i| *i)
+        .map_err(|_e| anyhow::Error::msg("failed"))?;
+
+    Ok(c)
 }

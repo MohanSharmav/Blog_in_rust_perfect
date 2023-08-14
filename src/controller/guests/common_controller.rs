@@ -2,7 +2,7 @@ use crate::controller::admin::pagination_controller::perfect_pagination_logic;
 use crate::controller::constants::ConfigurationConstants;
 use crate::controller::guests::General_pagination::general_pagination;
 use crate::model::category::get_all_categories_database;
-use crate::model::posts_pagination::select_specific_pages_post;
+use crate::model::posts::select_specific_pages_post;
 use actix_http::header::LOCATION;
 use actix_web::http::header::ContentType;
 use actix_web::web::Redirect;

@@ -3,16 +3,13 @@ use crate::controller::admin::admin_pagination::{
 };
 use crate::controller::constants::ConfigurationConstants;
 use crate::controller::guests::common_controller::set_posts_per_page;
-use crate::model::category::{
-    category_pagination_controller_database_function, get_all_categories_database,
-};
-use crate::model::pagination::{category_pagination_logic, pagination_logic};
-use crate::model::posts_pagination::select_specific_pages_post;
+use crate::model::category::{category_pagination_controller_database_function, category_pagination_logic, get_all_categories_database};
+use crate::model::posts::select_specific_pages_post;
 use crate::model::single_posts::{query_single_post, query_single_post_in_struct};
 use actix_http::header::LOCATION;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
-use actix_web::{http, web, HttpResponse};
+use actix_web::{http, HttpResponse, web};
 use handlebars::Handlebars;
 use serde_json::json;
 
