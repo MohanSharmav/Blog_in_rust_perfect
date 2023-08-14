@@ -83,7 +83,6 @@ async fn main() -> Result<(), anyhow::Error> {
                     .session_lifecycle(PersistentSession::default().session_ttl(COOKIE_DURATION))
                     .build(),
             )
-            // .service(web::resource("/test").to(index))
             .service(web::resource("/").to(redirect_user))
             .service(web::resource("/posts").to(main_page))
             .service(web::resource("./templates/").to(redirect_user))
@@ -144,10 +143,6 @@ async fn main() -> Result<(), anyhow::Error> {
             .service(
                 web::resource("/posts/page/{page_number}")
                     .route(web::get().to(new_common_page_controller)),
-            )
-            .service(
-                web::resource("/posts/ben/{page_number}")
-                    .route(web::get().to(new_common_page_controller_test)),
             )
             .service(web::resource("/ben").to(england_admin_pagination_display))
             .service(Files::new("/", "./templates").show_files_listing())

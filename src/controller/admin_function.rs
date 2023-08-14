@@ -1,3 +1,4 @@
+use actix_http::header::LOCATION;
 use crate::controller::common_controller::set_posts_per_page;
 use crate::controller::constants::ConfigurationConstants;
 use crate::controller::pagination_controller::perfect_pagination_logic;
@@ -12,6 +13,7 @@ use actix_web::http::header::ContentType;
 use actix_web::{http, web, HttpResponse};
 use handlebars::Handlebars;
 use serde_json::json;
+use crate::controller::General_pagination::admin_pagination_with_category;
 
 pub async fn admin_category_display(
     info: web::Path<(String, i32)>,
@@ -43,57 +45,21 @@ pub async fn admin_category_display(
         posts_per_page += 1;
     }
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
-
-    let x1 = r#"
-     <div class="card mb-4">
-                                <!-- Basic Pagination -->
-                                   <!-- Basic Pagination -->
-                                                <nav aria-label="Page navigation">
-                                                    <ul class="pagination">
- "#;
-
-    let y = pages_count.len();
+    let count_of_number_of_pages = pages_count.len();
     let cp: usize = params.clone() as usize;
-    let mut pagination_final_string = String::new();
-    pagination_final_string.push_str(x1);
-    for i in 1..y + 1 {
-        if i == cp {
-            let tag_and_url = r#"
-            <li class="page-item active">
-              <a class="page-link "  href="/admin/categories/"#;
-            pagination_final_string.push_str(tag_and_url);
-            let category_id = category_input.clone();
-            pagination_final_string.push_str(&*category_id);
-            let static_keyword_page = r#"/page/"#;
-            pagination_final_string.push_str(&*static_keyword_page);
-            let href_link = i.to_string();
-            pagination_final_string.push_str(&*href_link);
-            let end_of_tag = r#"">"#;
-            pagination_final_string.push_str(end_of_tag);
-            let text_inside_tag = i.to_string();
-            pagination_final_string.push_str(&*text_inside_tag);
+    // //"/admin/categories/{category_id}/page/{page_number}
+    // let redirection_url= "/admin/categories/".to_string() + &*category_input.clone() + &*"/page/1".to_string();
+    // if cp > count_of_number_of_pages || cp <= 0 {
+    //     return  Ok(HttpResponse::SeeOther()
+    //         .insert_header((LOCATION, redirection_url))
+    //         .content_type(ContentType::html())
+    //         .finish())
+    // }
+    let pagination_final_string=admin_pagination_with_category(cp,count_of_number_of_pages,category_input.clone())
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
-            let close_tag = r#"</a>"#;
-            pagination_final_string.push_str(close_tag);
-        } else {
-            let tag_and_url = r#"<li class="page-item">
-              <a class="page-link "   href="/admin/categories/page/"
-            "#;
-            pagination_final_string.push_str(tag_and_url);
-            let category_id = category_input.clone();
-            pagination_final_string.push_str(&*category_id);
-            let static_keyword_page = r#"/page/"#;
-            pagination_final_string.push_str(&*static_keyword_page);
-            let href_link = i.to_string();
-            pagination_final_string.push_str(&*href_link);
-            let end_of_tag = r#"">"#;
-            pagination_final_string.push_str(end_of_tag);
-            let text_inside_tag = i.to_string();
-            pagination_final_string.push_str(&*text_inside_tag);
-            let close_tag = r#"</a> "#;
-            pagination_final_string.push_str(close_tag);
-        }
-    }
+
     let category_postinng = category_pagination_controller_database_function(
         category_input,
         db,
@@ -103,13 +69,11 @@ pub async fn admin_category_display(
     .await
     .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let mut test = String::new();
-    let x = r#"<p>workins</p> "#;
-    test.push_str(x);
+
     let html = handlebars
         .render(
             "admin_separate_categories",
-            &json!({"testiii":test,"pagination":pagination_final_string,"tiger":&category_postinng,"pages_count":&pages_count,"o":all_category}),
+            &json!({"pagination":pagination_final_string,"tiger":&category_postinng,"pages_count":&pages_count,"o":all_category}),
         )
        .map_err(actix_web::error::ErrorInternalServerError)?;
 

@@ -36,11 +36,6 @@ pub async fn new_common_page_controller(
     let current_page = param as usize;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     let sample: Vec<_> = (1..=posts_per_page).collect();
-    let x1 = r#"
-    <br>
-<div class="paginations">
- "#;
-
     let count_of_number_of_pages = pages_count.len();
     let cp: usize = current_page.clone();
 

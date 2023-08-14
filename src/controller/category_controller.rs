@@ -232,7 +232,8 @@ pub async fn get_category_with_pagination(
     let count_of_number_of_pages = pages_count.len();
     let cp: usize = par.clone() as usize;
     let admin=false;
-  let pagination_final_string=  general_pagination_with_category(cp,count_of_number_of_pages,&category_input,admin)
+
+    let pagination_final_string=  general_pagination_with_category(cp,count_of_number_of_pages,&category_input,admin)
       .await
       .map_err(actix_web::error::ErrorInternalServerError)?;
 
