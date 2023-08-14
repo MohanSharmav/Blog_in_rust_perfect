@@ -1,14 +1,16 @@
-use crate::controller::common_controller::set_posts_per_page;
+use crate::controller::admin::admin_pagination::admin_pagination_with_category;
+use crate::controller::admin::pagination_controller::get_pagination_for_all_categories_list;
 use crate::controller::constants::ConfigurationConstants;
-use crate::controller::pagination_controller::get_pagination_for_all_categories_list;
-use crate::model::category_database::{
+use crate::controller::guests::common_controller::set_posts_per_page;
+use crate::controller::guests::General_pagination::general_pagination_with_category;
+use crate::model::category::{
     category_pagination_controller_database_function, create_new_category_database,
     delete_category_database, get_all_categories_database,
     get_all_categories_database_with_pagination_display, get_all_specific_category_database,
     update_category_database,
 };
-use crate::model::database::CreateNewCategory;
-use crate::model::pagination_database::category_pagination_logic;
+use crate::model::pagination::category_pagination_logic;
+use crate::model::structs::CreateNewCategory;
 use actix_http::header::LOCATION;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
@@ -17,8 +19,6 @@ use actix_web::{http, web, HttpResponse, HttpResponseBuilder};
 use anyhow::Result;
 use handlebars::Handlebars;
 use serde_json::json;
-use crate::controller::admin_pagination::admin_pagination_with_category;
-use crate::controller::General_pagination::general_pagination_with_category;
 
 pub async fn get_all_categories(
     config: web::Data<ConfigurationConstants>,
@@ -47,7 +47,7 @@ pub async fn get_all_categories(
     let count_of_number_of_pages = pages_count.len();
     let cp: usize = param.clone() as usize;
 
-    let pagination_final_string=admin_pagination_with_category(cp,count_of_number_of_pages)
+    let pagination_final_string = admin_pagination_with_category(cp, count_of_number_of_pages)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -198,11 +198,12 @@ pub async fn get_category_posts(
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     let count_of_number_of_pages = pages_count.len();
     let cp: usize = par.clone() as usize;
-    let admin=false;
+    let admin = false;
 
-    let pagination_final_string=  general_pagination_with_category(cp,count_of_number_of_pages,&category_input,admin)
-      .await
-      .map_err(actix_web::error::ErrorInternalServerError)?;
+    let pagination_final_string =
+        general_pagination_with_category(cp, count_of_number_of_pages, &category_input, admin)
+            .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let category_postinng = category_pagination_controller_database_function(
         category_input.to_string(),

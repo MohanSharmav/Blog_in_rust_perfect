@@ -1,4 +1,4 @@
-use crate::model::database::{select_posts, Posts};
+use crate::model::structs::{select_posts, Posts};
 use actix_web::Error as ActixError;
 use anyhow::anyhow;
 use serde::Deserialize;

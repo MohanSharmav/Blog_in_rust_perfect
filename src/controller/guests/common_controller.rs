@@ -1,14 +1,14 @@
+use crate::controller::admin::pagination_controller::perfect_pagination_logic;
 use crate::controller::constants::ConfigurationConstants;
-use crate::controller::pagination_controller::perfect_pagination_logic;
-use crate::model::category_database::get_all_categories_database;
-use crate::model::pagination_logic::select_specific_pages_post;
+use crate::controller::guests::General_pagination::general_pagination;
+use crate::model::category::get_all_categories_database;
+use crate::model::posts_pagination::select_specific_pages_post;
 use actix_http::header::LOCATION;
 use actix_web::http::header::ContentType;
 use actix_web::web::Redirect;
 use actix_web::{web, HttpResponse, Responder};
 use handlebars::Handlebars;
 use serde_json::json;
-use crate::controller::General_pagination::general_pagination;
 
 pub async fn redirect_user() -> impl Responder {
     web::Redirect::to("/posts/page/1")
@@ -40,14 +40,15 @@ pub async fn index(
     let cp: usize = current_page.clone();
 
     if cp > count_of_number_of_pages || cp <= 0 {
-       return  Ok(HttpResponse::SeeOther()
+        return Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/posts/page/1"))
             .content_type(ContentType::html())
-            .finish())
+            .finish());
     }
 
-   let pagination_final_string= general_pagination(cp,count_of_number_of_pages )
-       .await.map_err(actix_web::error::ErrorInternalServerError)?;
+    let pagination_final_string = general_pagination(cp, count_of_number_of_pages)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let exact_posts_only = select_specific_pages_post(param, &db.clone())
         .await

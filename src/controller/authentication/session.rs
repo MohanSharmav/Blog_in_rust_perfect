@@ -1,5 +1,5 @@
 use crate::controller::constants::ConfigurationConstants;
-use crate::model::authentication::login_database::{login_database, LoginCheck};
+use crate::model::authentication::session::{login_database, LoginCheck};
 use actix_http::header::LOCATION;
 use actix_identity::Identity;
 use actix_web::error::InternalError;
@@ -31,7 +31,6 @@ pub async fn get_login(
 }
 
 pub async fn login(
-
     form: web::Form<User>,
     req: HttpRequest,
     _user: Option<Identity>,

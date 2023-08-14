@@ -1,4 +1,4 @@
-use crate::model::database::{Categories, PostsCategories};
+use crate::model::structs::{Categories, PostsCategories};
 use sqlx::{Pool, Postgres};
 
 pub async fn get_all_categories_database(
@@ -94,7 +94,8 @@ pub async fn get_all_specific_category_database(
     id: i32,
     db: &Pool<Postgres>,
 ) -> Result<Vec<Categories>, anyhow::Error> {
-    let all_categories = sqlx::query_as::<_, Categories>("select name,id from categories where id=$1")
+    let all_categories =
+        sqlx::query_as::<_, Categories>("select name,id from categories where id=$1")
             .bind(id)
             .fetch_all(db)
             .await?;

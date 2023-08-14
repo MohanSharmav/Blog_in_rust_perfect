@@ -1,8 +1,9 @@
-use crate::controller::common_controller::set_posts_per_page;
+use crate::controller::admin::admin_pagination::admin_pagination_main_page;
 use crate::controller::constants::ConfigurationConstants;
-use crate::model::category_database::get_all_categories_database;
-use crate::model::pagination_database::pagination_logic;
-use crate::model::pagination_logic::select_specific_pages_post;
+use crate::controller::guests::common_controller::set_posts_per_page;
+use crate::model::category::get_all_categories_database;
+use crate::model::pagination::pagination_logic;
+use crate::model::posts_pagination::select_specific_pages_post;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
 use actix_web::{http, web, HttpResponse, ResponseError};
@@ -12,7 +13,6 @@ use serde_json::json;
 use sqlx::{Pool, Postgres, Row};
 use std::fmt::{Debug, Display, Formatter};
 use warp::http::status;
-use crate::controller::admin_pagination::admin_pagination_main_page;
 
 #[derive(Debug)]
 struct MyOwnErrors {
@@ -57,9 +57,7 @@ pub async fn admin_index(
     let count_of_number_of_pages = pages_count.len();
     let cp: usize = par.clone() as usize;
 
-
-
-    let pagination_final_string=admin_pagination_main_page(cp,count_of_number_of_pages)
+    let pagination_final_string = admin_pagination_main_page(cp, count_of_number_of_pages)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -74,7 +72,6 @@ pub async fn admin_index(
     let all_category = get_all_categories_database(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-
 
     let htmls = handlebars.render("admin_post_table", &json!({"a":&paginators,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category,"pagination":pagination_final_string}))
         .map_err( actix_web::error::ErrorInternalServerError)?;

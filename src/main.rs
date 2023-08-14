@@ -1,25 +1,23 @@
 mod controller;
 mod model;
-use crate::controller::admin_function::{get_category_posts_a, show_post};
-use crate::controller::authentication::login::{
-    check_user, failed_login_page, login, get_login, logout,
+use crate::controller::admin::admin_function::{get_category_posts_a, show_post};
+use crate::controller::admin::category_controller::{
+    create_category, destroy_category, edit_category, get_all_categories, get_category_posts,
+    new_category, update_category,
 };
-use crate::controller::authentication::register::{register, get_register};
-use crate::controller::category_controller::{
-    destroy_category, get_all_categories, get_category_posts, new_category,
-    edit_category, create_category, update_category,
+use crate::controller::admin::pagination_controller::admin_index;
+use crate::controller::admin::posts_controller::{
+    destroy_post, edit_post, get_new_post, new_posts, update_post,
 };
-use crate::controller::common_controller::{
-    main_page, index, new_common_page_controller_test, redirect_user,
+use crate::controller::authentication::register::{get_register, register};
+use crate::controller::authentication::session::{
+    check_user, failed_login_page, get_login, login, logout,
 };
 use crate::controller::constants::ConfigurationConstants;
-use crate::controller::pagination_controller::{
-    admin_index, england_admin_pagination_display,
+use crate::controller::guests::common_controller::{
+    index, main_page, new_common_page_controller_test, redirect_user,
 };
-use crate::controller::posts_controller::{
-    destroy_post, get_new_post, edit_post, new_posts, update_post,
-};
-use crate::controller::single_post_controller::show_posts;
+use crate::controller::guests::single_post_controller::show_posts;
 use actix_files::Files;
 use actix_identity::IdentityMiddleware;
 use actix_session::config::PersistentSession;
@@ -32,7 +30,7 @@ use actix_web_flash_messages::FlashMessage;
 use actix_web_flash_messages::FlashMessagesFramework;
 use handlebars::Handlebars;
 use magic_crypt::new_magic_crypt;
-use model::authentication::login_database::login_database;
+use model::authentication::session::login_database;
 use sqlx::postgres::PgPoolOptions;
 use std::fs::DirEntry;
 use std::path::Path;
@@ -103,11 +101,9 @@ async fn main() -> Result<(), anyhow::Error> {
                     .route(web::get().to(get_all_categories)),
             )
             .service(web::resource("/admin/posts/new").to(get_new_post))
-            .service(web::resource("/admin/posts")
-                .route(web::post().to(new_posts)))
+            .service(web::resource("/admin/posts").route(web::post().to(new_posts)))
             .service(
-                web::resource("/admin/posts/{post_id}")
-                    .route(web::get().to(show_post)) // .route(web::delete().to(delete_post))
+                web::resource("/admin/posts/{post_id}").route(web::get().to(show_post)), // .route(web::delete().to(delete_post))
             )
             .service(
                 web::resource("/admin/posts/{post_id}/edit")
@@ -119,7 +115,7 @@ async fn main() -> Result<(), anyhow::Error> {
             )
             .service(
                 web::resource("/admin/categories/{category_id}/page/{page_number}")
-                    .to(get_category_posts_a)
+                    .to(get_category_posts_a),
             )
             .service(
                 web::resource("/admin/category/{name}/delete")
@@ -141,10 +137,7 @@ async fn main() -> Result<(), anyhow::Error> {
                 web::resource("/posts/category/{category_id}/page/{page_number}")
                     .to(get_category_posts),
             )
-            .service(
-                web::resource("/posts/page/{page_number}")
-                    .route(web::get().to(index))
-            )
+            .service(web::resource("/posts/page/{page_number}").route(web::get().to(index)))
     })
     .bind("127.0.0.1:8080")?
     .run()

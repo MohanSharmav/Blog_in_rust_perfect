@@ -1,5 +1,5 @@
-use crate::controller::common_controller::set_posts_per_page;
-use crate::model::database::Posts;
+use crate::controller::guests::common_controller::set_posts_per_page;
+use crate::model::structs::Posts;
 use sqlx::{Pool, Postgres};
 
 pub async fn select_specific_pages_post(

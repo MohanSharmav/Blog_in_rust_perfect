@@ -1,6 +1,6 @@
 use sqlx::{Pool, Postgres};
 
-pub async fn register_new_user_database(
+pub async fn register_user(
     user: &str,
     password: String,
     db: &Pool<Postgres>,

@@ -1,4 +1,4 @@
-use crate::model::database::Posts;
+use crate::model::structs::Posts;
 use sqlx::{Pool, Postgres, Row};
 
 pub async fn query_single_post(

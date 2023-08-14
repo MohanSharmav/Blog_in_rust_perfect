@@ -1,19 +1,20 @@
-use actix_http::header::LOCATION;
-use crate::controller::common_controller::set_posts_per_page;
+use crate::controller::admin::admin_pagination::{
+    admin_pagination_with_category, admin_pagination_with_category_2,
+};
 use crate::controller::constants::ConfigurationConstants;
-use crate::controller::pagination_controller::perfect_pagination_logic;
-use crate::model::category_database::{
+use crate::controller::guests::common_controller::set_posts_per_page;
+use crate::model::category::{
     category_pagination_controller_database_function, get_all_categories_database,
 };
-use crate::model::pagination_database::{category_pagination_logic, pagination_logic};
-use crate::model::pagination_logic::select_specific_pages_post;
-use crate::model::single_posts_database::{query_single_post, query_single_post_in_struct};
+use crate::model::pagination::{category_pagination_logic, pagination_logic};
+use crate::model::posts_pagination::select_specific_pages_post;
+use crate::model::single_posts::{query_single_post, query_single_post_in_struct};
+use actix_http::header::LOCATION;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
 use actix_web::{http, web, HttpResponse};
 use handlebars::Handlebars;
 use serde_json::json;
-use crate::controller::General_pagination::admin_pagination_with_category;
 
 pub async fn get_category_posts_a(
     info: web::Path<(String, i32)>,
@@ -48,10 +49,10 @@ pub async fn get_category_posts_a(
     let count_of_number_of_pages = pages_count.len();
     let cp: usize = params.clone() as usize;
 
-    let pagination_final_string=admin_pagination_with_category(cp,count_of_number_of_pages,category_input.clone())
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
+    let pagination_final_string =
+        admin_pagination_with_category_2(cp, count_of_number_of_pages, category_input.clone())
+            .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let category_postinng = category_pagination_controller_database_function(
         category_input,
@@ -61,7 +62,6 @@ pub async fn get_category_posts_a(
     )
     .await
     .map_err(actix_web::error::ErrorInternalServerError)?;
-
 
     let html = handlebars
         .render(

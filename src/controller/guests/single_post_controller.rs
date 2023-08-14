@@ -1,6 +1,6 @@
 use crate::controller::constants::ConfigurationConstants;
-use crate::model::category_database::get_all_categories_database;
-use crate::model::single_posts_database::{query_single_post, query_single_post_in_struct};
+use crate::model::category::get_all_categories_database;
+use crate::model::single_posts::{query_single_post, query_single_post_in_struct};
 use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
 use handlebars::Handlebars;

@@ -1,6 +1,6 @@
-use crate::controller::authentication::login::User;
+use crate::controller::authentication::session::User;
 use crate::controller::constants::ConfigurationConstants;
-use crate::model::authentication::register_database::register_new_user_database;
+use crate::model::authentication::register::register_user;
 use actix_http::header::LOCATION;
 use actix_web::http::header::ContentType;
 use actix_web::web::Redirect;
@@ -30,7 +30,7 @@ pub async fn register(
     let mcrypt = &config.magic_key;
     let db = &config.database_connection;
     let encrypted_password = mcrypt.encrypt_str_to_base64(password);
-    register_new_user_database(user, encrypted_password, db)
+    register_user(user, encrypted_password, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

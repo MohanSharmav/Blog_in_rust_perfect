@@ -1,8 +1,11 @@
 use crate::controller::constants::ConfigurationConstants;
-use crate::model::category_database::get_all_categories_database;
-use crate::model::database::CreateNewPost;
-use crate::model::posts_database::{create_post_database, create_post_without_category_database, delete_post_database, get_category_id_from_post_id, update_post_database, update_post_without_category_database};
-use crate::model::single_posts_database::query_single_post_in_struct;
+use crate::model::category::get_all_categories_database;
+use crate::model::posts::{
+    create_post_database, create_post_without_category_database, delete_post_database,
+    get_category_id_from_post_id, update_post_database, update_post_without_category_database,
+};
+use crate::model::single_posts::query_single_post_in_struct;
+use crate::model::structs::CreateNewPost;
 use actix_http::header::LOCATION;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
@@ -121,7 +124,7 @@ pub async fn update_post(
     let description = &form.description;
     let category_id = &form.category_id;
 
-    let get_category_id_of_current_post=get_category_id_from_post_id(id,db)
+    let get_category_id_of_current_post = get_category_id_from_post_id(id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError);
 
@@ -129,15 +132,16 @@ pub async fn update_post(
         update_post_without_category_database(title.clone(), description.clone(), id.clone(), db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
-println!("-----------------------------😮");
 
         Ok(HttpResponse::SeeOther()
-            // .insert_header(http::header::LOCATION, "/login")
             .insert_header((LOCATION, "/admin/posts/page/1"))
             .content_type(ContentType::html())
             .finish())
     } else {
-        println!("------------------{}{}{}----{}",title,description,id,category_id);
+        println!(
+            "------------------{}{}{}----{}",
+            title, description, id, category_id
+        );
         update_post_database(title, description, id, category_id, db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
