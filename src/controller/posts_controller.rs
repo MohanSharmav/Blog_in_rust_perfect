@@ -42,7 +42,7 @@ pub async fn get_new_post(
         .content_type(ContentType::html())
         .body(html))
 }
-pub async fn receive_new_posts(
+pub async fn new_posts(
     form: web::Form<CreateNewPost>,
     config: web::Data<ConfigurationConstants>,
 ) -> Result<Redirect, actix_web::Error> {
@@ -63,7 +63,7 @@ pub async fn receive_new_posts(
     }
 }
 
-pub async fn delete_post(
+pub async fn destroy_post(
     to_delete: web::Path<String>,
     config: web::Data<ConfigurationConstants>,
 ) -> Result<Redirect, actix_web::Error> {
@@ -76,7 +76,7 @@ pub async fn delete_post(
     Ok(Redirect::to("/admin/posts/page/1"))
 }
 
-pub async fn page_to_update_post(
+pub async fn edit_post(
     id: web::Path<i32>,
     config: web::Data<ConfigurationConstants>,
     to_be_updated_post: web::Path<String>,
@@ -109,7 +109,7 @@ pub async fn page_to_update_post(
 pub async fn update_post_helper(ids: &String) -> &String {
     ids
 }
-pub async fn receive_updated_post(
+pub async fn update_post(
     id: web::Path<i32>,
     form: web::Form<CreateNewPost>,
     _current_post_name: web::Path<String>,

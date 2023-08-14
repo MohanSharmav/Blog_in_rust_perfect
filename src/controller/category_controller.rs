@@ -20,7 +20,7 @@ use serde_json::json;
 use crate::controller::admin_pagination::admin_pagination_with_category;
 use crate::controller::General_pagination::general_pagination_with_category;
 
-pub async fn get_all_categories_controller(
+pub async fn get_all_categories(
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
@@ -72,7 +72,7 @@ pub async fn get_all_categories_controller(
         .body(html))
 }
 
-pub async fn get_new_category(
+pub async fn new_category(
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
@@ -96,7 +96,7 @@ pub async fn get_new_category(
         .body(html))
 }
 
-pub async fn receive_new_category(
+pub async fn create_category(
     form: web::Form<CreateNewCategory>,
     config: web::Data<ConfigurationConstants>,
 ) -> Result<HttpResponse, actix_web::Error> {
@@ -112,7 +112,7 @@ pub async fn receive_new_category(
         .finish())
 }
 
-pub async fn delete_category(
+pub async fn destroy_category(
     id: web::Path<String>,
     config: web::Data<ConfigurationConstants>,
 ) -> Result<Redirect, actix_web::Error> {
@@ -124,7 +124,7 @@ pub async fn delete_category(
     Ok(Redirect::to("/admin/categories/page/1"))
 }
 
-pub async fn page_to_update_category(
+pub async fn edit_category(
     config: web::Data<ConfigurationConstants>,
     to_be_updated_category: web::Path<i32>,
     handlebars: web::Data<Handlebars<'_>>,
@@ -158,7 +158,7 @@ pub async fn page_to_update_category(
         .body(html))
 }
 
-pub async fn receive_updated_category(
+pub async fn update_category(
     id: web::Path<i32>,
     form: web::Form<CreateNewCategory>,
     current_category_name: web::Path<String>,
@@ -177,7 +177,7 @@ pub async fn receive_updated_category(
         .finish())
 }
 
-pub async fn get_category_with_pagination(
+pub async fn get_category_posts(
     info: web::Path<(String, u32)>,
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,

@@ -9,7 +9,7 @@ use handlebars::Handlebars;
 use magic_crypt::MagicCryptTrait;
 use serde_json::json;
 
-pub async fn get_register_page(
+pub async fn get_register(
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let html = handlebars
@@ -21,7 +21,7 @@ pub async fn get_register_page(
         .body(html))
 }
 
-pub async fn get_data_from_register_page(
+pub async fn register(
     form: web::Form<User>,
     config: web::Data<ConfigurationConstants>,
 ) -> Result<HttpResponse, actix_web::Error> {

@@ -15,7 +15,7 @@ use handlebars::Handlebars;
 use serde_json::json;
 use crate::controller::General_pagination::admin_pagination_with_category;
 
-pub async fn admin_category_display(
+pub async fn get_category_posts_a(
     info: web::Path<(String, i32)>,
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
@@ -75,7 +75,7 @@ pub async fn admin_category_display(
         .body(html))
 }
 
-pub async fn admin_unique_posts_display(
+pub async fn show_post(
     path: web::Path<String>,
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,

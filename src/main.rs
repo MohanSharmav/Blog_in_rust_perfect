@@ -1,25 +1,25 @@
 mod controller;
 mod model;
-use crate::controller::admin_function::{admin_category_display, admin_unique_posts_display};
+use crate::controller::admin_function::{get_category_posts_a, show_post};
 use crate::controller::authentication::login::{
-    check_user, failed_login_page, get_data_from_login_page, get_login_page, logout,
+    check_user, failed_login_page, login, get_login, logout,
 };
-use crate::controller::authentication::register::{get_data_from_register_page, get_register_page};
+use crate::controller::authentication::register::{register, get_register};
 use crate::controller::category_controller::{
-    delete_category, get_all_categories_controller, get_category_with_pagination, get_new_category,
-    page_to_update_category, receive_new_category, receive_updated_category,
+    destroy_category, get_all_categories, get_category_posts, new_category,
+    edit_category, create_category, update_category,
 };
 use crate::controller::common_controller::{
-    main_page, new_common_page_controller, new_common_page_controller_test, redirect_user,
+    main_page, index, new_common_page_controller_test, redirect_user,
 };
 use crate::controller::constants::ConfigurationConstants;
 use crate::controller::pagination_controller::{
-    admin_pagination_display, england_admin_pagination_display,
+    admin_index, england_admin_pagination_display,
 };
 use crate::controller::posts_controller::{
-    delete_post, get_new_post, page_to_update_post, receive_new_posts, receive_updated_post,
+    destroy_post, get_new_post, edit_post, new_posts, update_post,
 };
-use crate::controller::single_post_controller::get_single_post;
+use crate::controller::single_post_controller::show_posts;
 use actix_files::Files;
 use actix_identity::IdentityMiddleware;
 use actix_session::config::PersistentSession;
@@ -87,65 +87,64 @@ async fn main() -> Result<(), anyhow::Error> {
             .service(web::resource("/posts").to(main_page))
             .service(web::resource("./templates/").to(redirect_user))
             .service(web::resource("/check").to(check_user))
-            .service(web::resource("/admin/posts/page/{page_number}").to(admin_pagination_display))
+            .service(web::resource("/admin/posts/page/{page_number}").to(admin_index))
             .service(
                 web::resource("/admin/categories/new")
-                    .route(web::get().to(get_new_category))
-                    .route(web::post().to(receive_new_category)),
+                    .route(web::get().to(new_category))
+                    .route(web::post().to(create_category)),
             )
             .service(
                 web::resource("/admin/category/{title}/edit")
-                    .route(web::get().to(page_to_update_category))
-                    .route(web::post().to(receive_updated_category)),
+                    .route(web::get().to(edit_category))
+                    .route(web::post().to(update_category)),
             )
             .service(
                 web::resource("/admin/categories/page/{page_number}")
-                    .route(web::get().to(get_all_categories_controller)),
+                    .route(web::get().to(get_all_categories)),
             )
             .service(web::resource("/admin/posts/new").to(get_new_post))
-            .service(web::resource("/admin/posts").route(web::post().to(receive_new_posts)))
+            .service(web::resource("/admin/posts")
+                .route(web::post().to(new_posts)))
             .service(
                 web::resource("/admin/posts/{post_id}")
-                    .route(web::get().to(admin_unique_posts_display)), // .route(web::delete().to(delete_post))
+                    .route(web::get().to(show_post)) // .route(web::delete().to(delete_post))
             )
             .service(
                 web::resource("/admin/posts/{post_id}/edit")
-                    .route(web::get().to(page_to_update_post))
-                    .route(web::post().to(receive_updated_post)),
+                    .route(web::get().to(edit_post))
+                    .route(web::post().to(update_post)),
             )
             .service(
-                web::resource("/admin/post/{post_id}/delete").route(web::get().to(delete_post)),
+                web::resource("/admin/post/{post_id}/delete").route(web::get().to(destroy_post)),
             )
             .service(
                 web::resource("/admin/categories/{category_id}/page/{page_number}")
-                    .to(admin_category_display),
+                    .to(get_category_posts_a)
             )
             .service(
                 web::resource("/admin/category/{name}/delete")
-                    .route(web::get().to(delete_category)),
+                    .route(web::get().to(destroy_category)),
             )
             .service(
                 web::resource("/login")
-                    .route(web::get().to(get_login_page))
-                    .route(web::post().to(get_data_from_login_page)),
+                    .route(web::get().to(get_login))
+                    .route(web::post().to(login)),
             )
             .service(web::resource("/logout").to(logout))
             .service(
                 web::resource("/register")
-                    .route(web::get().to(get_register_page))
-                    .route(web::post().to(get_data_from_register_page)),
+                    .route(web::get().to(get_register))
+                    .route(web::post().to(register)),
             )
-            .service(web::resource("/posts/{post_id}").route(web::get().to(get_single_post)))
+            .service(web::resource("/posts/{post_id}").route(web::get().to(show_posts)))
             .service(
                 web::resource("/posts/category/{category_id}/page/{page_number}")
-                    .to(get_category_with_pagination),
+                    .to(get_category_posts),
             )
             .service(
                 web::resource("/posts/page/{page_number}")
-                    .route(web::get().to(new_common_page_controller)),
+                    .route(web::get().to(index))
             )
-            .service(web::resource("/ben").to(england_admin_pagination_display))
-            .service(Files::new("/", "./templates").show_files_listing())
     })
     .bind("127.0.0.1:8080")?
     .run()

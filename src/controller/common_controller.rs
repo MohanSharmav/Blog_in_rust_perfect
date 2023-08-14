@@ -18,7 +18,7 @@ pub async fn set_posts_per_page() -> i32 {
     3
 }
 
-pub async fn new_common_page_controller(
+pub async fn index(
     params: web::Path<i32>,
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,

@@ -18,7 +18,7 @@ pub struct User {
     pub(crate) username: String,
     pub(crate) password: String,
 }
-pub async fn get_login_page(
+pub async fn get_login(
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let html = handlebars
@@ -30,7 +30,8 @@ pub async fn get_login_page(
         .body(html))
 }
 
-pub async fn get_data_from_login_page(
+pub async fn login(
+
     form: web::Form<User>,
     req: HttpRequest,
     _user: Option<Identity>,

@@ -6,7 +6,7 @@ use actix_web::{web, HttpResponse};
 use handlebars::Handlebars;
 use serde_json::json;
 
-pub async fn get_single_post(
+pub async fn show_posts(
     path: web::Path<String>,
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,

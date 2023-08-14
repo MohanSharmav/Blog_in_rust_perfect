@@ -30,7 +30,7 @@ impl ResponseError for MyOwnErrors {
         status::StatusCode::BAD_GATEWAY
     }
 }
-pub async fn admin_pagination_display(
+pub async fn admin_index(
     config: web::Data<ConfigurationConstants>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
