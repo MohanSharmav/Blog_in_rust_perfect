@@ -17,6 +17,7 @@ use actix_web::{http, web, HttpResponse, HttpResponseBuilder};
 use anyhow::Result;
 use handlebars::Handlebars;
 use serde_json::json;
+use crate::controller::admin_pagination::admin_pagination_with_category;
 use crate::controller::General_pagination::general_pagination_with_category;
 
 pub async fn get_all_categories_controller(
@@ -43,46 +44,12 @@ pub async fn get_all_categories_controller(
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     let posts_per_page_constant = set_posts_per_page().await;
     let param = params.into_inner();
-    let y = pages_count.len();
+    let count_of_number_of_pages = pages_count.len();
     let cp: usize = param.clone() as usize;
-    let x1 = r#"<div class="card mb-4">
-                                <!-- Basic Pagination -->
-                                   <!-- Basic Pagination -->
-                                                <nav aria-label="Page navigation">
-                                                    <ul class="pagination">
-                                            "#;
 
-    let mut pagination_final_string = String::new();
-    pagination_final_string.push_str(x1);
-    for i in 1..y + 1 {
-        if i == cp {
-            let tag_and_url = r#"
-<li class="page-item active">
-              <a class="page-link "   href="/admin/categories/page/"#;
-            pagination_final_string.push_str(tag_and_url);
-            let href_link = i.to_string();
-            pagination_final_string.push_str(&*href_link);
-            let page_constant = r#"">"#;
-            pagination_final_string.push_str(page_constant);
-            let text_inside_tag = i.to_string();
-            pagination_final_string.push_str(&*text_inside_tag);
-            let close_tag = r#"</a>"#;
-            pagination_final_string.push_str(close_tag);
-        } else {
-            let tag_and_url = r#"
-<li class="page-item">
-              <a class="page-link "   href="/admin/categories/page/"#;
-            pagination_final_string.push_str(tag_and_url);
-            let href_link = i.to_string();
-            pagination_final_string.push_str(&*href_link);
-            let page_constant = r#"">"#;
-            pagination_final_string.push_str(page_constant);
-            let text_inside_tag = i.to_string();
-            pagination_final_string.push_str(&*text_inside_tag);
-            let close_tag = r#"</a>"#;
-            pagination_final_string.push_str(close_tag);
-        }
-    }
+    let pagination_final_string=admin_pagination_with_category(cp,count_of_number_of_pages)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let all_category = get_all_categories_database(db)
         .await

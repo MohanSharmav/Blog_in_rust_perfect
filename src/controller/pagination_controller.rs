@@ -12,6 +12,7 @@ use serde_json::json;
 use sqlx::{Pool, Postgres, Row};
 use std::fmt::{Debug, Display, Formatter};
 use warp::http::status;
+use crate::controller::admin_pagination::admin_pagination_main_page;
 
 #[derive(Debug)]
 struct MyOwnErrors {
@@ -53,9 +54,14 @@ pub async fn admin_pagination_display(
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     let current_page = params.clone();
     let par = params.into_inner();
-    let y = pages_count.len();
+    let count_of_number_of_pages = pages_count.len();
     let cp: usize = par.clone() as usize;
-    let mut pagination_final_string = String::new();
+
+
+
+    let pagination_final_string=admin_pagination_main_page(cp,count_of_number_of_pages)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let paginators = pagination_logic(&par, db)
         .await
@@ -69,46 +75,7 @@ pub async fn admin_pagination_display(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let test = r#"<div class="card mb-4">
-                                <!-- Basic Pagination -->
-                                   <!-- Basic Pagination -->
-                                                <nav aria-label="Page navigation">
-                                                    <ul class="pagination">
-                                            "#;
 
-    pagination_final_string.push_str(test);
-    for i in 1..y + 1 {
-        if i == cp {
-            let tag_and_url = r#"
-             <li class="page-item active">
-              <a class="page-link "   href="/admin/posts/page/"#;
-            pagination_final_string.push_str(tag_and_url);
-            let href_link = i.to_string();
-            pagination_final_string.push_str(&*href_link);
-            let end_of_tag = r#"">"#;
-            pagination_final_string.push_str(end_of_tag);
-            let text_inside_tag = i.to_string();
-            pagination_final_string.push_str(&*text_inside_tag);
-            let close_tag = r#"</a></li>"#;
-            pagination_final_string.push_str(close_tag);
-        } else {
-            let tag_and_url = r#"
-             <li class="page-item">
-              <a class="page-link "   href="/admin/posts/page/"#;
-            pagination_final_string.push_str(tag_and_url);
-            let href_link = i.to_string();
-            pagination_final_string.push_str(&*href_link);
-            let end_of_tag = r#"">"#;
-            pagination_final_string.push_str(end_of_tag);
-            let text_inside_tag = i.to_string();
-            pagination_final_string.push_str(&*text_inside_tag);
-            let close_tag = r#"</a></li>"#;
-            pagination_final_string.push_str(close_tag);
-        }
-    }
-    let v = r#"</ul>
-        </nav>"#;
-    pagination_final_string.push_str(v);
     let htmls = handlebars.render("admin_post_table", &json!({"a":&paginators,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category,"pagination":pagination_final_string}))
         .map_err( actix_web::error::ErrorInternalServerError)?;
 

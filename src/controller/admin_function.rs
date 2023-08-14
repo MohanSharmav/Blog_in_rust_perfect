@@ -47,14 +47,7 @@ pub async fn admin_category_display(
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     let count_of_number_of_pages = pages_count.len();
     let cp: usize = params.clone() as usize;
-    // //"/admin/categories/{category_id}/page/{page_number}
-    // let redirection_url= "/admin/categories/".to_string() + &*category_input.clone() + &*"/page/1".to_string();
-    // if cp > count_of_number_of_pages || cp <= 0 {
-    //     return  Ok(HttpResponse::SeeOther()
-    //         .insert_header((LOCATION, redirection_url))
-    //         .content_type(ContentType::html())
-    //         .finish())
-    // }
+
     let pagination_final_string=admin_pagination_with_category(cp,count_of_number_of_pages,category_input.clone())
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
