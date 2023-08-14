@@ -66,7 +66,6 @@ async fn main() -> Result<(), anyhow::Error> {
         database_connection: pool,
     };
     let confi = web::Data::new(config.clone());
-    // let message_store = CookieMessageStore::builder(secret_key.clone()).build();
 
     let message_store = CookieMessageStore::builder(secret_key.clone()).build();
     let message_framework = FlashMessagesFramework::builder(message_store).build();
@@ -76,10 +75,7 @@ async fn main() -> Result<(), anyhow::Error> {
             .app_data(message_framework.clone())
             .app_data(web::Data::new(handlebars.clone()))
             .app_data(confi.clone())
-            // .wrap(message_framework.clone())
             .wrap(IdentityMiddleware::default())
-            // .wrap(FlashMiddleware::default())
-            // .wrap(message_framework.clone())
             .wrap(
                 SessionMiddleware::builder(CookieSessionStore::default(), secret_key.clone())
                     .cookie_name("adf-obdd-service-auth".to_owned())
@@ -108,7 +104,6 @@ async fn main() -> Result<(), anyhow::Error> {
                     .route(web::get().to(get_all_categories_controller)),
             )
             .service(web::resource("/admin/posts/new").to(get_new_post))
-            // .service(web::resource("/admin/posts/new").to(receive_new_posts_with_no_category))
             .service(web::resource("/admin/posts").route(web::post().to(receive_new_posts)))
             .service(
                 web::resource("/admin/posts/{post_id}")
@@ -154,7 +149,6 @@ async fn main() -> Result<(), anyhow::Error> {
                 web::resource("/posts/ben/{page_number}")
                     .route(web::get().to(new_common_page_controller_test)),
             )
-            // .service(web::resource("/test").route(web::get().to(new_test)))
             .service(web::resource("/ben").to(england_admin_pagination_display))
             .service(Files::new("/", "./templates").show_files_listing())
     })
