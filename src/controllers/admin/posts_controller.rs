@@ -189,10 +189,10 @@ pub async fn get_categories_posts(
     }
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     let count_of_number_of_pages = pages_count.len();
-    let cp: usize = params.clone() as usize;
+    let current_page: usize = params.clone() as usize;
 
     let pagination_final_string =
-        admin_category_posts(cp, count_of_number_of_pages, category_input.clone())
+        admin_category_posts(current_page, count_of_number_of_pages, category_input.clone())
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -270,16 +270,16 @@ pub async fn admin_index(
     }
     let posts_per_page = posts_per_page as usize;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    let current_page = params.clone();
+    let start_page = params.clone();
     let par = params.into_inner();
     let count_of_number_of_pages = pages_count.len();
-    let cp: usize = par.clone() as usize;
+    let current_page: usize = par.clone() as usize;
 
-    let pagination_final_string = admin_main_page(cp, count_of_number_of_pages)
+    let pagination_final_string = admin_main_page(current_page, count_of_number_of_pages)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let exact_posts_only = specific_page_posts(current_page, db)
+    let exact_posts_only = specific_page_posts(start_page, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -311,13 +311,13 @@ pub async fn number_posts_count(db: &Pool<Postgres>) -> Result<i64, actix_web::e
         })
         .collect();
 
-    let a = counting_final
+    let before_remove_error = counting_final
         .get(0)
         .ok_or_else(|| actix_web::error::ErrorInternalServerError("error-1"))?;
 
-    let b = a
+    let exact_value = before_remove_error
         .as_ref()
         .map_err(|_er| actix_web::error::ErrorInternalServerError("error-2"))?;
 
-    Ok(*b)
+    Ok(*exact_value)
 }

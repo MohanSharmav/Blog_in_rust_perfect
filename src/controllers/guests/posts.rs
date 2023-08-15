@@ -38,16 +38,16 @@ pub async fn index(
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     let sample: Vec<_> = (1..=posts_per_page).collect();
     let count_of_number_of_pages = pages_count.len();
-    let cp: usize = current_page.clone();
+    let current_page: usize = current_page.clone();
 
-    if cp > count_of_number_of_pages || cp <= 0 {
+    if current_page > count_of_number_of_pages || current_page <= 0 {
         return Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/posts/page/1"))
             .content_type(ContentType::html())
             .finish());
     }
 
-    let pagination_final_string = index_pagination(cp, count_of_number_of_pages)
+    let pagination_final_string = index_pagination(current_page, count_of_number_of_pages)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

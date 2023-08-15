@@ -46,9 +46,9 @@ pub async fn get_all_categories(
     let posts_per_page_constant = set_posts_per_page().await;
     let param = params.into_inner();
     let count_of_number_of_pages = pages_count.len();
-    let cp: usize = param.clone() as usize;
+    let current_page: usize = param.clone() as usize;
 
-    let pagination_final_string = admin_categories(cp, count_of_number_of_pages)
+    let pagination_final_string = admin_categories(current_page, count_of_number_of_pages)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -200,11 +200,11 @@ pub async fn get_category_posts(
     }
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     let count_of_number_of_pages = pages_count.len();
-    let cp: usize = par.clone() as usize;
+    let current_page: usize = par.clone() as usize;
     let admin = false;
 
     let pagination_final_string =
-        general_category(cp, count_of_number_of_pages, &category_input, admin)
+        general_category(current_page, count_of_number_of_pages, &category_input, admin)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -251,13 +251,13 @@ pub async fn get_pagination_for_all_categories_list(
         })
         .collect();
 
-    let a = counting_final
+    let before_remove_error = counting_final
         .get(0)
         .ok_or_else(|| actix_web::error::ErrorInternalServerError("error-1"))?;
 
-    let b = a
+    let exact_value = before_remove_error
         .as_ref()
         .map_err(|_er| actix_web::error::ErrorInternalServerError("error-2"))?;
 
-    Ok(*b)
+    Ok(*exact_value)
 }

@@ -39,12 +39,12 @@ pub async fn login(
     let mcrypt = &config.magic_key;
     let encrypted_password = mcrypt.encrypt_str_to_base64(password);
     let db = &config.database_connection;
-    let result = login_database(username, encrypted_password, db)
+    let login_result = login_database(username, encrypted_password, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let y = LoginCheck { value: 1 };
-    if result == y {
+    let logic_check_value = LoginCheck { value: 1 };
+    if login_result == logic_check_value {
         Identity::login(&req.extensions(), username.to_string())
             .map_err(actix_web::error::ErrorInternalServerError)?;
         Ok(HttpResponse::SeeOther()
