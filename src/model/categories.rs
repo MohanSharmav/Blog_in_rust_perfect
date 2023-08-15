@@ -1,8 +1,8 @@
 use crate::model::structs::{Categories, PostsCategories};
-use sqlx::{Pool, Postgres, Row};
 use anyhow::anyhow;
+use sqlx::{Pool, Postgres, Row};
 
-pub async fn get_all_categories_database(
+pub async fn all_categories_db(
     db: &Pool<Postgres>,
 ) -> Result<Vec<Categories>, anyhow::Error> {
     let all_categories = sqlx::query_as::<_, Categories>("select name,id from categories")
@@ -12,7 +12,7 @@ pub async fn get_all_categories_database(
     Ok(all_categories)
 }
 
-pub async fn create_new_category_database(
+pub async fn create_new_category_db(
     db: &Pool<Postgres>,
     name: &String,
 ) -> Result<(), anyhow::Error> {
@@ -24,7 +24,7 @@ pub async fn create_new_category_database(
     Ok(())
 }
 
-pub async fn delete_category_database(
+pub async fn delete_category_db(
     db: &Pool<Postgres>,
     to_delete_category: &str,
 ) -> Result<(), anyhow::Error> {
@@ -43,7 +43,7 @@ pub async fn delete_category_database(
     Ok(())
 }
 
-pub async fn update_category_database(
+pub async fn update_category_db(
     name: &String,
     category_id: i32,
     db: &Pool<Postgres>,
@@ -56,7 +56,7 @@ pub async fn update_category_database(
     Ok(())
 }
 
-pub async fn category_pagination_controller_database_function(
+pub async fn category_db(
     category_id: String,
     db: &Pool<Postgres>,
     par: i32,
@@ -75,7 +75,7 @@ pub async fn category_pagination_controller_database_function(
     Ok(category_posts)
 }
 
-pub async fn get_all_categories_database_with_pagination_display(
+pub async fn get_all_categories_db(
     db: &Pool<Postgres>,
     parii: i32,
     posts_per_page_constant: i32,
@@ -91,7 +91,7 @@ pub async fn get_all_categories_database_with_pagination_display(
     Ok(all_categories)
 }
 
-pub async fn get_all_specific_category_database(
+pub async fn get_specific_category_posts(
     id: i32,
     db: &Pool<Postgres>,
 ) -> Result<Vec<Categories>, anyhow::Error> {

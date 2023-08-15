@@ -1,6 +1,5 @@
 use serde::Deserialize;
 use serde::Serialize;
-use sqlx::{Pool, Postgres};
 
 #[derive(Serialize)]
 pub struct DataForFrontEnd {
@@ -73,12 +72,4 @@ pub struct CreateNewCategory {
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
 pub struct GetId {
     pub id: i32,
-}
-
-pub async fn select_posts(db: &Pool<Postgres>) -> Result<Vec<Posts>, anyhow::Error> {
-    let postsing = sqlx::query_as::<_, Posts>("select id, title, description from posts")
-        .fetch_all(db)
-        .await?;
-
-    Ok(postsing)
 }

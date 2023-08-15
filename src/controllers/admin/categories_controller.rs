@@ -1,27 +1,28 @@
-use crate::controller::admin::admin_pagination::admin_pagination_with_category;
-use crate::controller::admin::pagination_controller::get_pagination_for_all_categories_list;
-use crate::controller::constants::ConfigurationConstants;
-use crate::controller::guests::common_controller::set_posts_per_page;
-use crate::controller::guests::General_pagination::general_pagination_with_category;
-use crate::model::category::{
-    category_pagination_controller_database_function, create_new_category_database,
-    delete_category_database, get_all_categories_database,
-    get_all_categories_database_with_pagination_display, get_all_specific_category_database,
-    update_category_database,
+use crate::controllers::constants::Configuration;
+use crate::controllers::guests::posts::set_posts_per_page;
+use crate::controllers::helpers::pagination_logic::admin_categories;
+use crate::controllers::helpers::pagination_logic::general_category;
+use crate::model::categories::category_pagination_logic;
+use crate::model::categories::{
+    category_db, create_new_category_db,
+    delete_category_db, all_categories_db,
+    get_all_categories_db, get_specific_category_posts,
+    update_category_db,
 };
-use crate::model::category::category_pagination_logic;
 use crate::model::structs::CreateNewCategory;
 use actix_http::header::LOCATION;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
 use actix_web::web::Redirect;
-use actix_web::{http, web, HttpResponse, HttpResponseBuilder};
+use actix_web::{http, web, HttpResponse};
 use anyhow::Result;
 use handlebars::Handlebars;
 use serde_json::json;
+use sqlx::{Pool, Postgres, Row};
+use std::result;
 
 pub async fn get_all_categories(
-    config: web::Data<ConfigurationConstants>,
+    config: web::Data<Configuration>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
     params: web::Path<i32>,
@@ -47,16 +48,16 @@ pub async fn get_all_categories(
     let count_of_number_of_pages = pages_count.len();
     let cp: usize = param.clone() as usize;
 
-    let pagination_final_string = admin_pagination_with_category(cp, count_of_number_of_pages)
+    let pagination_final_string = admin_categories(cp, count_of_number_of_pages)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let all_category = get_all_categories_database(db)
+    let all_category = all_categories_db(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let all_categories =
-        get_all_categories_database_with_pagination_display(db, param, posts_per_page_constant)
+        get_all_categories_db(db, param, posts_per_page_constant)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -73,7 +74,7 @@ pub async fn get_all_categories(
 }
 
 pub async fn new_category(
-    config: web::Data<ConfigurationConstants>,
+    config: web::Data<Configuration>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
 ) -> Result<HttpResponse, actix_web::Error> {
@@ -83,7 +84,7 @@ pub async fn new_category(
             .body(""));
     }
     let db = &config.database_connection;
-    let all_category = get_all_categories_database(db)
+    let all_category = all_categories_db(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -98,11 +99,11 @@ pub async fn new_category(
 
 pub async fn create_category(
     form: web::Form<CreateNewCategory>,
-    config: web::Data<ConfigurationConstants>,
+    config: web::Data<Configuration>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let name = &form.name;
     let db = &config.database_connection;
-    create_new_category_database(db, name)
+    create_new_category_db(db, name)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -114,18 +115,18 @@ pub async fn create_category(
 
 pub async fn destroy_category(
     id: web::Path<String>,
-    config: web::Data<ConfigurationConstants>,
+    config: web::Data<Configuration>,
 ) -> Result<Redirect, actix_web::Error> {
     let to_delete_category = &id.into_inner();
     let db = &config.database_connection;
-    delete_category_database(db, to_delete_category)
+    delete_category_db(db, to_delete_category)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     Ok(Redirect::to("/admin/categories/page/1"))
 }
 
 pub async fn edit_category(
-    config: web::Data<ConfigurationConstants>,
+    config: web::Data<Configuration>,
     to_be_updated_category: web::Path<i32>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
@@ -137,12 +138,12 @@ pub async fn edit_category(
     }
 
     let db = &config.database_connection;
-    let all_category = get_all_categories_database(db)
+    let all_category = all_categories_db(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let to_be_updated_category = to_be_updated_category.clone();
-    let x = get_all_specific_category_database(to_be_updated_category, db)
+    let x = get_specific_category_posts(to_be_updated_category, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -162,13 +163,13 @@ pub async fn update_category(
     id: web::Path<i32>,
     form: web::Form<CreateNewCategory>,
     current_category_name: web::Path<String>,
-    config: web::Data<ConfigurationConstants>,
+    config: web::Data<Configuration>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
     let _current_post_name = &current_category_name.into_inner();
     let name = &form.name;
     let category_id = id.into_inner();
-    update_category_database(name, category_id, db)
+    update_category_db(name, category_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     Ok(HttpResponse::SeeOther()
@@ -179,7 +180,7 @@ pub async fn update_category(
 
 pub async fn get_category_posts(
     info: web::Path<(String, u32)>,
-    config: web::Data<ConfigurationConstants>,
+    config: web::Data<Configuration>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
@@ -201,11 +202,11 @@ pub async fn get_category_posts(
     let admin = false;
 
     let pagination_final_string =
-        general_pagination_with_category(cp, count_of_number_of_pages, &category_input, admin)
+        general_category(cp, count_of_number_of_pages, &category_input, admin)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let category_postinng = category_pagination_controller_database_function(
+    let category_postinng = category_db(
         category_input.to_string(),
         db,
         par,
@@ -214,7 +215,7 @@ pub async fn get_category_posts(
     .await
     .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let all_category = get_all_categories_database(db)
+    let all_category = all_categories_db(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -228,4 +229,33 @@ pub async fn get_category_posts(
     Ok(HttpResponse::Ok()
         .content_type(ContentType::html())
         .body(html))
+}
+
+pub async fn get_pagination_for_all_categories_list(
+    db: &Pool<Postgres>,
+) -> result::Result<i64, actix_web::error::Error> {
+    let rows = sqlx::query("SELECT COUNT(*) FROM categories")
+        .fetch_all(db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    let counting_final: Vec<result::Result<i64, actix_web::Error>> = rows
+        .into_iter()
+        .map(|row| {
+            let final_count: i64 = row
+                .try_get("count")
+                .map_err(actix_web::error::ErrorInternalServerError)?;
+            Ok::<i64, actix_web::Error>(final_count)
+        })
+        .collect();
+
+    let a = counting_final
+        .get(0)
+        .ok_or_else(|| actix_web::error::ErrorInternalServerError("error-1"))?;
+
+    let b = a
+        .as_ref()
+        .map_err(|_er| actix_web::error::ErrorInternalServerError("error-2"))?;
+
+    Ok(*b)
 }

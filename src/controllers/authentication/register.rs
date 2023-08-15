@@ -1,9 +1,8 @@
-use crate::controller::authentication::session::User;
-use crate::controller::constants::ConfigurationConstants;
+use crate::controllers::authentication::session::User;
+use crate::controllers::constants::Configuration;
 use crate::model::authentication::register::register_user;
 use actix_http::header::LOCATION;
 use actix_web::http::header::ContentType;
-use actix_web::web::Redirect;
 use actix_web::{web, HttpResponse};
 use handlebars::Handlebars;
 use magic_crypt::MagicCryptTrait;
@@ -23,7 +22,7 @@ pub async fn get_register(
 
 pub async fn register(
     form: web::Form<User>,
-    config: web::Data<ConfigurationConstants>,
+    config: web::Data<Configuration>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let user = &form.username;
     let password = &form.password;

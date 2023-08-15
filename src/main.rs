@@ -1,39 +1,31 @@
-mod controller;
+mod controllers;
 mod model;
-use crate::controller::admin::admin_function::{get_category_posts_a, show_post};
-use crate::controller::admin::category_controller::{
+use crate::controllers::admin::categories_controller::{
     create_category, destroy_category, edit_category, get_all_categories, get_category_posts,
     new_category, update_category,
 };
-use crate::controller::admin::pagination_controller::admin_index;
-use crate::controller::admin::posts_controller::{
+use crate::controllers::admin::posts_controller::{
     destroy_post, edit_post, get_new_post, new_posts, update_post,
 };
-use crate::controller::authentication::register::{get_register, register};
-use crate::controller::authentication::session::{
-    check_user, failed_login_page, get_login, login, logout,
-};
-use crate::controller::constants::ConfigurationConstants;
-use crate::controller::guests::common_controller::{
-    index, main_page, new_common_page_controller_test, redirect_user,
-};
-use crate::controller::guests::single_post_controller::show_posts;
+use crate::controllers::authentication::register::{get_register, register};
+use crate::controllers::authentication::session::{check_user, get_login, login, logout};
+use crate::controllers::constants::Configuration;
+use crate::controllers::guests::posts::{index, main_page, redirect_user};
 use actix_files::Files;
 use actix_identity::IdentityMiddleware;
 use actix_session::config::PersistentSession;
 use actix_session::storage::CookieSessionStore;
 use actix_session::SessionMiddleware;
 use actix_web::cookie::Key;
-use actix_web::{web, App, HttpResponse, HttpServer, Result};
+use actix_web::{web, App, HttpServer, Result};
 use actix_web_flash_messages::storage::CookieMessageStore;
-use actix_web_flash_messages::FlashMessage;
 use actix_web_flash_messages::FlashMessagesFramework;
+use controllers::admin::posts_controller::admin_index;
+use controllers::admin::posts_controller::{get_categories_posts, show_post};
+use controllers::guests::posts::show_posts;
 use handlebars::Handlebars;
 use magic_crypt::new_magic_crypt;
-use model::authentication::session::login_database;
 use sqlx::postgres::PgPoolOptions;
-use std::fs::DirEntry;
-use std::path::Path;
 
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
@@ -59,7 +51,7 @@ async fn main() -> Result<(), anyhow::Error> {
         .connect(&db_url)
         .await?;
 
-    let config = ConfigurationConstants {
+    let config = Configuration {
         magic_key: mcrypt,
         database_connection: pool,
     };
@@ -115,7 +107,7 @@ async fn main() -> Result<(), anyhow::Error> {
             )
             .service(
                 web::resource("/admin/categories/{category_id}/page/{page_number}")
-                    .to(get_category_posts_a),
+                    .to(get_categories_posts),
             )
             .service(
                 web::resource("/admin/category/{name}/delete")
@@ -138,6 +130,7 @@ async fn main() -> Result<(), anyhow::Error> {
                     .to(get_category_posts),
             )
             .service(web::resource("/posts/page/{page_number}").route(web::get().to(index)))
+            .service(Files::new("/", "./templates").show_files_listing())
     })
     .bind("127.0.0.1:8080")?
     .run()

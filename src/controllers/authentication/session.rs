@@ -1,17 +1,14 @@
-use crate::controller::constants::ConfigurationConstants;
+use crate::controllers::constants::Configuration;
 use crate::model::authentication::session::{login_database, LoginCheck};
 use actix_http::header::LOCATION;
 use actix_identity::Identity;
-use actix_web::error::InternalError;
 use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
 use actix_web::{HttpMessage as _, HttpRequest, Responder};
-use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages};
 use handlebars::Handlebars;
 use magic_crypt::MagicCryptTrait;
 use serde::Deserialize;
 use serde_json::json;
-use std::fs;
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct User {
@@ -34,7 +31,7 @@ pub async fn login(
     form: web::Form<User>,
     req: HttpRequest,
     _user: Option<Identity>,
-    config: web::Data<ConfigurationConstants>,
+    config: web::Data<Configuration>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let username = &form.username;
     let password = &form.password.to_string();
@@ -71,16 +68,4 @@ pub async fn check_user(user: Option<Identity>) -> impl Responder {
     } else {
         web::Redirect::to("/")
     }
-}
-
-pub async fn failed_login_page(
-    handlebars: web::Data<Handlebars<'_>>,
-) -> Result<HttpResponse, actix_web::Error> {
-    let html = handlebars
-        .render("llogin", &json!({"":""}))
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    Ok(HttpResponse::Ok()
-        .content_type(ContentType::html())
-        .body(html))
 }

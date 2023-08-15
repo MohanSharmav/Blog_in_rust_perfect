@@ -1,11 +1,12 @@
-use crate::controller::admin::pagination_controller::perfect_pagination_logic;
-use crate::controller::constants::ConfigurationConstants;
-use crate::controller::guests::General_pagination::general_pagination;
-use crate::model::category::get_all_categories_database;
-use crate::model::posts::select_specific_pages_post;
+use crate::controllers::admin::posts_controller::number_posts_count;
+use crate::controllers::constants::Configuration;
+use crate::controllers::helpers::pagination_logic::index_pagination;
+use crate::model::categories::all_categories_db;
+use crate::model::posts::{
+    query_single_post, single_post_in_struct, specific_pages_post,
+};
 use actix_http::header::LOCATION;
 use actix_web::http::header::ContentType;
-use actix_web::web::Redirect;
 use actix_web::{web, HttpResponse, Responder};
 use handlebars::Handlebars;
 use serde_json::json;
@@ -20,11 +21,11 @@ pub async fn set_posts_per_page() -> i32 {
 
 pub async fn index(
     params: web::Path<i32>,
-    config: web::Data<ConfigurationConstants>,
+    config: web::Data<Configuration>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
-    let total_posts_length = perfect_pagination_logic(db).await?;
+    let total_posts_length = number_posts_count(db).await?;
     let posts_per_page_constant = set_posts_per_page().await as i64;
     let mut posts_per_page = total_posts_length / posts_per_page_constant;
     let check_remainder = total_posts_length % posts_per_page_constant;
@@ -46,15 +47,15 @@ pub async fn index(
             .finish());
     }
 
-    let pagination_final_string = general_pagination(cp, count_of_number_of_pages)
+    let pagination_final_string = index_pagination(cp, count_of_number_of_pages)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let exact_posts_only = select_specific_pages_post(param, &db.clone())
+    let exact_posts_only = specific_pages_post(param, &db.clone())
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let all_category = get_all_categories_database(db)
+    let all_category = all_categories_db(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -66,44 +67,12 @@ pub async fn index(
         .body(htmls))
 }
 
-pub async fn new_common_page_controller_test(
-    params: web::Path<i32>,
-    config: web::Data<ConfigurationConstants>,
-    handlebars: web::Data<Handlebars<'_>>,
-) -> Result<HttpResponse, actix_web::Error> {
-    let db = &config.database_connection;
-    let total_posts_length = perfect_pagination_logic(db).await?;
-    let posts_per_page_constant = set_posts_per_page().await as i64;
-    let mut posts_per_page = total_posts_length / posts_per_page_constant;
-    let check_remainder = total_posts_length % posts_per_page_constant;
-    if check_remainder != 0 {
-        posts_per_page += 1;
-    }
-    let posts_per_page = posts_per_page as usize;
-    let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    let param = params.into_inner();
-    let exact_posts_only = select_specific_pages_post(param, &db.clone())
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    let all_category = get_all_categories_database(db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    let htmls = handlebars.render("common_two", &json!({"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category}))
-        .map_err( actix_web::error::ErrorInternalServerError)?;
-
-    Ok(HttpResponse::Ok()
-        .content_type(ContentType::html())
-        .body(htmls))
-}
-
 pub async fn main_page(
-    config: web::Data<ConfigurationConstants>,
+    config: web::Data<Configuration>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
-    let total_posts_length = perfect_pagination_logic(db).await?;
+    let total_posts_length = number_posts_count(db).await?;
     let posts_per_page_constant = set_posts_per_page().await as i64;
     let mut posts_per_page = total_posts_length / posts_per_page_constant;
     let check_remainder = total_posts_length % posts_per_page_constant;
@@ -112,22 +81,14 @@ pub async fn main_page(
     }
     let posts_per_page = posts_per_page as usize;
     let param = 1;
-    let current_page = param as usize;
+    let _current_page = param as usize;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    let mut sample: Vec<_> = (1..=posts_per_page).collect();
-    let mut c = 0;
-    for i in sample.clone().into_iter() {
-        if i == current_page {
-            c = i;
-            sample.remove(i);
-        }
-    }
 
-    let exact_posts_only = select_specific_pages_post(param, &db.clone())
+    let exact_posts_only = specific_pages_post(param, &db.clone())
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let all_category = get_all_categories_database(db)
+    let all_category = all_categories_db(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -137,4 +98,35 @@ pub async fn main_page(
     Ok(HttpResponse::Ok()
         .content_type(ContentType::html())
         .body(htmls))
+}
+
+pub async fn show_posts(
+    path: web::Path<String>,
+    config: web::Data<Configuration>,
+    handlebars: web::Data<Handlebars<'_>>,
+) -> Result<HttpResponse, actix_web::Error> {
+    let db = &config.database_connection;
+    let titles = path.parse::<i32>().unwrap_or_default();
+    let single_post = query_single_post(titles, db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    let single_post_struct = single_post_in_struct(titles, db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    let all_category = all_categories_db(db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    let html = handlebars
+        .render(
+            "single",
+            &json!({"o":&single_post,"single_post":single_post_struct,"o":all_category}),
+        )
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    Ok(HttpResponse::Ok()
+        .content_type(ContentType::html())
+        .body(html))
 }

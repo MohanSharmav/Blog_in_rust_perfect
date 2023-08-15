@@ -1,9 +1,9 @@
+use crate::controllers::guests::posts::set_posts_per_page;
 use crate::model::structs::{GetId, Posts};
 use core::option::Option;
-use sqlx::{Pool, Postgres};
-use crate::controller::guests::common_controller::set_posts_per_page;
+use sqlx::{Pool, Postgres, Row};
 
-pub async fn delete_post_database(
+pub async fn delete_post_db(
     to_delete: String,
     db: &Pool<Postgres>,
 ) -> Result<(), anyhow::Error> {
@@ -20,7 +20,7 @@ pub async fn delete_post_database(
     Ok(())
 }
 
-pub async fn update_post_database(
+pub async fn update_post_db(
     title: &String,
     description: &String,
     id: i32,
@@ -43,7 +43,7 @@ pub async fn update_post_database(
     Ok(())
 }
 
-pub async fn create_post_database(
+pub async fn create_post(
     title: String,
     description: String,
     category_id: &i32,
@@ -67,7 +67,7 @@ pub async fn create_post_database(
     Ok(())
 }
 
-pub async fn create_post_without_category_database(
+pub async fn create_post_without_category(
     title: String,
     description: String,
     db: &Pool<Postgres>,
@@ -81,7 +81,7 @@ pub async fn create_post_without_category_database(
     Ok(())
 }
 
-pub async fn update_post_without_category_database(
+pub async fn update_post_without_category(
     title: String,
     description: String,
     id: i32,
@@ -102,11 +102,11 @@ pub async fn update_post_without_category_database(
     Ok(())
 }
 
-pub async fn get_category_id_from_post_id(
+pub async fn category_id_from_post_id(
     postid: i32,
     db: &Pool<Postgres>,
 ) -> Result<Option<i32>, anyhow::Error> {
-    //todo
+    //todo //todo
     let category_id =
         sqlx::query_as::<_, GetId>("select category_id from categories_posts where post_id=$1")
             .bind(postid)
@@ -118,7 +118,7 @@ pub async fn get_category_id_from_post_id(
     Ok::<std::option::Option<i32>, anyhow::Error>(Some(*id))
 }
 
-pub async fn select_specific_pages_post(
+pub async fn specific_pages_post(
     start_page: i32,
     db: &Pool<Postgres>,
 ) -> Result<Vec<Posts>, anyhow::Error> {
@@ -133,4 +133,37 @@ pub async fn select_specific_pages_post(
     .await?;
 
     Ok(perfect_posts)
+}
+
+pub async fn query_single_post(
+    titles: i32,
+    db: &Pool<Postgres>,
+) -> Result<Vec<String>, anyhow::Error> {
+    let rows = sqlx::query("SELECT title,description FROM posts WHERE id=$1")
+        .bind(titles)
+        .fetch_all(db)
+        .await?;
+
+    let single_post = rows
+        .iter()
+        .map(|row| {
+            let title: String = row.get("title");
+            let description: String = row.get("description");
+            title + " " + &description
+        })
+        .collect();
+
+    Ok(single_post)
+}
+
+pub async fn single_post_in_struct(
+    titles: i32,
+    db: &Pool<Postgres>,
+) -> Result<Vec<Posts>, anyhow::Error> {
+    let single_post =
+        sqlx::query_as::<_, Posts>("select id, title, description from posts  WHERE id=$1")
+            .bind(titles)
+            .fetch_all(db)
+            .await?;
+    Ok(single_post)
 }
