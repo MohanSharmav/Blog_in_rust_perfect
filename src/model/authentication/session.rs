@@ -1,18 +1,5 @@
-use serde::Deserialize;
-use sqlx::postgres::PgRow;
-use sqlx::{Error, FromRow, Pool, Postgres, Row};
-
-#[derive(Deserialize, Debug, Clone, PartialEq)]
-pub struct LoginCheck {
-    pub(crate) value: i64,
-}
-
-impl<'r> FromRow<'r, PgRow> for LoginCheck {
-    fn from_row(row: &'r PgRow) -> Result<Self, Error> {
-        let name = row.try_get("count")?;
-        Ok(LoginCheck { value: name })
-    }
-}
+use sqlx::{Pool, Postgres};
+use crate::model::structs::LoginCheck;
 
 pub async fn login_database(
     users: &String,

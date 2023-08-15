@@ -169,9 +169,11 @@ pub async fn update_category(
     let _current_post_name = &current_category_name.into_inner();
     let name = &form.name;
     let category_id = id.into_inner();
+
     update_category_db(name, category_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
+
     Ok(HttpResponse::SeeOther()
         .insert_header((LOCATION, "/admin/categories/page/1"))
         .content_type(ContentType::html())

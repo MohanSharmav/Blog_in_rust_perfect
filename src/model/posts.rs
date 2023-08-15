@@ -118,7 +118,7 @@ pub async fn category_id_from_post_id(
     Ok::<std::option::Option<i32>, anyhow::Error>(Some(*id))
 }
 
-pub async fn specific_pages_post(
+pub async fn specific_page_posts(
     start_page: i32,
     db: &Pool<Postgres>,
 ) -> Result<Vec<Posts>, anyhow::Error> {
@@ -156,7 +156,7 @@ pub async fn query_single_post(
     Ok(single_post)
 }
 
-pub async fn single_post_in_struct(
+pub async fn single_post_db(
     titles: i32,
     db: &Pool<Postgres>,
 ) -> Result<Vec<Posts>, anyhow::Error> {

@@ -3,7 +3,7 @@ use crate::controllers::constants::Configuration;
 use crate::controllers::helpers::pagination_logic::index_pagination;
 use crate::model::categories::all_categories_db;
 use crate::model::posts::{
-    query_single_post, single_post_in_struct, specific_pages_post,
+    query_single_post, single_post_db, specific_page_posts,
 };
 use actix_http::header::LOCATION;
 use actix_web::http::header::ContentType;
@@ -51,7 +51,7 @@ pub async fn index(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let exact_posts_only = specific_pages_post(param, &db.clone())
+    let exact_posts_only = specific_page_posts(param, &db.clone())
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -84,7 +84,7 @@ pub async fn main_page(
     let _current_page = param as usize;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
 
-    let exact_posts_only = specific_pages_post(param, &db.clone())
+    let exact_posts_only = specific_page_posts(param, &db.clone())
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -111,7 +111,7 @@ pub async fn show_posts(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let single_post_struct = single_post_in_struct(titles, db)
+    let single_post_struct = single_post_db(titles, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

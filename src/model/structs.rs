@@ -1,16 +1,7 @@
 use serde::Deserialize;
 use serde::Serialize;
-
-#[derive(Serialize)]
-pub struct DataForFrontEnd {
-    pub colored_text: String,
-}
-
-#[derive(Serialize, Clone)]
-pub struct Pagination {
-    pub current_page: i32,
-    pub other_pages: Vec<usize>,
-}
+use sqlx::{Error, FromRow, Row};
+use sqlx::postgres::PgRow;
 
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
 pub struct Categories {
@@ -72,4 +63,16 @@ pub struct CreateNewCategory {
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
 pub struct GetId {
     pub id: i32,
+}
+
+#[derive(Deserialize, Debug, Clone, PartialEq)]
+pub struct LoginCheck {
+    pub(crate) value: i64,
+}
+
+impl<'r> FromRow<'r, PgRow> for LoginCheck {
+    fn from_row(row: &'r PgRow) -> Result<Self, Error> {
+        let name = row.try_get("count")?;
+        Ok(LoginCheck { value: name })
+    }
 }

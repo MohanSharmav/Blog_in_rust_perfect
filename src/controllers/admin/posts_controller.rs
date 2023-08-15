@@ -7,10 +7,10 @@ use crate::model::categories::{
     category_db, category_pagination_logic,
     all_categories_db,
 };
-use crate::model::posts::single_post_in_struct;
+use crate::model::posts::single_post_db;
 use crate::model::posts::{
     create_post, create_post_without_category, delete_post_db,
-    category_id_from_post_id, query_single_post, specific_pages_post,
+    category_id_from_post_id, query_single_post, specific_page_posts,
     update_post_db, update_post_without_category,
 };
 use crate::model::structs::CreateNewPost;
@@ -94,14 +94,13 @@ pub async fn edit_post(
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let to_be_updated_post = to_be_updated_post.clone();
-    update_post_helper(&to_be_updated_post).await;
     let db = &config.database_connection;
     let all_category = all_categories_db(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let post_id = id.into_inner();
-    let single_post_struct = single_post_in_struct(post_id, db)
+    let single_post_struct = single_post_db(post_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -117,9 +116,6 @@ pub async fn edit_post(
         .body(html))
 }
 
-pub async fn update_post_helper(ids: &String) -> &String {
-    ids
-}
 pub async fn update_post(
     id: web::Path<i32>,
     form: web::Form<CreateNewPost>,
@@ -236,7 +232,7 @@ pub async fn show_post(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let single_post_struct = single_post_in_struct(titles, db)
+    let single_post_struct = single_post_db(titles, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -283,11 +279,7 @@ pub async fn admin_index(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    // let paginators = pagination_logic(&par, db)
-    //     .await
-    //     .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    let exact_posts_only = specific_pages_post(current_page, db)
+    let exact_posts_only = specific_page_posts(current_page, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
