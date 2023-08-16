@@ -44,7 +44,7 @@ pub async fn get_all_categories(
     let posts_per_page_constant = set_posts_per_page().await;
     let param = params.into_inner();
     let count_of_number_of_pages = pages_count.len();
-    let mut current_page: usize = param.clone() as usize;
+    let current_page: usize = param.clone() as usize;
     if current_page <= 0 || current_page > count_of_number_of_pages {
         let pagination_final_string = admin_categories(current_page, count_of_number_of_pages)
             .await
@@ -58,7 +58,7 @@ pub async fn get_all_categories(
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        let html = handlebars
+        let _html = handlebars
             .render(
                 "admin_category_table",
                 &json!({ "pagination":pagination_final_string,"z": &all_categories,"o":all_category,"pages_count":pages_count}),

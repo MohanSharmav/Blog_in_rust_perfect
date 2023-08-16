@@ -47,7 +47,7 @@ pub async fn get_new_post(
         .content_type(ContentType::html())
         .body(html))
 }
-pub async fn new_posts(
+pub async fn new_post(
     form: web::Form<CreateNewPost>,
     config: web::Data<Configuration>,
 ) -> Result<Redirect, actix_web::Error> {
@@ -181,31 +181,44 @@ pub async fn get_categories_posts(
         posts_per_page += 1;
     }
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    let count_of_number_of_pages = pages_count.len();
-    let current_page: usize = params.clone() as usize;
+    let mut count_of_number_of_pages = pages_count.len();
+    let mut current_page: usize = params.clone() as usize;
 
-    let pagination_final_string = admin_category_posts(
-        current_page,
-        count_of_number_of_pages,
-        category_input.clone(),
-    )
-    .await
-    .map_err(actix_web::error::ErrorInternalServerError)?;
+    if count_of_number_of_pages == 0 {
+        count_of_number_of_pages = 1;
+    }
+    if current_page <= 0 || current_page > count_of_number_of_pages {
+        let redirect_url =
+            "/admin/categories/".to_string() + &*category_input.clone() + &*"/page/1".to_string();
 
-    let category_postinng = category_db(category_input, db, params, posts_per_page_constant)
+        return Ok(HttpResponse::SeeOther()
+            .insert_header((LOCATION, redirect_url))
+            .content_type(ContentType::html())
+            .finish());
+    } else {
+        let pagination_final_string = admin_category_posts(
+            current_page,
+            count_of_number_of_pages,
+            category_input.clone(),
+        )
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let html = handlebars
-        .render(
-            "admin_separate_categories",
-            &json!({"pagination":pagination_final_string,"tiger":&category_postinng,"pages_count":&pages_count,"o":all_category}),
-        )
-       .map_err(actix_web::error::ErrorInternalServerError)?;
+        let category_postinng = category_db(category_input, db, params, posts_per_page_constant)
+            .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    Ok(HttpResponse::Ok()
-        .content_type(ContentType::html())
-        .body(html))
+        let html = handlebars
+            .render(
+                "admin_separate_categories",
+                &json!({"pagination":pagination_final_string,"tiger":&category_postinng,"pages_count":&pages_count,"o":all_category}),
+            )
+            .map_err(actix_web::error::ErrorInternalServerError)?;
+
+        Ok(HttpResponse::Ok()
+            .content_type(ContentType::html())
+            .body(html))
+    }
 }
 
 pub async fn show_post(
@@ -266,24 +279,46 @@ pub async fn admin_index(
     let count_of_number_of_pages = pages_count.len();
     let current_page: usize = par.clone() as usize;
 
-    let pagination_final_string = admin_main_page(current_page, count_of_number_of_pages)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
+    if current_page <= 0 || current_page > count_of_number_of_pages {
+        let pagination_final_string = admin_main_page(current_page, count_of_number_of_pages)
+            .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let exact_posts_only = specific_page_posts(start_page, db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
+        let exact_posts_only = specific_page_posts(start_page, db)
+            .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let all_category = all_categories_db(db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
+        let all_category = all_categories_db(db)
+            .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let htmls = handlebars.render("admin_post_table", &json!({"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category,"pagination":pagination_final_string}))
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+        let _htmls = handlebars.render("admin_post_table", &json!({"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category,"pagination":pagination_final_string}))
+            .map_err( actix_web::error::ErrorInternalServerError)?;
 
-    Ok(HttpResponse::Ok()
-        .content_type(ContentType::html())
-        .body(htmls))
+        Ok(HttpResponse::SeeOther()
+            .insert_header((LOCATION, "/admin/posts/page/1"))
+            .content_type(ContentType::html())
+            .finish())
+    } else {
+        let pagination_final_string = admin_main_page(current_page, count_of_number_of_pages)
+            .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
+
+        let exact_posts_only = specific_page_posts(start_page, db)
+            .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
+
+        let all_category = all_categories_db(db)
+            .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
+
+        let htmls = handlebars.render("admin_post_table", &json!({"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category,"pagination":pagination_final_string}))
+            .map_err(actix_web::error::ErrorInternalServerError)?;
+
+        Ok(HttpResponse::Ok()
+            .content_type(ContentType::html())
+            .body(htmls))
+    }
 }
 
 pub async fn number_posts_count(db: &Pool<Postgres>) -> Result<i64, actix_web::error::Error> {

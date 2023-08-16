@@ -5,7 +5,7 @@ use crate::controllers::admin::categories_controller::{
     new_category, update_category,
 };
 use crate::controllers::admin::posts_controller::{
-    destroy_post, edit_post, get_new_post, new_posts, update_post,
+    destroy_post, edit_post, get_new_post, new_post, update_post,
 };
 use crate::controllers::authentication::register::{get_register, register};
 use crate::controllers::authentication::session::{check_user, get_login, login, logout};
@@ -93,7 +93,7 @@ async fn main() -> Result<(), anyhow::Error> {
                     .route(web::get().to(get_all_categories)),
             )
             .service(web::resource("/admin/posts/new").to(get_new_post))
-            .service(web::resource("/admin/posts").route(web::post().to(new_posts)))
+            .service(web::resource("/admin/posts").route(web::post().to(new_post)))
             .service(
                 web::resource("/admin/posts/{post_id}").route(web::get().to(show_post)), // .route(web::delete().to(delete_post))
             )
