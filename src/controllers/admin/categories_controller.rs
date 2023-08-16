@@ -4,10 +4,8 @@ use crate::controllers::helpers::pagination_logic::admin_categories;
 use crate::controllers::helpers::pagination_logic::general_category;
 use crate::model::categories::category_pagination_logic;
 use crate::model::categories::{
-    category_db, create_new_category_db,
-    delete_category_db, all_categories_db,
-    get_all_categories_db, get_specific_category_posts,
-    update_category_db,
+    all_categories_db, category_db, create_new_category_db, delete_category_db,
+    get_all_categories_db, get_specific_category_posts, update_category_db,
 };
 use crate::model::structs::CreateNewCategory;
 use actix_http::header::LOCATION;
@@ -46,31 +44,55 @@ pub async fn get_all_categories(
     let posts_per_page_constant = set_posts_per_page().await;
     let param = params.into_inner();
     let count_of_number_of_pages = pages_count.len();
-    let current_page: usize = param.clone() as usize;
-
-    let pagination_final_string = admin_categories(current_page, count_of_number_of_pages)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    let all_category = all_categories_db(db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    let all_categories =
-        get_all_categories_db(db, param, posts_per_page_constant)
+    let mut current_page: usize = param.clone() as usize;
+    if current_page <= 0 || current_page > count_of_number_of_pages {
+        let pagination_final_string = admin_categories(current_page, count_of_number_of_pages)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let html = handlebars
-        .render(
-            "admin_category_table",
-            &json!({ "pagination":pagination_final_string,"z": &all_categories,"o":all_category,"pages_count":pages_count}),
-        )
-        .map_err(actix_web::error::ErrorInternalServerError)?;
+        let all_category = all_categories_db(db)
+            .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    Ok(HttpResponse::Ok()
-        .content_type(ContentType::html())
-        .body(html))
+        let all_categories = get_all_categories_db(db, param, posts_per_page_constant)
+            .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
+
+        let html = handlebars
+            .render(
+                "admin_category_table",
+                &json!({ "pagination":pagination_final_string,"z": &all_categories,"o":all_category,"pages_count":pages_count}),
+            )
+            .map_err(actix_web::error::ErrorInternalServerError)?;
+
+        Ok(HttpResponse::SeeOther()
+            .insert_header((LOCATION, "/admin/categories/page/1"))
+            .content_type(ContentType::html())
+            .finish())
+    } else {
+        let pagination_final_string = admin_categories(current_page, count_of_number_of_pages)
+            .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
+
+        let all_category = all_categories_db(db)
+            .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
+
+        let all_categories = get_all_categories_db(db, param, posts_per_page_constant)
+            .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
+
+        let html = handlebars
+            .render(
+                "admin_category_table",
+                &json!({ "pagination":pagination_final_string,"z": &all_categories,"o":all_category,"pages_count":pages_count}),
+            )
+            .map_err(actix_web::error::ErrorInternalServerError)?;
+
+        Ok(HttpResponse::Ok()
+            .content_type(ContentType::html())
+            .body(html))
+    }
 }
 
 pub async fn new_category(
@@ -203,19 +225,19 @@ pub async fn get_category_posts(
     let current_page: usize = par.clone() as usize;
     let admin = false;
 
-    let pagination_final_string =
-        general_category(current_page, count_of_number_of_pages, &category_input, admin)
-            .await
-            .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    let category_postinng = category_db(
-        category_input.to_string(),
-        db,
-        par,
-        posts_per_page_constant,
+    let pagination_final_string = general_category(
+        current_page,
+        count_of_number_of_pages,
+        &category_input,
+        admin,
     )
     .await
     .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    let category_postinng =
+        category_db(category_input.to_string(), db, par, posts_per_page_constant)
+            .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let all_category = all_categories_db(db)
         .await

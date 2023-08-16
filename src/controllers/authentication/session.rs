@@ -1,15 +1,15 @@
 use crate::controllers::constants::Configuration;
 use crate::model::authentication::session::login_database;
+use crate::model::structs::LoginCheck;
 use actix_http::header::LOCATION;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
-use actix_web::{HttpResponse, web};
+use actix_web::{web, HttpResponse};
 use actix_web::{HttpMessage as _, HttpRequest, Responder};
 use handlebars::Handlebars;
 use magic_crypt::MagicCryptTrait;
 use serde::Deserialize;
 use serde_json::json;
-use crate::model::structs::LoginCheck;
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct User {

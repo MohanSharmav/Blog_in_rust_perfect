@@ -3,10 +3,7 @@ use crate::model::structs::{GetId, Posts};
 use core::option::Option;
 use sqlx::{Pool, Postgres, Row};
 
-pub async fn delete_post_db(
-    to_delete: String,
-    db: &Pool<Postgres>,
-) -> Result<(), anyhow::Error> {
+pub async fn delete_post_db(to_delete: String, db: &Pool<Postgres>) -> Result<(), anyhow::Error> {
     let to_delete = to_delete.parse::<i32>()?;
     sqlx::query("delete from categories_posts where post_id=$1")
         .bind(to_delete)
@@ -156,10 +153,7 @@ pub async fn query_single_post(
     Ok(single_post)
 }
 
-pub async fn single_post_db(
-    titles: i32,
-    db: &Pool<Postgres>,
-) -> Result<Vec<Posts>, anyhow::Error> {
+pub async fn single_post_db(titles: i32, db: &Pool<Postgres>) -> Result<Vec<Posts>, anyhow::Error> {
     let single_post =
         sqlx::query_as::<_, Posts>("select id, title, description from posts  WHERE id=$1")
             .bind(titles)

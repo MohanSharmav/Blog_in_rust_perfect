@@ -1,17 +1,11 @@
 use crate::controllers::constants::Configuration;
 use crate::controllers::guests::posts::set_posts_per_page;
-use crate::controllers::helpers::pagination_logic::{
-    admin_main_page, admin_category_posts,
-};
-use crate::model::categories::{
-    category_db, category_pagination_logic,
-    all_categories_db,
-};
+use crate::controllers::helpers::pagination_logic::{admin_category_posts, admin_main_page};
+use crate::model::categories::{all_categories_db, category_db, category_pagination_logic};
 use crate::model::posts::single_post_db;
 use crate::model::posts::{
-    create_post, create_post_without_category, delete_post_db,
-    category_id_from_post_id, query_single_post, specific_page_posts,
-    update_post_db, update_post_without_category,
+    category_id_from_post_id, create_post, create_post_without_category, delete_post_db,
+    query_single_post, specific_page_posts, update_post_db, update_post_without_category,
 };
 use crate::model::structs::CreateNewPost;
 use actix_http::header::LOCATION;
@@ -151,7 +145,6 @@ pub async fn update_post(
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
         Ok(HttpResponse::SeeOther()
-            // .insert_header(http::header::LOCATION, "/login")
             .insert_header((LOCATION, "/admin/posts/page/1"))
             .content_type(ContentType::html())
             .finish())
@@ -191,19 +184,17 @@ pub async fn get_categories_posts(
     let count_of_number_of_pages = pages_count.len();
     let current_page: usize = params.clone() as usize;
 
-    let pagination_final_string =
-        admin_category_posts(current_page, count_of_number_of_pages, category_input.clone())
-            .await
-            .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    let category_postinng = category_db(
-        category_input,
-        db,
-        params,
-        posts_per_page_constant,
+    let pagination_final_string = admin_category_posts(
+        current_page,
+        count_of_number_of_pages,
+        category_input.clone(),
     )
     .await
     .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    let category_postinng = category_db(category_input, db, params, posts_per_page_constant)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
         .render(

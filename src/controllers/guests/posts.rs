@@ -2,9 +2,7 @@ use crate::controllers::admin::posts_controller::number_posts_count;
 use crate::controllers::constants::Configuration;
 use crate::controllers::helpers::pagination_logic::index_pagination;
 use crate::model::categories::all_categories_db;
-use crate::model::posts::{
-    query_single_post, single_post_db, specific_page_posts,
-};
+use crate::model::posts::{query_single_post, single_post_db, specific_page_posts};
 use actix_http::header::LOCATION;
 use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse, Responder};

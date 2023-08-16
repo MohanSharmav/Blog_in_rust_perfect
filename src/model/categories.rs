@@ -2,9 +2,7 @@ use crate::model::structs::{Categories, PostsCategories};
 use anyhow::anyhow;
 use sqlx::{Pool, Postgres, Row};
 
-pub async fn all_categories_db(
-    db: &Pool<Postgres>,
-) -> Result<Vec<Categories>, anyhow::Error> {
+pub async fn all_categories_db(db: &Pool<Postgres>) -> Result<Vec<Categories>, anyhow::Error> {
     let all_categories = sqlx::query_as::<_, Categories>("select name,id from categories")
         .fetch_all(db)
         .await?;

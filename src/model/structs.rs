@@ -1,7 +1,7 @@
 use serde::Deserialize;
 use serde::Serialize;
-use sqlx::{Error, FromRow, Row};
 use sqlx::postgres::PgRow;
+use sqlx::{Error, FromRow, Row};
 
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
 pub struct Categories {

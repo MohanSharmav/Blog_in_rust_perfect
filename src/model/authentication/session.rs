@@ -1,5 +1,5 @@
-use sqlx::{Pool, Postgres};
 use crate::model::structs::LoginCheck;
+use sqlx::{Pool, Postgres};
 
 pub async fn login_database(
     users: &String,
