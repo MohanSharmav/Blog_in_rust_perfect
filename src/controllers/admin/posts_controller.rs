@@ -13,6 +13,7 @@ use actix_identity::Identity;
 use actix_web::http::header::ContentType;
 use actix_web::web::Redirect;
 use actix_web::{http, web, HttpResponse};
+use actix_web_lab::__reexports::futures_util::TryFutureExt;
 use handlebars::Handlebars;
 use serde_json::json;
 use sqlx::{Pool, Postgres, Row};
@@ -122,10 +123,10 @@ pub async fn update_post(
     let description = &form.description;
     let category_id = &form.category_id;
 
-    let _get_category_id_of_current_post = category_id_from_post_id(id, db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError);
+    let get_category_id_of_current_post = category_id_from_post_id(id, db).await.unwrap_or_default();
 
+
+    println!("--------------------------------{:?}--------------------------------",get_category_id_of_current_post);
     if category_id.clone() == 0_i32 {
         update_post_without_category(title.clone(), description.clone(), id.clone(), db)
             .await
@@ -182,7 +183,7 @@ pub async fn get_categories_posts(
     }
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     let mut count_of_number_of_pages = pages_count.len();
-    let mut current_page: usize = params.clone() as usize;
+    let  current_page: usize = params.clone() as usize;
 
     if count_of_number_of_pages == 0 {
         count_of_number_of_pages = 1;

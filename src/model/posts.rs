@@ -102,17 +102,24 @@ pub async fn update_post_without_category(
 pub async fn category_id_from_post_id(
     postid: i32,
     db: &Pool<Postgres>,
-) -> Result<Option<i32>, anyhow::Error> {
+) -> Result<i32, anyhow::Error> {
     //todo //todo
-    let category_id =
-        sqlx::query_as::<_, GetId>("select category_id from categories_posts where post_id=$1")
-            .bind(postid)
-            .fetch_all(db)
-            .await?;
-    let x: &GetId = &category_id[0];
-    let GetId { id } = x;
+    println!("---------------------------------------🪼----------------------");
+
+    let category_id = sqlx::query_as::<_, GetId>(
+        "select category_id from categories_posts where post_id=$1"
+    )
+        .bind(postid)
+        .fetch_all(db)
+        .await?;
+    // let x: &GetId = &category_id[0];
+    // let GetId { id } = x;
+    // let x: &GetId = &category_id[0];
+    // let GetId { id } = x;
+    println!("---------------------------------------🪼----------------------{:?}",category_id.clone());
     // Ok(Some(*id))
-    Ok::<std::option::Option<i32>, anyhow::Error>(Some(*id))
+    // Ok::<std::option::Option<i32>, anyhow::Error>(Some(*id))
+   Ok(1)
 }
 
 pub async fn specific_page_posts(
