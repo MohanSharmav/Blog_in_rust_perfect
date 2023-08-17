@@ -51,6 +51,7 @@ pub async fn login(
             .insert_header((LOCATION, "/admin/posts/page/1"))
             .finish())
     } else {
+
         Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/login"))
             .content_type(ContentType::html())
