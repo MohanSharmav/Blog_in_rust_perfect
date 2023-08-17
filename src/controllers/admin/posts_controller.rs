@@ -145,10 +145,6 @@ pub async fn update_post(
             .content_type(ContentType::html())
             .finish())
     } else {
-        println!(
-            "------------------{}{}{}----{}",
-            title, description, id, category_id
-        );
         update_post_db(title, description, id, category_id, db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
