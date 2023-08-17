@@ -65,7 +65,7 @@ pub async fn index(
         .body(htmls))
 }
 
-pub async fn main_page(
+pub async fn index_redirect(
     config: web::Data<Configuration>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {

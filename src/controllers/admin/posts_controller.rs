@@ -219,9 +219,9 @@ pub async fn get_categories_posts(
             )
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        Ok(HttpResponse::Ok()
+        return Ok(HttpResponse::Ok()
             .content_type(ContentType::html())
-            .body(html))
+            .body(html));
     }
 }
 
@@ -284,20 +284,6 @@ pub async fn admin_index(
     let current_page: usize = par.clone() as usize;
 
     if current_page <= 0 || current_page > count_of_number_of_pages {
-        let pagination_final_string = admin_main_page(current_page, count_of_number_of_pages)
-            .await
-            .map_err(actix_web::error::ErrorInternalServerError)?;
-
-        let exact_posts_only = specific_page_posts(start_page, db)
-            .await
-            .map_err(actix_web::error::ErrorInternalServerError)?;
-
-        let all_category = all_categories_db(db)
-            .await
-            .map_err(actix_web::error::ErrorInternalServerError)?;
-
-        let _htmls = handlebars.render("admin_post_table", &json!({"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category,"pagination":pagination_final_string}))
-            .map_err( actix_web::error::ErrorInternalServerError)?;
 
         Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/admin/posts/page/1"))

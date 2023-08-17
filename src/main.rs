@@ -10,7 +10,7 @@ use crate::controllers::admin::posts_controller::{
 use crate::controllers::authentication::register::{get_register, register};
 use crate::controllers::authentication::session::{check_user, get_login, login, logout};
 use crate::controllers::constants::Configuration;
-use crate::controllers::guests::posts::{index, main_page, redirect_user};
+use crate::controllers::guests::posts::{index, index_redirect, redirect_user};
 use actix_files::Files;
 use actix_identity::IdentityMiddleware;
 use actix_session::config::PersistentSession;
@@ -74,7 +74,7 @@ async fn main() -> Result<(), anyhow::Error> {
                     .build(),
             )
             .service(web::resource("/").to(redirect_user))
-            .service(web::resource("/posts").to(main_page))
+            .service(web::resource("/posts").to(index_redirect))
             .service(web::resource("./templates/").to(redirect_user))
             .service(web::resource("/check").to(check_user))
             .service(web::resource("/admin/posts/page/{page_number}").to(admin_index))
