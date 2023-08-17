@@ -1,5 +1,5 @@
 use crate::controllers::guests::posts::set_posts_per_page;
-use crate::model::structs::{GetId, Posts};
+use crate::model::structs::{GetCategoryId, GetId, Posts};
 use core::option::Option;
 use sqlx::{Pool, Postgres, Row};
 
@@ -106,20 +106,25 @@ pub async fn category_id_from_post_id(
     //todo //todo
     println!("---------------------------------------🪼----------------------");
 
-    let category_id = sqlx::query_as::<_, GetId>(
+    let category_id_vec = sqlx::query_as::<_,GetCategoryId >(
         "select category_id from categories_posts where post_id=$1"
     )
         .bind(postid)
         .fetch_all(db)
-        .await?;
-    // let x: &GetId = &category_id[0];
-    // let GetId { id } = x;
-    // let x: &GetId = &category_id[0];
-    // let GetId { id } = x;
-    println!("---------------------------------------🪼----------------------{:?}",category_id.clone());
+        .await
+        .unwrap_or_default();
+
+    let x: &GetCategoryId = &category_id_vec[0];
+    let GetCategoryId { category_id } = x;
+    // // let x: &GetId = &category_id[0];
+    // // let GetId { id } = x;
+    // println!("---------------------------------------🪼----------------------{:?}",category_id_vec.clone());
+    // println!("---------------------------------------🪼----------------------{:?}",x.clone());
+    // println!("---------------------------------------🪼----------------------{:?}",category_id.clone());
+
     // Ok(Some(*id))
     // Ok::<std::option::Option<i32>, anyhow::Error>(Some(*id))
-   Ok(1)
+   Ok(*category_id)
 }
 
 pub async fn specific_page_posts(
@@ -167,4 +172,24 @@ pub async fn single_post_db(titles: i32, db: &Pool<Postgres>) -> Result<Vec<Post
             .fetch_all(db)
             .await?;
     Ok(single_post)
+}
+
+pub async fn update_post_from_no_category(title: &String, description: &String, category_id_of_current_post: i32, id: i32, db: &Pool<Postgres>) -> Result<(), anyhow::Error>
+{
+    sqlx::query("update posts set title=$1 ,description=$2 where id=$3")
+        .bind(title)
+        .bind(description)
+        .bind(id)
+        .execute(db)
+        .await?;
+
+    sqlx::query("insert into categories_posts values $1,$2")
+        .bind(id)
+        .bind(category_id_of_current_post)
+        .fetch_all(db)
+        .await?;
+
+    Ok(())
+
+
 }

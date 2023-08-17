@@ -2,7 +2,7 @@ use crate::controllers::constants::Configuration;
 use crate::controllers::guests::posts::set_posts_per_page;
 use crate::controllers::helpers::pagination_logic::{admin_category_posts, admin_main_page};
 use crate::model::categories::{all_categories_db, category_db, category_pagination_logic};
-use crate::model::posts::single_post_db;
+use crate::model::posts::{single_post_db, update_post_from_no_category};
 use crate::model::posts::{
     category_id_from_post_id, create_post, create_post_without_category, delete_post_db,
     query_single_post, specific_page_posts, update_post_db, update_post_without_category,
@@ -123,16 +123,26 @@ pub async fn update_post(
     let description = &form.description;
     let category_id = &form.category_id;
 
-    let get_category_id_of_current_post = category_id_from_post_id(id, db).await.unwrap_or_default();
+    let category_id_of_current_post = category_id_from_post_id(id, db).await.unwrap_or_default();
 
 
-    println!("--------------------------------{:?}--------------------------------",get_category_id_of_current_post);
+
+    if category_id_of_current_post==0{
+        update_post_from_no_category(title,description,category_id_of_current_post,id,db)
+        .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
+
+        return  Ok(HttpResponse::SeeOther()
+            .insert_header((LOCATION, "/admin/posts/page/1"))
+            .content_type(ContentType::html())
+            .finish())
+    }
     if category_id.clone() == 0_i32 {
         update_post_without_category(title.clone(), description.clone(), id.clone(), db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        Ok(HttpResponse::SeeOther()
+       return  Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/admin/posts/page/1"))
             .content_type(ContentType::html())
             .finish())
@@ -145,7 +155,7 @@ pub async fn update_post(
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        Ok(HttpResponse::SeeOther()
+       return  Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/admin/posts/page/1"))
             .content_type(ContentType::html())
             .finish())

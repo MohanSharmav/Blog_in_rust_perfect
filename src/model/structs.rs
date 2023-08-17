@@ -76,3 +76,7 @@ impl<'r> FromRow<'r, PgRow> for LoginCheck {
         Ok(LoginCheck { value: name })
     }
 }
+#[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
+pub struct GetCategoryId {
+    pub category_id: i32,
+}
