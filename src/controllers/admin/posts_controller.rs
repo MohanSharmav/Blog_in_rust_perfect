@@ -125,10 +125,8 @@ pub async fn update_post(
 
     let category_id_of_current_post = category_id_from_post_id(id, db).await.unwrap_or_default();
 
-
-
     if category_id_of_current_post==0{
-        update_post_from_no_category(title,description,category_id_of_current_post,id,db)
+        update_post_from_no_category(title,description,category_id,id,db)
         .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 

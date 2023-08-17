@@ -103,8 +103,6 @@ pub async fn category_id_from_post_id(
     postid: i32,
     db: &Pool<Postgres>,
 ) -> Result<i32, anyhow::Error> {
-    //todo //todo
-    println!("---------------------------------------🪼----------------------");
 
     let category_id_vec = sqlx::query_as::<_,GetCategoryId >(
         "select category_id from categories_posts where post_id=$1"
@@ -114,17 +112,11 @@ pub async fn category_id_from_post_id(
         .await
         .unwrap_or_default();
 
-    let x: &GetCategoryId = &category_id_vec[0];
-    let GetCategoryId { category_id } = x;
-    // // let x: &GetId = &category_id[0];
-    // // let GetId { id } = x;
-    // println!("---------------------------------------🪼----------------------{:?}",category_id_vec.clone());
-    // println!("---------------------------------------🪼----------------------{:?}",x.clone());
-    // println!("---------------------------------------🪼----------------------{:?}",category_id.clone());
+    let x = category_id_vec.get(0)
+        .map(|i|i.category_id)
+        .unwrap_or_default();
 
-    // Ok(Some(*id))
-    // Ok::<std::option::Option<i32>, anyhow::Error>(Some(*id))
-   Ok(*category_id)
+   Ok(x)
 }
 
 pub async fn specific_page_posts(
@@ -174,7 +166,7 @@ pub async fn single_post_db(titles: i32, db: &Pool<Postgres>) -> Result<Vec<Post
     Ok(single_post)
 }
 
-pub async fn update_post_from_no_category(title: &String, description: &String, category_id_of_current_post: i32, id: i32, db: &Pool<Postgres>) -> Result<(), anyhow::Error>
+pub async fn update_post_from_no_category(title: &String, description: &String, category_id: &i32, id: i32, db: &Pool<Postgres>) -> Result<(), anyhow::Error>
 {
     sqlx::query("update posts set title=$1 ,description=$2 where id=$3")
         .bind(title)
@@ -183,13 +175,11 @@ pub async fn update_post_from_no_category(title: &String, description: &String, 
         .execute(db)
         .await?;
 
-    sqlx::query("insert into categories_posts values $1,$2")
+    sqlx::query("insert into categories_posts values ($1,$2)")
         .bind(id)
-        .bind(category_id_of_current_post)
+        .bind(category_id)
         .fetch_all(db)
         .await?;
 
     Ok(())
-
-
 }
