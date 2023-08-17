@@ -12,7 +12,7 @@ use actix_http::header::LOCATION;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
 use actix_web::web::Redirect;
-use actix_web::{http, web, HttpResponse};
+use actix_web::{http, HttpResponse, web};
 use anyhow::Result;
 use handlebars::Handlebars;
 use serde_json::json;
@@ -182,71 +182,6 @@ pub async fn update_category(
         .insert_header((LOCATION, "/admin/categories/page/1"))
         .content_type(ContentType::html())
         .finish())
-}
-
-pub async fn get_category_posts(
-    info: web::Path<(String, u32)>,
-    config: web::Data<Configuration>,
-    handlebars: web::Data<Handlebars<'_>>,
-) -> Result<HttpResponse, actix_web::Error> {
-    let db = &config.database_connection;
-    let path = info.clone().0;
-    let par = info.into_inner().1 as i32;
-    let category_input: String = path;
-    let total_posts_length = category_pagination_logic(&category_input, db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-    let posts_per_page_constant = set_posts_per_page().await as i64;
-    let mut posts_per_page = total_posts_length / posts_per_page_constant;
-    let check_remainder = total_posts_length % posts_per_page_constant;
-    if check_remainder != 0 {
-        posts_per_page += 1;
-    }
-    let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    let mut count_of_number_of_pages = pages_count.len();
-    let current_page: usize = par.clone() as usize;
-    let admin = false;
-    if count_of_number_of_pages == 0 {
-        count_of_number_of_pages = 1;
-    }
-    if current_page <= 0 || current_page > count_of_number_of_pages {
-        let redirect_url =
-            "/posts/category/".to_string() + &*category_input.clone() + &*"/page/1".to_string();
-
-        return Ok(HttpResponse::SeeOther()
-            .insert_header((LOCATION, redirect_url))
-            .content_type(ContentType::html())
-            .finish());
-    } else {
-        let pagination_final_string = general_category(
-            current_page,
-            count_of_number_of_pages,
-            &category_input,
-            admin,
-        )
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-        let category_postinng =
-            category_db(category_input.to_string(), db, par, posts_per_page_constant)
-                .await
-                .map_err(actix_web::error::ErrorInternalServerError)?;
-
-        let all_category = all_categories_db(db)
-            .await
-            .map_err(actix_web::error::ErrorInternalServerError)?;
-
-        let html = handlebars
-            .render(
-                "category",
-                &json!({"pagination":pagination_final_string,"tiger":&category_postinng,"pages_count":&pages_count,"o":all_category}),
-            )
-            .map_err(actix_web::error::ErrorInternalServerError)?;
-
-        Ok(HttpResponse::Ok()
-            .content_type(ContentType::html())
-            .body(html))
-    }
 }
 
 pub async fn get_pagination_for_all_categories_list(

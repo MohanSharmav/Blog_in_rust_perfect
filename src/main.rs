@@ -1,7 +1,7 @@
 mod controllers;
 mod model;
 use crate::controllers::admin::categories_controller::{
-    create_category, destroy_category, edit_category, get_all_categories, get_category_posts,
+    create_category, destroy_category, edit_category, get_all_categories,
     new_category, update_category,
 };
 use crate::controllers::admin::posts_controller::{
@@ -17,12 +17,12 @@ use actix_session::config::PersistentSession;
 use actix_session::storage::CookieSessionStore;
 use actix_session::SessionMiddleware;
 use actix_web::cookie::Key;
-use actix_web::{web, App, HttpServer, Result};
+use actix_web::{App, HttpServer, Result, web};
 use actix_web_flash_messages::storage::CookieMessageStore;
 use actix_web_flash_messages::FlashMessagesFramework;
 use controllers::admin::posts_controller::admin_index;
 use controllers::admin::posts_controller::{get_categories_posts, show_post};
-use controllers::guests::posts::show_posts;
+use controllers::guests::posts::{get_category_posts, show_posts};
 use handlebars::Handlebars;
 use magic_crypt::new_magic_crypt;
 use sqlx::postgres::PgPoolOptions;
