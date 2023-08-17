@@ -13,7 +13,6 @@ use actix_identity::Identity;
 use actix_web::http::header::ContentType;
 use actix_web::web::Redirect;
 use actix_web::{http, web, HttpResponse};
-use actix_web_lab::__reexports::futures_util::TryFutureExt;
 use handlebars::Handlebars;
 use serde_json::json;
 use sqlx::{Pool, Postgres, Row};
