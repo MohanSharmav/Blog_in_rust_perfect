@@ -42,6 +42,13 @@
       rel="stylesheet"
     />
 
+    <style>
+      .alert {
+  padding: 20px;
+  background-color: #f44336;
+  color: white;
+}
+    </style>
     <!-- Icons. Uncomment required icon fonts -->
     <link rel="stylesheet" href="/assets/vendor/fonts/boxicons.css" />
 
@@ -137,14 +144,14 @@
               <!-- /Logo -->
               <h4 class="mb-2">Welcome to Sneat! 👋</h4>
 
-<!--              {{#if error_html}}-->
-<!--              <span class="subtitle-red">{error_html}</span>-->
-<!--              {{/if}}-->
-
-
-
 
               <p class="mb-4">Please sign-in to your account and start the adventure</p>
+              {{#if message}}
+              <span class="subtitle-red">Welcome to login</span>
+              <div class="alert">
+                <strong>{{message}}</strong>
+              </div>
+              {{/if}}
 
               <form id="formAuthentication" class="mb-3"  action="http://localhost:8080/login" method="post">
                 <div class="mb-3">

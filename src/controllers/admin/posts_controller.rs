@@ -2,11 +2,11 @@ use crate::controllers::constants::Configuration;
 use crate::controllers::guests::posts::set_posts_per_page;
 use crate::controllers::helpers::pagination_logic::{admin_category_posts, admin_main_page};
 use crate::model::categories::{all_categories_db, category_db, category_pagination_logic};
-use crate::model::posts::{single_post_db, update_post_from_no_category};
 use crate::model::posts::{
     category_id_from_post_id, create_post, create_post_without_category, delete_post_db,
     query_single_post, specific_page_posts, update_post_db, update_post_without_category,
 };
+use crate::model::posts::{single_post_db, update_post_from_no_category};
 use crate::model::structs::CreateNewPost;
 use actix_http::header::LOCATION;
 use actix_identity::Identity;
@@ -124,34 +124,34 @@ pub async fn update_post(
 
     let category_id_of_current_post = category_id_from_post_id(id, db).await.unwrap_or_default();
 
-    if category_id_of_current_post==0{
-        update_post_from_no_category(title,description,category_id,id,db)
-        .await
+    if category_id_of_current_post == 0 {
+        update_post_from_no_category(title, description, category_id, id, db)
+            .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        return  Ok(HttpResponse::SeeOther()
+        return Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/admin/posts/page/1"))
             .content_type(ContentType::html())
-            .finish())
+            .finish());
     }
     if category_id.clone() == 0_i32 {
         update_post_without_category(title.clone(), description.clone(), id.clone(), db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
-       return  Ok(HttpResponse::SeeOther()
+        return Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/admin/posts/page/1"))
             .content_type(ContentType::html())
-            .finish())
+            .finish());
     } else {
         update_post_db(title, description, id, category_id, db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
-       return  Ok(HttpResponse::SeeOther()
+        return Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/admin/posts/page/1"))
             .content_type(ContentType::html())
-            .finish())
+            .finish());
     }
 }
 
@@ -186,7 +186,7 @@ pub async fn get_categories_posts(
     }
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     let mut count_of_number_of_pages = pages_count.len();
-    let  current_page: usize = params.clone() as usize;
+    let current_page: usize = params.clone() as usize;
 
     if count_of_number_of_pages == 0 {
         count_of_number_of_pages = 1;

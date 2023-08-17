@@ -20,7 +20,7 @@ pub async fn get_login(
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let html = handlebars
-        .render("auth-login-basic", &json!({"m":"ASs"}))
+        .render("auth-login-basic", &json!({"one":"one"}))
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
@@ -33,6 +33,7 @@ pub async fn login(
     req: HttpRequest,
     _user: Option<Identity>,
     config: web::Data<Configuration>,
+    handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let username = &form.username;
     let password = &form.password.to_string();
@@ -51,11 +52,14 @@ pub async fn login(
             .insert_header((LOCATION, "/admin/posts/page/1"))
             .finish())
     } else {
+        let message = "Login failed wrong id or password";
+        let html = handlebars
+            .render("auth-login-basic", &json!({ "message": message }))
+            .map_err(actix_web::error::ErrorInternalServerError)?;
 
         Ok(HttpResponse::SeeOther()
-            .insert_header((LOCATION, "/login"))
             .content_type(ContentType::html())
-            .finish())
+            .body(html))
     }
 }
 

@@ -102,20 +102,20 @@ pub async fn category_id_from_post_id(
     postid: i32,
     db: &Pool<Postgres>,
 ) -> Result<i32, anyhow::Error> {
-
-    let category_id_vec = sqlx::query_as::<_,GetCategoryId >(
-        "select category_id from categories_posts where post_id=$1"
+    let category_id_vec = sqlx::query_as::<_, GetCategoryId>(
+        "select category_id from categories_posts where post_id=$1",
     )
-        .bind(postid)
-        .fetch_all(db)
-        .await
+    .bind(postid)
+    .fetch_all(db)
+    .await
+    .unwrap_or_default();
+
+    let x = category_id_vec
+        .get(0)
+        .map(|i| i.category_id)
         .unwrap_or_default();
 
-    let x = category_id_vec.get(0)
-        .map(|i|i.category_id)
-        .unwrap_or_default();
-
-   Ok(x)
+    Ok(x)
 }
 
 pub async fn specific_page_posts(
@@ -165,8 +165,13 @@ pub async fn single_post_db(titles: i32, db: &Pool<Postgres>) -> Result<Vec<Post
     Ok(single_post)
 }
 
-pub async fn update_post_from_no_category(title: &String, description: &String, category_id: &i32, id: i32, db: &Pool<Postgres>) -> Result<(), anyhow::Error>
-{
+pub async fn update_post_from_no_category(
+    title: &String,
+    description: &String,
+    category_id: &i32,
+    id: i32,
+    db: &Pool<Postgres>,
+) -> Result<(), anyhow::Error> {
     sqlx::query("update posts set title=$1 ,description=$2 where id=$3")
         .bind(title)
         .bind(description)
