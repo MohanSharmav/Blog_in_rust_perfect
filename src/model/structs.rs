@@ -1,3 +1,4 @@
+use actix_web_flash_messages::FlashMessage;
 use serde::Deserialize;
 use serde::Serialize;
 use sqlx::postgres::PgRow;
@@ -79,4 +80,14 @@ impl<'r> FromRow<'r, PgRow> for LoginCheck {
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
 pub struct GetCategoryId {
     pub category_id: i32,
+}
+pub struct IncomingFlashMessagess {
+    messages: Vec<FlashMessage>,
+}
+
+impl IncomingFlashMessagess {
+    /// Return an iterator over incoming [`FlashMessage`]s.
+    pub fn iter(&self) -> impl ExactSizeIterator<Item = &FlashMessage> {
+        self.messages.iter()
+    }
 }

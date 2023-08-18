@@ -1,6 +1,6 @@
 use crate::controllers::constants::Configuration;
 use crate::model::authentication::session::login_database;
-use crate::model::structs::LoginCheck;
+use crate::model::structs::{IncomingFlashMessagess, LoginCheck};
 use actix_http::header::LOCATION;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
@@ -26,30 +26,22 @@ pub async fn get_login(
     let html = handlebars
         .render("auth-login-basic", &json!({"one":"one"}))
         .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    FlashMessage::error("Hey there sadkdmamsdjasndsdnj !").send();
-    FlashMessage::debug("How is it going?").send();
+    //
+    // FlashMessage::error("Hey there sadkdmamsdjasndsdnj !").send();
+    // FlashMessage::debug("How is it going?").send();
 
     Ok(HttpResponse::Ok()
         .content_type(ContentType::html())
         .body(html))
 }
-pub struct IncomingFlashMessagess {
-    messages: Vec<FlashMessage>,
-}
 
-impl IncomingFlashMessagess {
-    /// Return an iterator over incoming [`FlashMessage`]s.
-    pub fn iter(&self) -> impl ExactSizeIterator<Item = &FlashMessage> {
-        self.messages.iter()
-    }
-}
 pub async fn login(
     form: web::Form<User>,
     req: HttpRequest,
     _user: Option<Identity>,
     config: web::Data<Configuration>,
     handlebars: web::Data<Handlebars<'_>>,
+    flash_message: IncomingFlashMessages
 ) -> Result<HttpResponse, actix_web::Error> {
     let username = &form.username;
     let password = &form.password.to_string();
@@ -73,17 +65,24 @@ pub async fn login(
             .render("auth-login-basic", &json!({"one":"one"}))
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        FlashMessage::error("Hey there sadkdmamsdjasndsdnj !").send();
+        FlashMessage::error("Login Fail!").send();
         FlashMessage::debug("How is it going?").send();
         let mut error_html = String::new();
-        error_html= "login failed".to_string();
-        // for m in IncomingFlashMessagess.iter() {
-        //     writeln!(error_html, "<p><i>{}</i></p>", m.content()).unwrap();
-        // }
+        // error_html= "login failed".to_string();
+        for m in flash_message.iter() {
+            writeln!(error_html, "{}", m.content()).unwrap();
+        }
+        let html = handlebars
+            .render("auth-login-basic", &json!({"message":error_html}))
+            .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        Ok(HttpResponse::SeeOther()
-               .content_type(ContentType::html())
-               .body(error_html))
+
+        Ok(HttpResponse::Ok()
+            .content_type(ContentType::html())
+            .body(html))
+        // Ok(HttpResponse::SeeOther()
+        //        .content_type(ContentType::html())
+        //        .body(error_html))
     }
 }
 
