@@ -22,13 +22,20 @@ pub struct User {
 }
 pub async fn get_login(
     handlebars: web::Data<Handlebars<'_>>,
+    flash_message: IncomingFlashMessages
 ) -> Result<HttpResponse, actix_web::Error> {
     let html = handlebars
         .render("auth-login-basic", &json!({"one":"one"}))
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    //
-    // FlashMessage::error("Hey there sadkdmamsdjasndsdnj !").send();
-    // FlashMessage::debug("How is it going?").send();
+
+    let mut error_html = String::new();
+    // error_html= "login failed".to_string();
+    for m in flash_message.iter() {
+        writeln!(error_html, "{}", m.content()).unwrap();
+    }
+    let html = handlebars
+        .render("auth-login-basic", &json!({"message":error_html}))
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
         .content_type(ContentType::html())
@@ -60,26 +67,27 @@ pub async fn login(
             .insert_header((LOCATION, "/admin/posts/page/1"))
             .finish())
     } else {
-        FlashMessage::error("error".to_string()).send();
+        // FlashMessage::error("error".to_string()).send();
         let html = handlebars
             .render("auth-login-basic", &json!({"one":"one"}))
             .map_err(actix_web::error::ErrorInternalServerError)?;
-
-        FlashMessage::error("Login Fail!").send();
+        //
+        FlashMessage::error("Login Fail - Wrong Id or password!").send();
         FlashMessage::debug("How is it going?").send();
-        let mut error_html = String::new();
-        // error_html= "login failed".to_string();
-        for m in flash_message.iter() {
-            writeln!(error_html, "{}", m.content()).unwrap();
-        }
-        let html = handlebars
-            .render("auth-login-basic", &json!({"message":error_html}))
-            .map_err(actix_web::error::ErrorInternalServerError)?;
+        // let mut error_html = String::new();
+        // // error_html= "login failed".to_string();
+        // for m in flash_message.iter() {
+        //     writeln!(error_html, "{}", m.content()).unwrap();
+        // }
+        // let html = handlebars
+        //     .render("auth-login-basic", &json!({"message":error_html}))
+        //     .map_err(actix_web::error::ErrorInternalServerError)?;
 
 
-        Ok(HttpResponse::Ok()
-            .content_type(ContentType::html())
-            .body(html))
+        Ok(
+           HttpResponse::SeeOther()
+               .insert_header((http::header::LOCATION, "/login"))
+               .finish()   )
         // Ok(HttpResponse::SeeOther()
         //        .content_type(ContentType::html())
         //        .body(error_html))
