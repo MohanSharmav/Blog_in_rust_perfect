@@ -8,7 +8,7 @@ use crate::controllers::admin::posts_controller::{
     destroy_post, edit_post, get_new_post, new_post, update_post,
 };
 use crate::controllers::authentication::register::{get_register, register};
-use crate::controllers::authentication::session::{check_user, get_login, login, logout};
+use crate::controllers::authentication::session::{build_message_framework, check_user, get_login, login, logout, set, show};
 use crate::controllers::constants::Configuration;
 use crate::controllers::guests::posts::{index, index_redirect, redirect_user};
 use actix_files::Files;
@@ -26,6 +26,7 @@ use controllers::guests::posts::{get_category_posts, show_posts};
 use handlebars::Handlebars;
 use magic_crypt::new_magic_crypt;
 use sqlx::postgres::PgPoolOptions;
+
 
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
@@ -57,15 +58,17 @@ async fn main() -> Result<(), anyhow::Error> {
     };
     let confi = web::Data::new(config.clone());
 
-    let message_store = CookieMessageStore::builder(secret_key.clone()).build();
-    let message_framework = FlashMessagesFramework::builder(message_store).build();
+    // let message_store = CookieMessageStore::builder(secret_key.clone()).build();
+    // let message_framework = FlashMessagesFramework::builder(message_store).build();
+    let signing_key = Key::generate();
+    let message_framework = build_message_framework(signing_key);
 
     HttpServer::new(move || {
         App::new()
-            .app_data(message_framework.clone())
             .app_data(web::Data::new(handlebars.clone()))
             .app_data(confi.clone())
             .wrap(IdentityMiddleware::default())
+            .wrap(message_framework.clone())
             .wrap(
                 SessionMiddleware::builder(CookieSessionStore::default(), secret_key.clone())
                     .cookie_name("adf-obdd-service-auth".to_owned())
@@ -77,6 +80,10 @@ async fn main() -> Result<(), anyhow::Error> {
             .service(web::resource("/posts").to(index_redirect))
             .service(web::resource("./templates/").to(redirect_user))
             .service(web::resource("/check").to(check_user))
+         // end test
+            .service(web::resource("/show").to(show))
+            .service(web::resource("/set").to(set))
+        //end test
             .service(web::resource("/admin/posts/page/{page_number}").to(admin_index))
             .service(
                 web::resource("/admin/categories/new")

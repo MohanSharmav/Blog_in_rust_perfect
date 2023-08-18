@@ -146,11 +146,21 @@
 
 
               <p class="mb-4">Please sign-in to your account and start the adventure</p>
+<!--              {{#if message}}-->
+<!--              <span class="subtitle-red">Welcome to login</span>-->
+<!--              <div class="alert">-->
+<!--                <strong>{{message}}</strong>-->
+<!--              </div>-->
+<!--              {{/if}}-->
+              {{#if messages}}
+              {{#for message in messages}}
+            xxx---------------  {{message}}
+              {{/for}}
+              {{/if}}
+{{message}}
+              ssss
               {{#if message}}
-              <span class="subtitle-red">Welcome to login</span>
-              <div class="alert">
-                <strong>{{message}}</strong>
-              </div>
+              <div class="alert alert-danger">{{message}}</div>
               {{/if}}
 
               <form id="formAuthentication" class="mb-3"  action="http://localhost:8080/login" method="post">
