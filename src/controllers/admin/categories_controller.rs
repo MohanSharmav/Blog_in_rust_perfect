@@ -1,10 +1,8 @@
 use crate::controllers::constants::Configuration;
 use crate::controllers::guests::posts::set_posts_per_page;
 use crate::controllers::helpers::pagination_logic::admin_categories;
-use crate::controllers::helpers::pagination_logic::general_category;
-use crate::model::categories::category_pagination_logic;
 use crate::model::categories::{
-    all_categories_db, category_db, create_new_category_db, delete_category_db,
+    all_categories_db, create_new_category_db, delete_category_db,
     get_all_categories_db, get_specific_category_posts, update_category_db,
 };
 use crate::model::structs::CreateNewCategory;
@@ -12,7 +10,7 @@ use actix_http::header::LOCATION;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
 use actix_web::web::Redirect;
-use actix_web::{http, HttpResponse, web};
+use actix_web::{http, web, HttpResponse};
 use anyhow::Result;
 use handlebars::Handlebars;
 use serde_json::json;

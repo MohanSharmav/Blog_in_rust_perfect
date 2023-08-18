@@ -5,7 +5,7 @@ use crate::model::categories::{all_categories_db, category_db, category_paginati
 use crate::model::posts::{query_single_post, single_post_db, specific_page_posts};
 use actix_http::header::LOCATION;
 use actix_web::http::header::ContentType;
-use actix_web::{HttpResponse, Responder, web};
+use actix_web::{web, HttpResponse, Responder};
 use handlebars::Handlebars;
 use serde_json::json;
 

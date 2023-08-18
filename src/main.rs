@@ -1,14 +1,16 @@
 mod controllers;
 mod model;
 use crate::controllers::admin::categories_controller::{
-    create_category, destroy_category, edit_category, get_all_categories,
-    new_category, update_category,
+    create_category, destroy_category, edit_category, get_all_categories, new_category,
+    update_category,
 };
 use crate::controllers::admin::posts_controller::{
     destroy_post, edit_post, get_new_post, new_post, update_post,
 };
 use crate::controllers::authentication::register::{get_register, register};
-use crate::controllers::authentication::session::{build_message_framework, check_user, get_login, login, logout, set, show};
+use crate::controllers::authentication::session::{
+    build_message_framework, check_user, get_login, login, logout,
+};
 use crate::controllers::constants::Configuration;
 use crate::controllers::guests::posts::{index, index_redirect, redirect_user};
 use actix_files::Files;
@@ -17,16 +19,13 @@ use actix_session::config::PersistentSession;
 use actix_session::storage::CookieSessionStore;
 use actix_session::SessionMiddleware;
 use actix_web::cookie::Key;
-use actix_web::{App, HttpServer, Result, web};
-use actix_web_flash_messages::storage::CookieMessageStore;
-use actix_web_flash_messages::FlashMessagesFramework;
+use actix_web::{web, App, HttpServer, Result};
 use controllers::admin::posts_controller::admin_index;
 use controllers::admin::posts_controller::{get_categories_posts, show_post};
 use controllers::guests::posts::{get_category_posts, show_posts};
 use handlebars::Handlebars;
 use magic_crypt::new_magic_crypt;
 use sqlx::postgres::PgPoolOptions;
-
 
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
@@ -80,10 +79,6 @@ async fn main() -> Result<(), anyhow::Error> {
             .service(web::resource("/posts").to(index_redirect))
             .service(web::resource("./templates/").to(redirect_user))
             .service(web::resource("/check").to(check_user))
-         // end test
-            .service(web::resource("/show").to(show))
-            .service(web::resource("/set").to(set))
-        //end test
             .service(web::resource("/admin/posts/page/{page_number}").to(admin_index))
             .service(
                 web::resource("/admin/categories/new")

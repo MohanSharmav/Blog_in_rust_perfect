@@ -1,19 +1,19 @@
 use crate::controllers::constants::Configuration;
 use crate::model::authentication::session::login_database;
-use crate::model::structs::{IncomingFlashMessagess, LoginCheck};
+use crate::model::structs::{ LoginCheck};
 use actix_http::header::LOCATION;
 use actix_identity::Identity;
+use actix_web::cookie::Key;
 use actix_web::http::header::ContentType;
-use actix_web::{web, HttpResponse, http};
+use actix_web::{http, web, HttpResponse};
 use actix_web::{HttpMessage as _, HttpRequest, Responder};
+use actix_web_flash_messages::storage::{CookieMessageStore };
 use actix_web_flash_messages::{FlashMessage, FlashMessagesFramework, IncomingFlashMessages};
-use actix_web_flash_messages::storage::{CookieMessageStore, SessionMessageStore};
 use handlebars::Handlebars;
 use magic_crypt::MagicCryptTrait;
 use serde::Deserialize;
 use serde_json::json;
 use std::fmt::Write;
-use actix_web::cookie::Key;
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct User {
@@ -22,19 +22,15 @@ pub struct User {
 }
 pub async fn get_login(
     handlebars: web::Data<Handlebars<'_>>,
-    flash_message: IncomingFlashMessages
+    flash_message: IncomingFlashMessages,
 ) -> Result<HttpResponse, actix_web::Error> {
-    let html = handlebars
-        .render("auth-login-basic", &json!({"one":"one"}))
-        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let mut error_html = String::new();
-    // error_html= "login failed".to_string();
     for m in flash_message.iter() {
         writeln!(error_html, "{}", m.content()).unwrap();
     }
     let html = handlebars
-        .render("auth-login-basic", &json!({"message":error_html}))
+        .render("auth-login-basic", &json!({ "message": error_html }))
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
@@ -47,8 +43,6 @@ pub async fn login(
     req: HttpRequest,
     _user: Option<Identity>,
     config: web::Data<Configuration>,
-    handlebars: web::Data<Handlebars<'_>>,
-    flash_message: IncomingFlashMessages
 ) -> Result<HttpResponse, actix_web::Error> {
     let username = &form.username;
     let password = &form.password.to_string();
@@ -67,30 +61,10 @@ pub async fn login(
             .insert_header((LOCATION, "/admin/posts/page/1"))
             .finish())
     } else {
-        // FlashMessage::error("error".to_string()).send();
-        let html = handlebars
-            .render("auth-login-basic", &json!({"one":"one"}))
-            .map_err(actix_web::error::ErrorInternalServerError)?;
-        //
         FlashMessage::error("Login Fail - Wrong Id or password!").send();
-        FlashMessage::debug("How is it going?").send();
-        // let mut error_html = String::new();
-        // // error_html= "login failed".to_string();
-        // for m in flash_message.iter() {
-        //     writeln!(error_html, "{}", m.content()).unwrap();
-        // }
-        // let html = handlebars
-        //     .render("auth-login-basic", &json!({"message":error_html}))
-        //     .map_err(actix_web::error::ErrorInternalServerError)?;
-
-
-        Ok(
-           HttpResponse::SeeOther()
-               .insert_header((http::header::LOCATION, "/login"))
-               .finish()   )
-        // Ok(HttpResponse::SeeOther()
-        //        .content_type(ContentType::html())
-        //        .body(error_html))
+        Ok(HttpResponse::SeeOther()
+            .insert_header((http::header::LOCATION, "/login"))
+            .finish())
     }
 }
 
@@ -106,26 +80,7 @@ pub async fn check_user(user: Option<Identity>) -> impl Responder {
         web::Redirect::to("/")
     }
 }
-
-pub async fn show(messages: IncomingFlashMessages) -> impl Responder {
-    let mut body = String::new();
-    for message in messages.iter() {
-        writeln!(body, "{} - {}", message.content(), message.level()).unwrap();
-    }
-    HttpResponse::Ok().body(body)
-}
-
-pub async fn set() -> impl Responder {
-    FlashMessage::error("Hey there sadkdmamsdjasndsdnj !").send();
-    FlashMessage::debug("How is it going?").send();
-    HttpResponse::SeeOther()
-        .insert_header((http::header::LOCATION, "/show"))
-        .finish()
-}
-
-
 pub fn build_message_framework(signing_key: Key) -> FlashMessagesFramework {
     let message_store = CookieMessageStore::builder(signing_key).build();
-    FlashMessagesFramework::builder(message_store)
-        .build()
+    FlashMessagesFramework::builder(message_store).build()
 }

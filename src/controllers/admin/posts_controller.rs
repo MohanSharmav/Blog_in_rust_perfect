@@ -284,7 +284,6 @@ pub async fn admin_index(
     let current_page: usize = par.clone() as usize;
 
     if current_page <= 0 || current_page > count_of_number_of_pages {
-
         Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/admin/posts/page/1"))
             .content_type(ContentType::html())
