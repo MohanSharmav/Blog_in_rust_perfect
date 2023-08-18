@@ -27,11 +27,23 @@ pub async fn get_login(
         .render("auth-login-basic", &json!({"one":"one"}))
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
+    FlashMessage::error("Hey there sadkdmamsdjasndsdnj !").send();
+    FlashMessage::debug("How is it going?").send();
+
     Ok(HttpResponse::Ok()
         .content_type(ContentType::html())
         .body(html))
 }
+pub struct IncomingFlashMessagess {
+    messages: Vec<FlashMessage>,
+}
 
+impl IncomingFlashMessagess {
+    /// Return an iterator over incoming [`FlashMessage`]s.
+    pub fn iter(&self) -> impl ExactSizeIterator<Item = &FlashMessage> {
+        self.messages.iter()
+    }
+}
 pub async fn login(
     form: web::Form<User>,
     req: HttpRequest,
@@ -57,18 +69,21 @@ pub async fn login(
             .finish())
     } else {
         FlashMessage::error("error".to_string()).send();
-        FlashMessagesFramework::builder(SessionMessageStore::default())
-            .build();
         let html = handlebars
             .render("auth-login-basic", &json!({"one":"one"}))
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
         FlashMessage::error("Hey there sadkdmamsdjasndsdnj !").send();
         FlashMessage::debug("How is it going?").send();
+        let mut error_html = String::new();
+        error_html= "login failed".to_string();
+        // for m in IncomingFlashMessagess.iter() {
+        //     writeln!(error_html, "<p><i>{}</i></p>", m.content()).unwrap();
+        // }
 
         Ok(HttpResponse::SeeOther()
-            .insert_header((http::header::LOCATION, "/login"))
-               .finish())
+               .content_type(ContentType::html())
+               .body(error_html))
     }
 }
 
