@@ -1,13 +1,13 @@
 use crate::controllers::constants::Configuration;
 use crate::model::authentication::session::login_database;
-use crate::model::structs::{ LoginCheck};
+use crate::model::structs::LoginCheck;
 use actix_http::header::LOCATION;
 use actix_identity::Identity;
 use actix_web::cookie::Key;
 use actix_web::http::header::ContentType;
 use actix_web::{http, web, HttpResponse};
 use actix_web::{HttpMessage as _, HttpRequest, Responder};
-use actix_web_flash_messages::storage::{CookieMessageStore };
+use actix_web_flash_messages::storage::CookieMessageStore;
 use actix_web_flash_messages::{FlashMessage, FlashMessagesFramework, IncomingFlashMessages};
 use handlebars::Handlebars;
 use magic_crypt::MagicCryptTrait;
@@ -24,7 +24,6 @@ pub async fn get_login(
     handlebars: web::Data<Handlebars<'_>>,
     flash_message: IncomingFlashMessages,
 ) -> Result<HttpResponse, actix_web::Error> {
-
     let mut error_html = String::new();
     for m in flash_message.iter() {
         writeln!(error_html, "{}", m.content()).unwrap();
@@ -57,6 +56,8 @@ pub async fn login(
     if login_result == logic_check_value {
         Identity::login(&req.extensions(), username.to_string())
             .map_err(actix_web::error::ErrorInternalServerError)?;
+        FlashMessage::success("Login Success").send();
+        FlashMessage::info("Login Success").send();
         Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/admin/posts/page/1"))
             .finish())

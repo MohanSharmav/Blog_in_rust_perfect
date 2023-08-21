@@ -13,9 +13,11 @@ use actix_identity::Identity;
 use actix_web::http::header::ContentType;
 use actix_web::web::Redirect;
 use actix_web::{http, web, HttpResponse};
+use actix_web_flash_messages::IncomingFlashMessages;
 use handlebars::Handlebars;
 use serde_json::json;
 use sqlx::{Pool, Postgres, Row};
+use std::fmt::Write;
 
 pub async fn get_new_post(
     config: web::Data<Configuration>,
@@ -261,6 +263,7 @@ pub async fn admin_index(
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
     params: web::Path<i32>,
+    flash_message: IncomingFlashMessages,
 ) -> Result<HttpResponse, actix_web::Error> {
     if user.is_none() {
         return Ok(HttpResponse::SeeOther()
@@ -272,6 +275,11 @@ pub async fn admin_index(
     let posts_per_page_constant = set_posts_per_page().await as i64;
     let mut posts_per_page = total_posts_length / posts_per_page_constant;
     let check_remainder = total_posts_length % posts_per_page_constant;
+
+    let mut error_html = String::new();
+    for m in flash_message.iter() {
+        writeln!(error_html, "{}", m.content()).unwrap();
+    }
 
     if check_remainder != 0 {
         posts_per_page += 1;
@@ -301,7 +309,7 @@ pub async fn admin_index(
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        let htmls = handlebars.render("admin_post_table", &json!({"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category,"pagination":pagination_final_string}))
+        let htmls = handlebars.render("admin_post_table", &json!({"message": error_html,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category,"pagination":pagination_final_string}))
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
         Ok(HttpResponse::Ok()

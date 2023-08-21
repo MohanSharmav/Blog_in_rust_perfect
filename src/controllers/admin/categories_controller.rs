@@ -2,8 +2,8 @@ use crate::controllers::constants::Configuration;
 use crate::controllers::guests::posts::set_posts_per_page;
 use crate::controllers::helpers::pagination_logic::admin_categories;
 use crate::model::categories::{
-    all_categories_db, create_new_category_db, delete_category_db,
-    get_all_categories_db, get_specific_category_posts, update_category_db,
+    all_categories_db, create_new_category_db, delete_category_db, get_all_categories_db,
+    get_specific_category_posts, update_category_db,
 };
 use crate::model::structs::CreateNewCategory;
 use actix_http::header::LOCATION;
@@ -16,6 +16,8 @@ use handlebars::Handlebars;
 use serde_json::json;
 use sqlx::{Pool, Postgres, Row};
 use std::result;
+use actix_web_flash_messages::IncomingFlashMessages;
+use std::fmt::Write;
 
 pub async fn get_all_categories(
     config: web::Data<Configuration>,
@@ -79,6 +81,7 @@ pub async fn new_category(
     config: web::Data<Configuration>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
+    flash_message: IncomingFlashMessages,
 ) -> Result<HttpResponse, actix_web::Error> {
     if user.is_none() {
         return Ok(HttpResponse::SeeOther()
@@ -86,12 +89,16 @@ pub async fn new_category(
             .body(""));
     }
     let db = &config.database_connection;
+    let mut error_html = String::new();
+    for m in flash_message.iter() {
+        writeln!(error_html, "{}", m.content()).unwrap();
+    }
     let all_category = all_categories_db(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
-        .render("new_category", &json!({"o":"ax","o":all_category}))
+        .render("new_category", &json!({ "message": error_html,"o":"ax","o":all_category}))
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
