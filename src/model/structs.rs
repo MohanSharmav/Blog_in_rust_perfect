@@ -2,7 +2,7 @@ use serde::Deserialize;
 use serde::Serialize;
 use sqlx::postgres::PgRow;
 use sqlx::{Error, FromRow, Row};
-use validator::{Validate} ;
+use validator::Validate;
 
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
 pub struct Categories {
@@ -40,9 +40,11 @@ pub struct CreatePost {
     pub category_id: i32,
 }
 
-#[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow, Validate)]
 pub struct CreateNewPost {
+    #[validate(length(min = 1, message = "title cannot be empty"))]
     pub title: String,
+    #[validate(length(min = 1, message = "description cannot be empty"))]
     pub description: String,
     pub category_id: i32,
 }
@@ -57,9 +59,12 @@ pub struct CreateNewPostWithoutCategory {
 pub struct CreateNewPostWithNullCategory {
     pub category_id: i32,
 }
-#[derive(Deserialize, Debug, Clone, PartialEq, sqlx::FromRow,Validate)]
+#[derive(Deserialize, Debug, Clone, PartialEq, sqlx::FromRow, Validate)]
 pub struct CreateNewCategory {
-    #[validate(length(min = 2, message = "category can't be empty"))]
+    #[validate(length(
+        min = 2,
+        message = "category name cannot be empty and minimum should have 2 characters"
+    ))]
     pub(crate) name: String,
 }
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
@@ -82,5 +87,3 @@ impl<'r> FromRow<'r, PgRow> for LoginCheck {
 pub struct GetCategoryId {
     pub category_id: i32,
 }
-
-

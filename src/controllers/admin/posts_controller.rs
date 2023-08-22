@@ -13,9 +13,12 @@ use actix_identity::Identity;
 use actix_web::http::header::ContentType;
 use actix_web::web::Redirect;
 use actix_web::{http, web, HttpResponse};
+use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages};
 use handlebars::Handlebars;
 use serde_json::json;
 use sqlx::{Pool, Postgres, Row};
+use std::fmt::Write;
+use validator::{Validate, ValidationErrors};
 
 pub async fn get_new_post(
     config: web::Data<Configuration>,
@@ -50,21 +53,51 @@ pub async fn get_new_post(
 pub async fn new_post(
     form: web::Form<CreateNewPost>,
     config: web::Data<Configuration>,
-) -> Result<Redirect, actix_web::Error> {
+) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
     let title = &form.title;
     let description = &form.description;
     let category_id = &form.category_id;
+    let mut validation_errors = Vec::new();
+    let form_result = form.validate();
+    let mut flash_errors_string = String::new();
+    // .map_err(actix_web::error::ErrorInternalServerError)?;
+    match form_result {
+        Ok(_) => {
+            println!("no problems");
+        }
+        Err(_) => {
+            println!("------------------------------------- problems");
+        }
+    }
+    if let Err(errors) = form_result {
+        for error in errors.field_errors() {
+            validation_errors.push(format!("{} : {:?}", error.0, error.1));
+            let error_string = errors.to_string();
+            flash_errors_string = error_string;
+        }
+    }
+    if !validation_errors.is_empty() {
+        FlashMessage::error(flash_errors_string).send();
+        return Ok(HttpResponse::SeeOther()
+            .insert_header((http::header::LOCATION, "/admin/posts/page/1"))
+            .finish());
+    }
+
     if category_id.clone() == 0_i32 {
         create_post_without_category(title.clone(), description.clone(), db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
-        Ok(Redirect::to("/admin/posts/page/1"))
+        Ok(HttpResponse::SeeOther()
+            .insert_header((http::header::LOCATION, "/admin/posts/page/1"))
+            .finish())
     } else {
         create_post(title.clone(), description.clone(), &category_id.clone(), db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
-        Ok(Redirect::to("/admin/posts/page/1"))
+        Ok(HttpResponse::SeeOther()
+            .insert_header((http::header::LOCATION, "/admin/posts/page/1"))
+            .finish())
     }
 }
 
@@ -261,6 +294,7 @@ pub async fn admin_index(
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
     params: web::Path<i32>,
+    flash_message: IncomingFlashMessages,
 ) -> Result<HttpResponse, actix_web::Error> {
     if user.is_none() {
         return Ok(HttpResponse::SeeOther()
@@ -282,6 +316,10 @@ pub async fn admin_index(
     let par = params.into_inner();
     let count_of_number_of_pages = pages_count.len();
     let current_page: usize = par.clone() as usize;
+    let mut error_html = String::new();
+    for m in flash_message.iter() {
+        writeln!(error_html, "{}", m.content()).unwrap();
+    }
 
     if current_page <= 0 || current_page > count_of_number_of_pages {
         Ok(HttpResponse::SeeOther()
@@ -301,7 +339,7 @@ pub async fn admin_index(
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        let htmls = handlebars.render("admin_post_table", &json!({"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category,"pagination":pagination_final_string}))
+        let htmls = handlebars.render("admin_post_table", &json!({"message": error_html,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category,"pagination":pagination_final_string}))
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
         Ok(HttpResponse::Ok()

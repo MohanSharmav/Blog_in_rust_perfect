@@ -2,8 +2,8 @@ use crate::controllers::constants::Configuration;
 use crate::controllers::guests::posts::set_posts_per_page;
 use crate::controllers::helpers::pagination_logic::admin_categories;
 use crate::model::categories::{
-    all_categories_db, create_new_category_db, delete_category_db,
-    get_all_categories_db, get_specific_category_posts, update_category_db,
+    all_categories_db, create_new_category_db, delete_category_db, get_all_categories_db,
+    get_specific_category_posts, update_category_db,
 };
 use crate::model::structs::CreateNewCategory;
 use actix_http::header::LOCATION;
@@ -11,14 +11,14 @@ use actix_identity::Identity;
 use actix_web::http::header::ContentType;
 use actix_web::web::Redirect;
 use actix_web::{http, web, HttpResponse};
+use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages};
 use anyhow::Result;
 use handlebars::Handlebars;
 use serde_json::json;
 use sqlx::{Pool, Postgres, Row};
-use std::result;
-use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages};
-use validator::Validate;
 use std::fmt::Write;
+use std::result;
+use validator::Validate;
 
 pub async fn get_all_categories(
     config: web::Data<Configuration>,
@@ -112,21 +112,23 @@ pub async fn create_category(
 ) -> Result<HttpResponse, actix_web::Error> {
     let name = &form.name;
     let db = &config.database_connection;
-   let form_result=  form.validate();
+    let form_result = form.validate();
     let mut validation_errors = Vec::new();
-    let mut flash_errors = String::new();
+    let mut flash_error_string = String::new();
 
     if let Err(errors) = form_result {
         for error in errors.field_errors() {
             validation_errors.push(format!("{}: {:?}", error.0, error.1));
-        let error_string =errors.to_string();
-        flash_errors=error_string;
+            let error_string = errors.to_string();
+            flash_error_string = error_string;
         }
     }
 
     if !validation_errors.is_empty() {
-        FlashMessage::error(flash_errors).send();
-        return Ok(HttpResponse::SeeOther().header("Location", "/admin/categories/page/1").finish());
+        FlashMessage::error(flash_error_string).send();
+        return Ok(HttpResponse::SeeOther()
+            .insert_header((http::header::LOCATION, "/admin/categories/page/1"))
+            .finish());
     }
 
     create_new_category_db(db, name)
