@@ -19,9 +19,10 @@ pub struct Posts {
 
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
 pub struct UpdatePost {
-    pub(crate) current_title: String,
+    pub(crate) id: i32,
     pub(crate) title: String,
     pub(crate) description: String,
+    pub(crate) category_id: i32,
     pub(crate) name: String,
 }
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]

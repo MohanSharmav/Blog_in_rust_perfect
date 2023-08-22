@@ -198,6 +198,25 @@ pub async fn update_category(
     let name = &form.name;
     let category_id = id.into_inner();
 
+    let form_result = form.validate();
+    let mut validation_errors = Vec::new();
+    let mut flash_error_string = String::new();
+
+    if let Err(errors) = form_result {
+        for error in errors.field_errors() {
+            validation_errors.push(format!("{}: {:?}", error.0, error.1));
+            let error_string = errors.to_string();
+            flash_error_string = error_string;
+        }
+    }
+
+    if !validation_errors.is_empty() {
+        FlashMessage::error(flash_error_string).send();
+        return Ok(HttpResponse::SeeOther()
+            .insert_header((http::header::LOCATION, "/admin/categories/page/1"))
+            .finish());
+    }
+
     update_category_db(name, category_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
