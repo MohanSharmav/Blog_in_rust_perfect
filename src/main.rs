@@ -134,7 +134,7 @@ async fn main() -> Result<(), anyhow::Error> {
             .service(web::resource("/posts/page/{page_number}").route(web::get().to(index)))
             .service(Files::new("/", "./templates").show_files_listing())
     })
-    .bind("127.0.0.1:8081")?
+    .bind("127.0.0.1:8080")?
     .run()
     .await?;
 

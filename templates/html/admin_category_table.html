@@ -278,6 +278,9 @@
                     <div class="card">
                         <div  class="table-heading" >
                             <h5 class="card-header"  style="float:left"> Category</h5>
+                            {{#if message}}
+                            <div class="alert alert-danger">{{message}}</div>
+                            {{/if}}
                             <a href="/admin/categories/new"><button type="button" class="btn btn-dark " style="float:right">New</button></a>
                         </div>
                         <div class="table-responsive text-nowrap">

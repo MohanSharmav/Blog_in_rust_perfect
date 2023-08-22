@@ -16,15 +16,16 @@ use handlebars::Handlebars;
 use serde_json::json;
 use sqlx::{Pool, Postgres, Row};
 use std::result;
-use actix_web_validator::Query;
-
-
+use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages};
+use validator::Validate;
+use std::fmt::Write;
 
 pub async fn get_all_categories(
     config: web::Data<Configuration>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
     params: web::Path<i32>,
+    flash_message: IncomingFlashMessages,
 ) -> Result<HttpResponse, actix_web::Error> {
     if user.is_none() {
         return Ok(HttpResponse::SeeOther()
@@ -46,7 +47,10 @@ pub async fn get_all_categories(
     let param = params.into_inner();
     let count_of_number_of_pages = pages_count.len();
     let current_page: usize = param.clone() as usize;
-
+    let mut error_html = String::new();
+    for m in flash_message.iter() {
+        writeln!(error_html, "{}", m.content()).unwrap();
+    }
     if current_page <= 0 || current_page > count_of_number_of_pages {
         Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/admin/categories/page/1"))
@@ -68,7 +72,7 @@ pub async fn get_all_categories(
         let html = handlebars
             .render(
                 "admin_category_table",
-                &json!({ "pagination":pagination_final_string,"z": &all_categories,"o":all_category,"pages_count":pages_count}),
+                &json!({"message": error_html,"pagination":pagination_final_string,"z": &all_categories,"o":all_category,"pages_count":pages_count}),
             )
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -103,11 +107,28 @@ pub async fn new_category(
 }
 
 pub async fn create_category(
-    form: Query<CreateNewCategory>,
+    form: web::Form<CreateNewCategory>,
     config: web::Data<Configuration>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let name = &form.name;
     let db = &config.database_connection;
+   let form_result=  form.validate();
+    let mut validation_errors = Vec::new();
+    let mut flash_errors = String::new();
+
+    if let Err(errors) = form_result {
+        for error in errors.field_errors() {
+            validation_errors.push(format!("{}: {:?}", error.0, error.1));
+        let error_string =errors.to_string();
+        flash_errors=error_string;
+        }
+    }
+
+    if !validation_errors.is_empty() {
+        FlashMessage::error(flash_errors).send();
+        return Ok(HttpResponse::SeeOther().header("Location", "/admin/categories/page/1").finish());
+    }
+
     create_new_category_db(db, name)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
