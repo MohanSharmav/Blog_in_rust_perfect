@@ -175,6 +175,7 @@ pub async fn edit_category(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
+
     let html = handlebars
         .render(
             "update_category",

@@ -1,5 +1,5 @@
 use crate::controllers::guests::posts::set_posts_per_page;
-use crate::model::structs::{GetCategoryId, GetId, Posts};
+use crate::model::structs::{GetCategoryId, GetCategoryInfo, GetId, Posts};
 use sqlx::{Pool, Postgres, Row};
 
 pub async fn delete_post_db(to_delete: String, db: &Pool<Postgres>) -> Result<(), anyhow::Error> {
@@ -186,4 +186,25 @@ pub async fn update_post_from_no_category(
         .await?;
 
     Ok(())
+}
+
+
+pub async fn category_info_from_post_id(
+    postid: i32,
+    db: &Pool<Postgres>,
+) -> Result<i32, anyhow::Error> {
+    let category_id_vec = sqlx::query_as::<_, GetCategoryInfo>(
+        "select category_id from categories_posts where post_id=$1",
+    )
+        .bind(postid)
+        .fetch_all(db)
+        .await
+        .unwrap_or_default();
+
+    let x = category_id_vec
+        .get(0)
+        .map(|i| i.category_id)
+        .unwrap_or_default();
+
+    Ok(x)
 }
