@@ -1,8 +1,14 @@
 use crate::controllers::constants::Configuration;
 use crate::controllers::guests::posts::set_posts_per_page;
 use crate::controllers::helpers::pagination_logic::{admin_category_posts, admin_main_page};
-use crate::model::categories::{all_categories_db, category_db, category_pagination_logic};
-use crate::model::posts::{category_id_from_post_id, create_post, create_post_without_category, delete_post_db, query_single_post, specific_page_posts, update_post_db, update_post_without_category};
+use crate::model::categories::{
+    all_categories_db, all_categories_exception, category_db, category_pagination_logic,
+    get_specific_category_posts,
+};
+use crate::model::posts::{
+    category_id_from_post_id, create_post, create_post_without_category, delete_post_db,
+    query_single_post, specific_page_posts, update_post_db, update_post_without_category,
+};
 use crate::model::posts::{single_post_db, update_post_from_no_category};
 use crate::model::structs::CreateNewPost;
 use actix_http::header::LOCATION;
@@ -15,7 +21,7 @@ use handlebars::Handlebars;
 use serde_json::json;
 use sqlx::{Pool, Postgres, Row};
 use std::fmt::Write;
-use validator::{Validate};
+use validator::Validate;
 
 pub async fn get_new_post(
     config: web::Data<Configuration>,
@@ -111,25 +117,23 @@ pub async fn edit_post(
 ) -> Result<HttpResponse, actix_web::Error> {
     let to_be_updated_post = to_be_updated_post.clone();
     let db = &config.database_connection;
-    let all_category = all_categories_db(db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
     let post_id = id.into_inner();
     let single_post_struct = single_post_db(post_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    let category_id=category_id_from_post_id(post_id.clone(),db)
+    let category_id = category_id_from_post_id(post_id.clone(), db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-
-
-
+    let category_info = get_specific_category_posts(category_id, db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+    let all_category = all_categories_exception(db, category_id)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
     let html = handlebars
         .render(
             "update_post",
-            &json!({ "current_post":single_post_struct,"to_be_updated_post": &to_be_updated_post,"o":all_category }),
+            &json!({"category_info": category_info,"current_post":single_post_struct,"to_be_updated_post": &to_be_updated_post,"o":all_category }),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

@@ -305,7 +305,12 @@
                                         <div class="mb-3">
                                             <label  class="form-label"> select category</label>
                                             <select class="form-select" id="category_id" name="category_id" aria-label="Default select example">
+                                               {{#each category_info}}
+                                                <option value="{{this.id}}">{{this.name}}</option>
+
+                                                {{/each}}
                                                 <option value="0" >No category</option>
+
                                                 {{#each o}}
                                                 <option value="{{this.id}}">{{this.name}}</option>
                                                 {{/each}}

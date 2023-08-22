@@ -130,3 +130,15 @@ pub async fn category_pagination_logic(
 
     Ok(c)
 }
+pub async fn all_categories_exception(
+    db: &Pool<Postgres>,
+    category_id: i32,
+) -> Result<Vec<Categories>, anyhow::Error> {
+    let all_categories =
+        sqlx::query_as::<_, Categories>(" select * from categories where Not id=$1")
+            .bind(category_id)
+            .fetch_all(db)
+            .await?;
+
+    Ok(all_categories)
+}
