@@ -2,7 +2,7 @@ use crate::controllers::constants::Configuration;
 use crate::controllers::guests::posts::set_posts_per_page;
 use crate::controllers::helpers::pagination_logic::{admin_category_posts, admin_main_page};
 use crate::model::categories::{all_categories_db, category_db, category_pagination_logic};
-use crate::model::posts::{category_id_from_post_id, create_post, create_post_without_category, delete_post_db, post_info, query_single_post, specific_page_posts, update_post_db, update_post_without_category};
+use crate::model::posts::{category_id_from_post_id, create_post, create_post_without_category, delete_post_db, query_single_post, specific_page_posts, update_post_db, update_post_without_category};
 use crate::model::posts::{single_post_db, update_post_from_no_category};
 use crate::model::structs::CreateNewPost;
 use actix_http::header::LOCATION;
@@ -123,11 +123,8 @@ pub async fn edit_post(
     let category_id=category_id_from_post_id(post_id.clone(),db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    println!("-----------------------------------{:?} :category_id", category_id);
 
-    let post_info=post_info(post_id,db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
+
 
     let html = handlebars
         .render(
