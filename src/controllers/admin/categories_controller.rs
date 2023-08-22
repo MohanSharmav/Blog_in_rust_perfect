@@ -16,6 +16,9 @@ use handlebars::Handlebars;
 use serde_json::json;
 use sqlx::{Pool, Postgres, Row};
 use std::result;
+use actix_web_validator::Query;
+
+
 
 pub async fn get_all_categories(
     config: web::Data<Configuration>,
@@ -100,7 +103,7 @@ pub async fn new_category(
 }
 
 pub async fn create_category(
-    form: web::Form<CreateNewCategory>,
+    form: Query<CreateNewCategory>,
     config: web::Data<Configuration>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let name = &form.name;

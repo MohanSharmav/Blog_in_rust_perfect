@@ -2,6 +2,7 @@ use serde::Deserialize;
 use serde::Serialize;
 use sqlx::postgres::PgRow;
 use sqlx::{Error, FromRow, Row};
+use validator::{Validate} ;
 
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
 pub struct Categories {
@@ -56,8 +57,9 @@ pub struct CreateNewPostWithoutCategory {
 pub struct CreateNewPostWithNullCategory {
     pub category_id: i32,
 }
-#[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
+#[derive(Deserialize, Debug, Clone, PartialEq, sqlx::FromRow,Validate)]
 pub struct CreateNewCategory {
+    #[validate(length(min = 2, message = "category can't be empty"))]
     pub(crate) name: String,
 }
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
@@ -80,13 +82,5 @@ impl<'r> FromRow<'r, PgRow> for LoginCheck {
 pub struct GetCategoryId {
     pub category_id: i32,
 }
-// pub struct IncomingFlashMessagess {
-//     messages: Vec<FlashMessage>,
-// }
-//
-// impl IncomingFlashMessagess {
-//     /// Return an iterator over incoming [`FlashMessage`]s.
-//     pub fn iter(&self) -> impl ExactSizeIterator<Item = &FlashMessage> {
-//         self.messages.iter()
-//     }
-// }
+
+
