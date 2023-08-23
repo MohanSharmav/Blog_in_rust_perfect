@@ -1,5 +1,5 @@
 use crate::controllers::constants::Configuration;
-use crate::controllers::guests::posts::set_posts_per_page;
+use crate::controllers::guests::posts::{SET_POSTS_PER_PAGE};
 use crate::controllers::helpers::pagination_logic::admin_categories;
 use crate::model::categories::{
     all_categories_db, create_new_category_db, delete_category_db, get_all_categories_db,
@@ -35,7 +35,7 @@ pub async fn get_all_categories(
 
     let db = &config.database_connection;
     let total_posts_length = get_pagination_for_all_categories_list(db).await?;
-    let posts_per_page_constant = set_posts_per_page().await as i64;
+    let posts_per_page_constant = SET_POSTS_PER_PAGE;
     let mut posts_per_page = total_posts_length / posts_per_page_constant;
     let check_remainder = total_posts_length % posts_per_page_constant;
     if check_remainder != 0 {
@@ -43,7 +43,7 @@ pub async fn get_all_categories(
     }
     let posts_per_page = posts_per_page as usize;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    let posts_per_page_constant = set_posts_per_page().await;
+    let posts_per_page_constant = SET_POSTS_PER_PAGE as i32;
     let param = params.into_inner();
     let count_of_number_of_pages = pages_count.len();
     let current_page: usize = param as usize;

@@ -1,5 +1,5 @@
 use crate::controllers::constants::Configuration;
-use crate::controllers::guests::posts::set_posts_per_page;
+use crate::controllers::guests::posts::{SET_POSTS_PER_PAGE};
 use crate::controllers::helpers::pagination_logic::{admin_category_posts, admin_main_page};
 use crate::model::categories::{
     all_categories_db, all_categories_exception, category_db, category_pagination_logic,
@@ -226,7 +226,7 @@ pub async fn get_categories_posts(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let posts_per_page_constant = set_posts_per_page().await as i64;
+    let posts_per_page_constant = SET_POSTS_PER_PAGE;
     let mut posts_per_page = total_posts_length / posts_per_page_constant;
     let check_remainder = total_posts_length % posts_per_page_constant;
     if check_remainder != 0 {
@@ -318,7 +318,7 @@ pub async fn admin_index(
     }
     let db = &config.database_connection;
     let total_posts_length = number_posts_count(db).await?;
-    let posts_per_page_constant = set_posts_per_page().await as i64;
+    let posts_per_page_constant = SET_POSTS_PER_PAGE;
     let mut posts_per_page = total_posts_length / posts_per_page_constant;
     let check_remainder = total_posts_length % posts_per_page_constant;
 

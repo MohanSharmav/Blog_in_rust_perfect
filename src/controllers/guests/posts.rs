@@ -9,13 +9,14 @@ use actix_web::{web, HttpResponse, Responder};
 use handlebars::Handlebars;
 use serde_json::json;
 
+/*
+
+ */
 pub async fn redirect_user() -> impl Responder {
     web::Redirect::to("/posts/page/1")
 }
 
-pub async fn set_posts_per_page() -> i32 {
-    3
-}
+pub const SET_POSTS_PER_PAGE:i64=3;
 
 pub async fn index(
     params: web::Path<i32>,
@@ -24,7 +25,7 @@ pub async fn index(
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
     let total_posts_length = number_posts_count(db).await?;
-    let posts_per_page_constant = set_posts_per_page().await as i64;
+    let posts_per_page_constant = SET_POSTS_PER_PAGE;
     let mut posts_per_page = total_posts_length / posts_per_page_constant;
     let check_remainder = total_posts_length % posts_per_page_constant;
     if check_remainder != 0 {
@@ -71,7 +72,7 @@ pub async fn index_redirect(
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
     let total_posts_length = number_posts_count(db).await?;
-    let posts_per_page_constant = set_posts_per_page().await as i64;
+    let posts_per_page_constant = SET_POSTS_PER_PAGE;
     let mut posts_per_page = total_posts_length / posts_per_page_constant;
     let check_remainder = total_posts_length % posts_per_page_constant;
     if check_remainder != 0 {
@@ -140,7 +141,7 @@ pub async fn get_category_posts(
     let total_posts_length = category_pagination_logic(&category_input, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    let posts_per_page_constant = set_posts_per_page().await as i64;
+    let posts_per_page_constant = SET_POSTS_PER_PAGE;
     let mut posts_per_page = total_posts_length / posts_per_page_constant;
     let check_remainder = total_posts_length % posts_per_page_constant;
     if check_remainder != 0 {

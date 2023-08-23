@@ -1,4 +1,4 @@
-use crate::controllers::guests::posts::set_posts_per_page;
+use crate::controllers::guests::posts::{SET_POSTS_PER_PAGE};
 use crate::model::structs::{GetCategoryId, GetId, Posts};
 use sqlx::{Pool, Postgres, Row};
 
@@ -125,7 +125,7 @@ pub async fn specific_page_posts(
     db: &Pool<Postgres>,
 ) -> Result<Vec<Posts>, anyhow::Error> {
     let start_page = start_page;
-    let posts_per_page = set_posts_per_page().await;
+    let posts_per_page = SET_POSTS_PER_PAGE;
     let perfect_posts = sqlx::query_as::<_, Posts>(
         "select * from posts Order By id Asc limit $1 OFFSET ($2-1)*$1 ",
     )
