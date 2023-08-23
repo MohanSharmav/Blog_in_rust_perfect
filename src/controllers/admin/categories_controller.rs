@@ -46,12 +46,13 @@ pub async fn get_all_categories(
     let posts_per_page_constant = set_posts_per_page().await;
     let param = params.into_inner();
     let count_of_number_of_pages = pages_count.len();
-    let current_page: usize = param.clone() as usize;
+    let current_page: usize = param as usize;
     let mut error_html = String::new();
-    for m in flash_message.iter() {
-        writeln!(error_html, "{}", m.content()).unwrap();
+    for message in flash_message.iter() {
+        writeln!(error_html, "{}", message.content())
+            .map_err(actix_web::error::ErrorInternalServerError)?;
     }
-    if current_page <= 0 || current_page > count_of_number_of_pages {
+    if current_page == 0 || current_page > count_of_number_of_pages {
         Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/admin/categories/page/1"))
             .content_type(ContentType::html())
@@ -170,15 +171,15 @@ pub async fn edit_category(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let to_be_updated_category = to_be_updated_category.clone();
-    let x = get_specific_category_posts(to_be_updated_category, db)
+    let to_be_updated_category = *to_be_updated_category;
+    let posts = get_specific_category_posts(to_be_updated_category, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
         .render(
             "update_category",
-            &json!({ "to_be_updated_post": &to_be_updated_category ,"o":all_category,"category_old_name":x}),
+            &json!({ "to_be_updated_post": &to_be_updated_category ,"o":all_category,"category_old_name":posts}),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

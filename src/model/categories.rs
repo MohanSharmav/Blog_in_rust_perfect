@@ -27,7 +27,6 @@ pub async fn delete_category_db(
     to_delete_category: &str,
 ) -> Result<(), anyhow::Error> {
     let to_delete_category: i32 = to_delete_category.parse::<i32>()?;
-
     sqlx::query("delete from categories_posts where category_id=$1")
         .bind(to_delete_category)
         .execute(db)
@@ -64,11 +63,11 @@ pub async fn category_db(
     let category_posts = sqlx::query_as::<_, PostsCategories>(
         "select posts.title,posts.id,posts.description,categories.name  from posts,categories_posts,categories  where categories_posts.post_id=posts.id and categories.id=categories_posts.category_id and categories_posts.category_id=$1 Order By posts.id Asc  limit $3 offset($2-1)*$3"
     )
-     .bind(category_id)
+        .bind(category_id)
         .bind(par)
         .bind(posts_per_page)
-    .fetch_all(db)
-    .await?;
+        .fetch_all(db)
+        .await?;
 
     Ok(category_posts)
 }
@@ -122,13 +121,13 @@ pub async fn category_pagination_logic(
         })
         .collect();
 
-    let a = counting_final.get(0).ok_or(anyhow!("{}", "error"))?;
-    let c = a
+    let before_remove_error = counting_final.get(0).ok_or(anyhow!("{}", "error"))?;
+    let exact_value = before_remove_error
         .as_ref()
         .map(|i| *i)
         .map_err(|_e| anyhow::Error::msg("failed"))?;
 
-    Ok(c)
+    Ok(exact_value)
 }
 pub async fn all_categories_exception(
     db: &Pool<Postgres>,

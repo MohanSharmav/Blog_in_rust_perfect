@@ -79,7 +79,7 @@ pub async fn new_post(
             .finish());
     }
 
-    if category_id.clone() == 0_i32 {
+    if *category_id == 0_i32 {
         create_post_without_category(title.clone(), description.clone(), db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -121,7 +121,7 @@ pub async fn edit_post(
     let single_post_struct = single_post_db(post_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    let category_id = category_id_from_post_id(post_id.clone(), db)
+    let category_id = category_id_from_post_id(post_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     let category_info = get_specific_category_posts(category_id, db)
@@ -182,8 +182,8 @@ pub async fn update_post(
             .content_type(ContentType::html())
             .finish());
     }
-    if category_id.clone() == 0_i32 {
-        update_post_without_category(title.clone(), description.clone(), id.clone(), db)
+    if *category_id == 0_i32 {
+        update_post_without_category(title.clone(), description.clone(), id, db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -234,12 +234,12 @@ pub async fn get_categories_posts(
     }
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     let mut count_of_number_of_pages = pages_count.len();
-    let current_page: usize = params.clone() as usize;
+    let current_page: usize = params as usize;
 
     if count_of_number_of_pages == 0 {
         count_of_number_of_pages = 1;
     }
-    if current_page <= 0 || current_page > count_of_number_of_pages {
+    if current_page == 0 || current_page > count_of_number_of_pages {
         let redirect_url =
             "/admin/categories/".to_string() + &*category_input.clone() + &*"/page/1".to_string();
 
@@ -327,16 +327,17 @@ pub async fn admin_index(
     }
     let posts_per_page = posts_per_page as usize;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    let start_page = params.clone();
+    let start_page = *params;
     let par = params.into_inner();
     let count_of_number_of_pages = pages_count.len();
-    let current_page: usize = par.clone() as usize;
+    let current_page: usize = par as usize;
     let mut error_html = String::new();
-    for m in flash_message.iter() {
-        writeln!(error_html, "{}", m.content()).unwrap();
+    for message in flash_message.iter() {
+        writeln!(error_html, "{}", message.content())
+            .map_err(actix_web::error::ErrorInternalServerError)?;
     }
 
-    if current_page <= 0 || current_page > count_of_number_of_pages {
+    if current_page == 0 || current_page > count_of_number_of_pages {
         Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/admin/posts/page/1"))
             .content_type(ContentType::html())

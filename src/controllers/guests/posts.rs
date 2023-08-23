@@ -36,9 +36,9 @@ pub async fn index(
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     let sample: Vec<_> = (1..=posts_per_page).collect();
     let count_of_number_of_pages = pages_count.len();
-    let current_page: usize = current_page.clone();
+    let current_page: usize = current_page;
 
-    if current_page > count_of_number_of_pages || current_page <= 0 {
+    if current_page > count_of_number_of_pages || current_page == 0 {
         return Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/posts/page/1"))
             .content_type(ContentType::html())
@@ -79,7 +79,6 @@ pub async fn index_redirect(
     }
     let posts_per_page = posts_per_page as usize;
     let param = 1;
-    let _current_page = param as usize;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
 
     let exact_posts_only = specific_page_posts(param, &db.clone())
@@ -149,12 +148,12 @@ pub async fn get_category_posts(
     }
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     let mut count_of_number_of_pages = pages_count.len();
-    let current_page: usize = par.clone() as usize;
+    let current_page: usize = par as usize;
     let admin = false;
     if count_of_number_of_pages == 0 {
         count_of_number_of_pages = 1;
     }
-    if current_page <= 0 || current_page > count_of_number_of_pages {
+    if current_page == 0 || current_page > count_of_number_of_pages {
         let redirect_url =
             "/posts/category/".to_string() + &*category_input.clone() + &*"/page/1".to_string();
 

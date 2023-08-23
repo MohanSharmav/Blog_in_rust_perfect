@@ -52,8 +52,10 @@ pub async fn create_post(
     .bind(description)
     .fetch_all(db)
     .await?;
+
     let x: &GetId = &post_id[0];
     let GetId { id } = x;
+
     sqlx::query("insert into categories_posts values ($1,$2)")
         .bind(id)
         .bind(category_id)

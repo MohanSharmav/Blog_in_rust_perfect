@@ -50,15 +50,11 @@ async fn main() -> Result<(), anyhow::Error> {
         .max_connections(100)
         .connect(&db_url)
         .await?;
-
     let config = Configuration {
         magic_key: mcrypt,
         database_connection: pool,
     };
     let confi = web::Data::new(config.clone());
-
-    // let message_store = CookieMessageStore::builder(secret_key.clone()).build();
-    // let message_framework = FlashMessagesFramework::builder(message_store).build();
     let signing_key = Key::generate();
     let message_framework = build_message_framework(signing_key);
 

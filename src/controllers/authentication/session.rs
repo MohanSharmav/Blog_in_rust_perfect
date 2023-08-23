@@ -25,8 +25,9 @@ pub async fn get_login(
     flash_message: IncomingFlashMessages,
 ) -> Result<HttpResponse, actix_web::Error> {
     let mut error_html = String::new();
-    for m in flash_message.iter() {
-        writeln!(error_html, "{}", m.content()).unwrap();
+    for message in flash_message.iter() {
+        writeln!(error_html, "{}", message.content())
+            .map_err(actix_web::error::ErrorInternalServerError)?;
     }
     let html = handlebars
         .render("auth-login-basic", &json!({ "message": error_html }))
@@ -40,7 +41,6 @@ pub async fn get_login(
 pub async fn login(
     form: web::Form<User>,
     req: HttpRequest,
-    _user: Option<Identity>,
     config: web::Data<Configuration>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let username = &form.username;
