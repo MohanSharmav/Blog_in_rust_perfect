@@ -1,5 +1,5 @@
 use crate::controllers::constants::Configuration;
-use crate::controllers::guests::posts::{SET_POSTS_PER_PAGE};
+use crate::controllers::guests::posts::SET_POSTS_PER_PAGE;
 use crate::controllers::helpers::pagination_logic::admin_categories;
 use crate::model::categories::{
     all_categories_db, create_new_category_db, delete_category_db, get_all_categories_db,

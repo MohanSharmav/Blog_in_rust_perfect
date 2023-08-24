@@ -9,7 +9,6 @@ use actix_web::{web, HttpResponse, Responder};
 use handlebars::Handlebars;
 use serde_json::json;
 
-
 // @desc    Redirect user to index
 // @route   GET /
 // // @access  Public
@@ -20,7 +19,7 @@ pub async fn redirect_user() -> impl Responder {
     web::Redirect::to("/posts/page/1")
 }
 
-pub const SET_POSTS_PER_PAGE:i64=3;
+pub const SET_POSTS_PER_PAGE: i64 = 3;
 
 pub async fn index(
     params: web::Path<i32>,

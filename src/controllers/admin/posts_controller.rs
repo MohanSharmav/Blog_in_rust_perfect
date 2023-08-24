@@ -1,5 +1,5 @@
 use crate::controllers::constants::Configuration;
-use crate::controllers::guests::posts::{SET_POSTS_PER_PAGE};
+use crate::controllers::guests::posts::SET_POSTS_PER_PAGE;
 use crate::controllers::helpers::pagination_logic::{admin_category_posts, admin_main_page};
 use crate::model::categories::{
     all_categories_db, all_categories_exception, category_db, category_pagination_logic,
@@ -53,6 +53,7 @@ pub async fn get_new_post(
         .content_type(ContentType::html())
         .body(html))
 }
+
 pub async fn new_post(
     form: web::Form<CreateNewPost>,
     config: web::Data<Configuration>,

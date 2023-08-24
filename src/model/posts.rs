@@ -1,4 +1,4 @@
-use crate::controllers::guests::posts::{SET_POSTS_PER_PAGE};
+use crate::controllers::guests::posts::SET_POSTS_PER_PAGE;
 use crate::model::structs::{GetCategoryId, GetId, Posts};
 use sqlx::{Pool, Postgres, Row};
 
