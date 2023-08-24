@@ -1,5 +1,5 @@
 use crate::controllers::constants::Configuration;
-use crate::model::authentication::session::login_database;
+use crate::model::authentication::session::{login_database, password_check};
 use crate::model::structs::LoginCheck;
 use actix_http::header::LOCATION;
 use actix_identity::Identity;
@@ -9,17 +9,24 @@ use actix_web::{http, web, HttpResponse};
 use actix_web::{HttpMessage as _, HttpRequest, Responder};
 use actix_web_flash_messages::storage::CookieMessageStore;
 use actix_web_flash_messages::{FlashMessage, FlashMessagesFramework, IncomingFlashMessages};
+use argon2::password_hash::rand_core::OsRng;
+use argon2::password_hash::SaltString;
+use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 use handlebars::Handlebars;
 use magic_crypt::MagicCryptTrait;
+use secrecy::Secret;
 use serde::Deserialize;
 use serde_json::json;
+use std::borrow::Borrow;
 use std::fmt::Write;
+use std::ptr::hash;
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct User {
     pub(crate) username: String,
     pub(crate) password: String,
 }
+
 pub async fn get_login(
     handlebars: web::Data<Handlebars<'_>>,
     flash_message: IncomingFlashMessages,
@@ -44,16 +51,27 @@ pub async fn login(
     config: web::Data<Configuration>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let username = &form.username;
-    let password = &form.password.to_string();
-    let mcrypt = &config.magic_key;
-    let encrypted_password = mcrypt.encrypt_str_to_base64(password);
+    let password = &form.password;
     let db = &config.database_connection;
-    let login_result = login_database(username, encrypted_password, db)
+    let salt = SaltString::generate(&mut OsRng);
+    let argon2 = Argon2::default();
+    let password_hash = argon2
+        .hash_password(password.as_bytes(), &salt)
+        .unwrap()
+        .to_string();
+
+    let parsed_hash = password_check(username.clone(), db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let logic_check_value = LoginCheck { value: 1 };
-    if login_result == logic_check_value {
+    let parsed_hash =
+        PasswordHash::new(&*parsed_hash).map_err(actix_web::error::ErrorInternalServerError)?;
+
+    let result = Argon2::default()
+        .verify_password(password.as_bytes(), parsed_hash.borrow())
+        .is_ok();
+
+    if result == true {
         Identity::login(&req.extensions(), username.to_string())
             .map_err(actix_web::error::ErrorInternalServerError)?;
         Ok(HttpResponse::SeeOther()
@@ -66,7 +84,6 @@ pub async fn login(
             .finish())
     }
 }
-
 pub async fn logout(id: Identity) -> impl Responder {
     id.logout();
     web::Redirect::to("/")

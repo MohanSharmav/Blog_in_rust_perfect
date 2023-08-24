@@ -1,3 +1,4 @@
+use argon2::PasswordHash;
 use serde::Deserialize;
 use serde::Serialize;
 use sqlx::postgres::PgRow;
@@ -79,4 +80,8 @@ impl<'r> FromRow<'r, PgRow> for LoginCheck {
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
 pub struct GetCategoryId {
     pub category_id: i32,
+}
+#[derive(Deserialize, Debug, Clone, PartialEq, sqlx::FromRow)]
+pub struct Password {
+    pub password: String,
 }
