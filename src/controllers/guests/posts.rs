@@ -9,9 +9,13 @@ use actix_web::{web, HttpResponse, Responder};
 use handlebars::Handlebars;
 use serde_json::json;
 
-/*
 
- */
+// @desc    Redirect user to index
+// @route   GET /
+// // @access  Public
+// #[post("/my-api")]
+// #[doc("My API description")]
+// #[openapi(description = "My API description for Swagger")]
 pub async fn redirect_user() -> impl Responder {
     web::Redirect::to("/posts/page/1")
 }
