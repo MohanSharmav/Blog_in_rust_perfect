@@ -33,4 +33,12 @@ typeof = "1.0.0"
 thiserror = "1.0.40"
 glob = "0.3.1"
 env_logger = "0.10.0"
-
+actix-web-lab = "0.19.1"
+swagger = "6.3.0"
+actix-web-flash-messages = {version="0.4.2",features=["cookies","sessions"]}
+ansi_term = "0.12"
+build_html = "2.4.0"
+html_parser = "0.7.0"
+actix-web-validator = "5.0.1"
+validator = { version = "0.16", features = ["derive"] }
+utoipa = { version = "3", features = ["actix_extras"] }
