@@ -166,14 +166,10 @@ pub async fn get_category_posts(
             .content_type(ContentType::html())
             .finish());
     } else {
-        let pagination_final_string = general_category(
-            current_page,
-            count_of_number_of_pages,
-            &category_input,
-            admin,
-        )
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
+        let pagination_final_string =
+            general_category(current_page, count_of_number_of_pages, &category_input)
+                .await
+                .map_err(actix_web::error::ErrorInternalServerError)?;
 
         let category_postinng =
             category_db(category_input.to_string(), db, par, posts_per_page_constant)

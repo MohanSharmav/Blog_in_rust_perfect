@@ -1,21 +1,6 @@
-use crate::model::structs::{LoginCheck, Password};
+use crate::controllers::authentication::session::Password;
 use argon2::PasswordHash;
 use sqlx::{Pool, Postgres};
-
-pub async fn login_database(
-    users: &String,
-    password: String,
-    db: &Pool<Postgres>,
-) -> Result<LoginCheck, anyhow::Error> {
-    let login_result =
-        sqlx::query_as::<_, LoginCheck>("select count(1) from users where name=$1 AND password=$2")
-            .bind(users)
-            .bind(password)
-            .fetch_one(db)
-            .await?;
-
-    Ok(login_result)
-}
 
 pub async fn password_check(name: String, db: &Pool<Postgres>) -> Result<String, anyhow::Error> {
     let login_result = sqlx::query_as::<_, Password>(

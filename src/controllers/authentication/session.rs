@@ -1,6 +1,5 @@
 use crate::controllers::constants::Configuration;
-use crate::model::authentication::session::{login_database, password_check};
-use crate::model::structs::LoginCheck;
+use crate::model::authentication::session::password_check;
 use actix_http::header::LOCATION;
 use actix_identity::Identity;
 use actix_web::cookie::Key;
@@ -14,7 +13,6 @@ use argon2::password_hash::SaltString;
 use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 use handlebars::Handlebars;
 use magic_crypt::MagicCryptTrait;
-use secrecy::Secret;
 use serde::Deserialize;
 use serde_json::json;
 use std::borrow::Borrow;
@@ -63,7 +61,7 @@ pub async fn login(
     let parsed_hash = password_check(username.clone(), db)
         .await
         .unwrap_or("asdasd".parse()?);
-        // .map_err(actix_web::error::ErrorInternalServerError)?;
+    // .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let parsed_stored =
         PasswordHash::new(&*parsed_hash).map_err(actix_web::error::ErrorInternalServerError)?;
@@ -100,4 +98,9 @@ pub async fn check_user(user: Option<Identity>) -> impl Responder {
 pub fn build_message_framework(signing_key: Key) -> FlashMessagesFramework {
     let message_store = CookieMessageStore::builder(signing_key).build();
     FlashMessagesFramework::builder(message_store).build()
+}
+
+#[derive(Deserialize, Debug, Clone, PartialEq, sqlx::FromRow)]
+pub struct Password {
+    pub password: String,
 }

@@ -1,5 +1,6 @@
-use crate::model::structs::{Categories, PostsCategories};
+use crate::controllers::admin::posts_controller::PostsCategories;
 use anyhow::anyhow;
+use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres, Row};
 
 pub async fn all_categories_db(db: &Pool<Postgres>) -> Result<Vec<Categories>, anyhow::Error> {
@@ -140,4 +141,31 @@ pub async fn all_categories_exception(
             .await?;
 
     Ok(all_categories)
+}
+
+#[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
+pub struct Categories {
+    pub(crate) id: i32,
+    pub(crate) name: String,
+}
+
+#[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
+pub struct CreateNewPostWithoutCategory {
+    pub title: String,
+    pub description: String,
+}
+
+#[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
+pub struct CreateNewPostWithNullCategory {
+    pub category_id: i32,
+}
+
+#[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
+pub struct GetId {
+    pub id: i32,
+}
+
+#[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
+pub struct GetCategoryId {
+    pub category_id: i32,
 }

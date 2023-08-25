@@ -5,7 +5,6 @@ use crate::model::categories::{
     all_categories_db, create_new_category_db, delete_category_db, get_all_categories_db,
     get_specific_category_posts, update_category_db,
 };
-use crate::model::structs::CreateNewCategory;
 use actix_http::header::LOCATION;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
@@ -14,6 +13,7 @@ use actix_web::{http, web, HttpResponse};
 use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages};
 use anyhow::Result;
 use handlebars::Handlebars;
+use serde::Deserialize;
 use serde_json::json;
 use sqlx::{Pool, Postgres, Row};
 use std::fmt::Write;
@@ -198,7 +198,6 @@ pub async fn update_category(
     let _current_post_name = &current_category_name.into_inner();
     let name = &form.name;
     let category_id = id.into_inner();
-
     let form_result = form.validate();
     let mut validation_errors = Vec::new();
     let mut flash_error_string = String::new();
@@ -255,4 +254,13 @@ pub async fn get_pagination_for_all_categories_list(
         .map_err(|_er| actix_web::error::ErrorInternalServerError("error-2"))?;
 
     Ok(*exact_value)
+}
+
+#[derive(Deserialize, Debug, Clone, PartialEq, sqlx::FromRow, Validate)]
+pub struct CreateNewCategory {
+    #[validate(length(
+        min = 2,
+        message = "category name cannot be empty and minimum should have 2 characters"
+    ))]
+    pub(crate) name: String,
 }

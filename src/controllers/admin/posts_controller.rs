@@ -10,7 +10,6 @@ use crate::model::posts::{
     query_single_post, specific_page_posts, update_post_db, update_post_without_category,
 };
 use crate::model::posts::{single_post_db, update_post_from_no_category};
-use crate::model::structs::CreateNewPost;
 use actix_http::header::LOCATION;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
@@ -18,6 +17,7 @@ use actix_web::web::Redirect;
 use actix_web::{http, web, HttpResponse};
 use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages};
 use handlebars::Handlebars;
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::{Pool, Postgres, Row};
 use std::fmt::Write;
@@ -173,7 +173,7 @@ pub async fn update_post(
     }
 
     let category_id_of_current_post = category_id_from_post_id(id, db).await.unwrap_or_default();
-    if category_id_of_current_post==0 && *category_id==0_i32{
+    if category_id_of_current_post == 0 && *category_id == 0_i32 {
         update_post_without_category(title.clone(), description.clone(), id, db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -183,7 +183,7 @@ pub async fn update_post(
             .content_type(ContentType::html())
             .finish());
     }
-    if category_id_of_current_post == 0{
+    if category_id_of_current_post == 0 {
         update_post_from_no_category(title, description, category_id, id, db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -400,4 +400,28 @@ pub async fn number_posts_count(db: &Pool<Postgres>) -> Result<i64, actix_web::e
         .map_err(|_er| actix_web::error::ErrorInternalServerError("error-2"))?;
 
     Ok(*exact_value)
+}
+
+#[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
+pub struct Posts {
+    pub(crate) id: i32,
+    pub(crate) title: String,
+    pub(crate) description: String,
+}
+
+#[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
+pub struct PostsCategories {
+    pub title: String,
+    pub id: i32,
+    pub description: String,
+    pub name: String,
+}
+
+#[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow, Validate)]
+pub struct CreateNewPost {
+    #[validate(length(min = 1, message = "title cannot be empty"))]
+    pub title: String,
+    #[validate(length(min = 1, message = "description cannot be empty"))]
+    pub description: String,
+    pub category_id: i32,
 }
