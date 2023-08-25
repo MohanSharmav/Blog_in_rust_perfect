@@ -153,7 +153,6 @@ pub async fn get_category_posts(
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     let mut count_of_number_of_pages = pages_count.len();
     let current_page: usize = par as usize;
-    let admin = false;
     if count_of_number_of_pages == 0 {
         count_of_number_of_pages = 1;
     }

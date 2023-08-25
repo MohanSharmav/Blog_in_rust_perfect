@@ -24,7 +24,6 @@ use controllers::admin::posts_controller::admin_index;
 use controllers::admin::posts_controller::{get_categories_posts, show_post};
 use controllers::guests::posts::{get_category_posts, show_posts};
 use handlebars::Handlebars;
-use magic_crypt::new_magic_crypt;
 use sqlx::postgres::PgPoolOptions;
 
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
@@ -43,15 +42,12 @@ async fn main() -> Result<(), anyhow::Error> {
     handlebars.register_templates_directory(".html", "./templates/html/")?;
     handlebars.register_templates_directory(".hbs", "./templates/html/")?;
     dotenv::dotenv()?;
-    let value = std::env::var("MAGIC_KEY")?;
-    let mcrypt = new_magic_crypt!(value, 256); //Creates an instance of the magic crypt library/crate.
     let db_url = std::env::var("DATABASE_URL")?;
     let pool = PgPoolOptions::new()
         .max_connections(100)
         .connect(&db_url)
         .await?;
     let config = Configuration {
-        magic_key: mcrypt,
         database_connection: pool,
     };
     let confi = web::Data::new(config.clone());

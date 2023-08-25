@@ -54,8 +54,8 @@ pub async fn create_post(
     .fetch_all(db)
     .await?;
 
-    let x: &GetId = &post_id[0];
-    let GetId { id } = x;
+    let post_id: &GetId = &post_id[0];
+    let GetId { id } = post_id;
 
     sqlx::query("insert into categories_posts values ($1,$2)")
         .bind(id)
@@ -113,12 +113,12 @@ pub async fn category_id_from_post_id(
     .await
     .unwrap_or_default();
 
-    let x = category_id_vec
+    let category_id = category_id_vec
         .get(0)
         .map(|i| i.category_id)
         .unwrap_or_default();
 
-    Ok(x)
+    Ok(category_id)
 }
 
 pub async fn specific_page_posts(

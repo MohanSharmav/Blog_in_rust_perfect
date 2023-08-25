@@ -14,10 +14,7 @@ pub async fn password_check(name: String, db: &Pool<Postgres>) -> Result<String,
     .await?;
 
     let Password { password } = login_result;
-    let parsed_hash = PasswordHash::new(&*password)?;
-    // let parsed_hash = password_check(username.clone(), db)
-    //     .await
-    //     .map_err(actix_web::error::ErrorInternalServerError)?;
+    let password_has = PasswordHash::new(&*password)?;
 
-    Ok(parsed_hash.to_string())
+    Ok(password_has.to_string())
 }

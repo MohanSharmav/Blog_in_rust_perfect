@@ -8,16 +8,12 @@ use actix_web::{http, web, HttpResponse};
 use actix_web::{HttpMessage as _, HttpRequest, Responder};
 use actix_web_flash_messages::storage::CookieMessageStore;
 use actix_web_flash_messages::{FlashMessage, FlashMessagesFramework, IncomingFlashMessages};
-use argon2::password_hash::rand_core::OsRng;
-use argon2::password_hash::SaltString;
-use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
+use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use handlebars::Handlebars;
-use magic_crypt::MagicCryptTrait;
 use serde::Deserialize;
 use serde_json::json;
 use std::borrow::Borrow;
 use std::fmt::Write;
-use std::ptr::hash;
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct User {
@@ -51,12 +47,6 @@ pub async fn login(
     let username = &form.username;
     let password = &form.password;
     let db = &config.database_connection;
-    // let salt = SaltString::generate(&mut OsRng);
-    // let argon2 = Argon2::default();
-    // // let password_hash = argon2
-    // //     .hash_password(password.as_bytes(), &salt)
-    // //     .unwrap()
-    // //     .to_string();
 
     let parsed_hash = password_check(username.clone(), db)
         .await

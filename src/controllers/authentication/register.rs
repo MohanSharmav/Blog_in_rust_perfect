@@ -8,7 +8,6 @@ use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::SaltString;
 use argon2::{Argon2, PasswordHasher};
 use handlebars::Handlebars;
-use magic_crypt::MagicCryptTrait;
 use serde_json::json;
 
 pub async fn get_register(
