@@ -171,9 +171,19 @@ pub async fn update_post(
             .insert_header((http::header::LOCATION, "/admin/posts/page/1"))
             .finish());
     }
-    let category_id_of_current_post = category_id_from_post_id(id, db).await.unwrap_or_default();
 
-    if category_id_of_current_post == 0 {
+    let category_id_of_current_post = category_id_from_post_id(id, db).await.unwrap_or_default();
+    if category_id_of_current_post==0 && *category_id==0_i32{
+        update_post_without_category(title.clone(), description.clone(), id, db)
+            .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
+
+        return Ok(HttpResponse::SeeOther()
+            .insert_header((LOCATION, "/admin/posts/page/1"))
+            .content_type(ContentType::html())
+            .finish());
+    }
+    if category_id_of_current_post == 0{
         update_post_from_no_category(title, description, category_id, id, db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
