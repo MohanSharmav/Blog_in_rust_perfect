@@ -27,10 +27,6 @@ pub async fn password_check(name: String, db: &Pool<Postgres>) -> Result<String,
     .bind(name)
     .fetch_one(db)
     .await?;
-    // let Password{password} =login_result.password.to_string();
-    //
-    // let x: &GetId = &post_id[0];
-    // let GetId { id } = x;
 
     let Password { password } = login_result;
     let parsed_hash = PasswordHash::new(&*password)?;

@@ -62,7 +62,8 @@ pub async fn login(
 
     let parsed_hash = password_check(username.clone(), db)
         .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
+        .unwrap_or_default();
+        // .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let parsed_hash =
         PasswordHash::new(&*parsed_hash).map_err(actix_web::error::ErrorInternalServerError)?;
