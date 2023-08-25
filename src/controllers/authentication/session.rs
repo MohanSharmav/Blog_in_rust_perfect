@@ -53,23 +53,23 @@ pub async fn login(
     let username = &form.username;
     let password = &form.password;
     let db = &config.database_connection;
-    let salt = SaltString::generate(&mut OsRng);
-    let argon2 = Argon2::default();
-    let password_hash = argon2
-        .hash_password(password.as_bytes(), &salt)
-        .unwrap()
-        .to_string();
+    // let salt = SaltString::generate(&mut OsRng);
+    // let argon2 = Argon2::default();
+    // // let password_hash = argon2
+    // //     .hash_password(password.as_bytes(), &salt)
+    // //     .unwrap()
+    // //     .to_string();
 
     let parsed_hash = password_check(username.clone(), db)
         .await
-        .unwrap_or_default();
+        .unwrap_or("asdasd".parse()?);
         // .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let parsed_hash =
+    let parsed_stored =
         PasswordHash::new(&*parsed_hash).map_err(actix_web::error::ErrorInternalServerError)?;
 
     let result = Argon2::default()
-        .verify_password(password.as_bytes(), parsed_hash.borrow())
+        .verify_password(password.as_bytes(), parsed_stored.borrow())
         .is_ok();
 
     if result == true {

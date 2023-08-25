@@ -36,6 +36,7 @@ pub async fn register(
         .hash_password(password.as_bytes(), &salt)
         .unwrap()
         .to_string();
+
     register_user(user, password_hash, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
