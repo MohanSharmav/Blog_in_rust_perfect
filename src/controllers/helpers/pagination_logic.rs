@@ -9,19 +9,6 @@ pub async fn index_pagination(
     let mut pagination_string = String::new();
     pagination_string.push_str(start_tag);
 
-    if count_of_number_of_pages == 0 {
-        let tag_and_url = r#"<a class="active"  href="/posts/page/"#;
-        pagination_string.push_str(tag_and_url);
-        let href_link = 1.to_string();
-        pagination_string.push_str(&href_link);
-        let end_of_tag = r#"">"#;
-        pagination_string.push_str(end_of_tag);
-        let text_inside_tag = 1.to_string();
-        pagination_string.push_str(&text_inside_tag);
-        let close_tag = r#"</a>"#;
-        pagination_string.push_str(close_tag);
-    }
-
     for index in 1..count_of_number_of_pages + 1 {
         if index == current_page {
             let tag_and_url = r#"<a class="active"  href="/posts/page/"#;
@@ -64,19 +51,6 @@ pub async fn general_category(
         "#;
 
     pagination_string.push_str(end_tags);
-
-    if count_of_number_of_pages == 0 {
-        let tag_and_url = r#"<a class="active"  href="/posts/page/"#;
-        pagination_string.push_str(tag_and_url);
-        let href_link = 1.to_string();
-        pagination_string.push_str(&href_link);
-        let end_of_tag = r#"">"#;
-        pagination_string.push_str(end_of_tag);
-        let text_inside_tag = 1.to_string();
-        pagination_string.push_str(&text_inside_tag);
-        let close_tag = r#"</a>"#;
-        pagination_string.push_str(close_tag);
-    }
 
     for index in 1..count_of_number_of_pages + 1 {
         if index == current_page {

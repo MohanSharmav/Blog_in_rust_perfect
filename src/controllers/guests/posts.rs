@@ -11,10 +11,8 @@ use serde_json::json;
 
 // @desc    Redirect user to index
 // @route   GET /
-// // @access  Public
-// #[post("/my-api")]
-// #[doc("My API description")]
-// #[openapi(description = "My API description for Swagger")]
+// @access  Public
+
 pub async fn redirect_user() -> impl Responder {
     web::Redirect::to("/posts/page/1")
 }
@@ -27,13 +25,9 @@ pub async fn index(
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
-    let total_posts_length = number_posts_count(db).await?;
+    let total_posts_length = number_posts_count(db).await? +2 ;
     let posts_per_page_constant = SET_POSTS_PER_PAGE;
-    let mut posts_per_page = total_posts_length / posts_per_page_constant;
-    let check_remainder = total_posts_length % posts_per_page_constant;
-    if check_remainder != 0 {
-        posts_per_page += 1;
-    }
+    let posts_per_page = total_posts_length/ posts_per_page_constant;
     let posts_per_page = posts_per_page as usize;
     let param = params.into_inner();
     let current_page = param as usize;
@@ -61,12 +55,12 @@ pub async fn index(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let htmls = handlebars.render("common", &json!({"pagination":pagination_final_string,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category,"new_pagination":sample}))
+    let html = handlebars.render("common", &json!({"pagination":pagination_final_string,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category,"new_pagination":sample}))
         .map_err( actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
         .content_type(ContentType::html())
-        .body(htmls))
+        .body(html))
 }
 
 pub async fn index_redirect(
