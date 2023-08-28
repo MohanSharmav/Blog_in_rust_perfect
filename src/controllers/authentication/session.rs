@@ -50,7 +50,7 @@ pub async fn login(
 
     let parsed_hash = password_check(username.clone(), db)
         .await
-    .map_err(actix_web::error::ErrorInternalServerError)?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let parsed_stored =
         PasswordHash::new(&*parsed_hash).map_err(actix_web::error::ErrorInternalServerError)?;
@@ -89,7 +89,7 @@ pub fn build_message_framework(signing_key: Key) -> FlashMessagesFramework {
     FlashMessagesFramework::builder(message_store).build()
 }
 
-#[derive(Deserialize, Debug, Clone, PartialEq, sqlx::FromRow,Default)]
+#[derive(Deserialize, Debug, Clone, PartialEq, sqlx::FromRow, Default)]
 pub struct Password {
     pub password: String,
 }

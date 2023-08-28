@@ -115,7 +115,7 @@ pub async fn category_id_from_post_id(
 
     let category_id = category_id_vec
         .get(0)
-        .map(|i| i.category_id)
+        .map(|value| value.category_id)
         .unwrap_or_default();
 
     Ok(category_id)

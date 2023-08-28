@@ -13,6 +13,7 @@ use crate::controllers::authentication::session::{
 };
 use crate::controllers::constants::Configuration;
 use crate::controllers::guests::posts::{index, index_redirect, redirect_user};
+use crate::controllers::helpers::config::db_config;
 use actix_files::Files;
 use actix_identity::IdentityMiddleware;
 use actix_session::config::PersistentSession;
@@ -41,8 +42,8 @@ async fn main() -> Result<(), anyhow::Error> {
     let mut handlebars = Handlebars::new();
     handlebars.register_templates_directory(".html", "./templates/html/")?;
     handlebars.register_templates_directory(".hbs", "./templates/html/")?;
-    dotenv::dotenv()?;
-    let db_url = std::env::var("DATABASE_URL")?;
+    let confi_db_url = db_config().await?;
+    let db_url = confi_db_url;
     let pool = PgPoolOptions::new()
         .max_connections(100)
         .connect(&db_url)
