@@ -25,7 +25,7 @@ use controllers::admin::posts_controller::{get_categories_posts, show_post};
 use controllers::guests::posts::{get_category_posts, show_posts};
 use handlebars::Handlebars;
 use sqlx::postgres::PgPoolOptions;
-use crate::controllers::helpers::config::db_config;
+use crate::controllers::helpers::config::{ db_config};
 
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
