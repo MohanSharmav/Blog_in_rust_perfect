@@ -9,25 +9,12 @@ use argon2::password_hash::SaltString;
 use argon2::{Argon2, PasswordHasher};
 use handlebars::Handlebars;
 use serde_json::json;
-// use thiserror::Error;
-//
-// #[derive(Error, Debug)]
-// pub enum PasswordError {
-//     #[error("error hashing password: {0}")]
-//     Hash(String),
-//     #[error("error verifying password")]
-//     Verify,
-//     #[error("error hashing password")]
-//     PwHash,
-//     #[error("error getting enough random data")]
-//     RandomFillError,
-// }
 
 pub async fn get_register(
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let html = handlebars
-        .render("auth-register-basic", &json!({"yy":"welcome"}))
+        .render("auth-register-basic", &json!({"message":"welcome"}))
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()

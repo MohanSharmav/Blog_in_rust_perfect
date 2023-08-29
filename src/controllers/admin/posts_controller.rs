@@ -7,7 +7,7 @@ use crate::model::categories::{
 };
 use crate::model::posts::{
     category_id_from_post_id, create_post, create_post_without_category, delete_post_db,
-    query_single_post, specific_page_posts, update_post_db, update_post_without_category,
+    specific_page_posts, update_post_db, update_post_without_category,
 };
 use crate::model::posts::{single_post_db, update_post_from_no_category};
 use actix_http::header::LOCATION;
@@ -45,7 +45,7 @@ pub async fn get_new_post(
     let html = handlebars
         .render(
             "new_post",
-            &json!({ "all_categories": all_categories,"o":all_category }),
+            &json!({ "all_categories": all_categories,"categories":all_category }),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -113,10 +113,8 @@ pub async fn destroy_post(
 pub async fn edit_post(
     id: web::Path<i32>,
     config: web::Data<Configuration>,
-    to_be_updated_post: web::Path<String>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
-    let to_be_updated_post = to_be_updated_post.clone();
     let db = &config.database_connection;
     let post_id = id.into_inner();
     let single_post_struct = single_post_db(post_id, db)
@@ -134,7 +132,7 @@ pub async fn edit_post(
     let html = handlebars
         .render(
             "update_post",
-            &json!({"category_info": category_info,"current_post":single_post_struct,"to_be_updated_post": &to_be_updated_post,"o":all_category }),
+            &json!({"category_info": category_info,"current_post":single_post_struct,"categories":all_category }),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -233,10 +231,6 @@ pub async fn get_categories_posts(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let all_category = all_categories_db(db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
     let posts_per_page_constant = SET_POSTS_PER_PAGE;
     let mut posts_per_page = total_posts_length / posts_per_page_constant;
     let check_remainder = total_posts_length % posts_per_page_constant;
@@ -274,7 +268,7 @@ pub async fn get_categories_posts(
         let html = handlebars
             .render(
                 "admin_separate_categories",
-                &json!({"pagination":pagination_final_string,"tiger":&category_postinng,"pages_count":&pages_count,"o":all_category}),
+                &json!({"pagination":pagination_final_string,"posts":&category_postinng}),
             )
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -291,10 +285,6 @@ pub async fn show_post(
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
     let titles = path.parse::<i32>().unwrap_or_default();
-    let single_post = query_single_post(titles, db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
     let all_category = all_categories_db(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -306,7 +296,7 @@ pub async fn show_post(
     let html = handlebars
         .render(
             "admin_single_post",
-            &json!({"o":&single_post,"single_post":single_post_struct,"o":all_category}),
+            &json!({"single_post":single_post_struct,"categories":all_category}),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -362,11 +352,7 @@ pub async fn admin_index(
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        let all_category = all_categories_db(db)
-            .await
-            .map_err(actix_web::error::ErrorInternalServerError)?;
-
-        let htmls = handlebars.render("admin_post_table", &json!({"message": error_html,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category,"pagination":pagination_final_string}))
+        let htmls = handlebars.render("admin_post_table", &json!({"message": error_html,"posts":exact_posts_only,"pagination":pagination_final_string}))
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
         Ok(HttpResponse::Ok()

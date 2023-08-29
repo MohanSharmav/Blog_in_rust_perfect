@@ -304,7 +304,7 @@
                     <label  class="form-label"> select category</label>
                     <select class="form-select" id="category_id" name="category_id" aria-label="Default select example">
                       <option value="0" >No category</option>
-                      {{#each o}}
+                      {{#each categories}}
                       <option value="{{this.id}}">{{this.name}}</option>
                       {{/each}}
                     </select>

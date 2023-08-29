@@ -2,7 +2,7 @@ use crate::controllers::constants::Configuration;
 use crate::controllers::guests::posts::SET_POSTS_PER_PAGE;
 use crate::controllers::helpers::pagination_logic::admin_categories;
 use crate::model::categories::{
-    all_categories_db, create_new_category_db, delete_category_db, get_all_categories_db,
+     create_new_category_db, delete_category_db, get_all_categories_db,
     get_specific_category_posts, update_category_db,
 };
 use actix_http::header::LOCATION;
@@ -62,10 +62,6 @@ pub async fn get_all_categories(
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        let all_category = all_categories_db(db)
-            .await
-            .map_err(actix_web::error::ErrorInternalServerError)?;
-
         let all_categories = get_all_categories_db(db, param, posts_per_page_constant)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -73,7 +69,7 @@ pub async fn get_all_categories(
         let html = handlebars
             .render(
                 "admin_category_table",
-                &json!({"message": error_html,"pagination":pagination_final_string,"z": &all_categories,"o":all_category,"pages_count":pages_count}),
+                &json!({"message": error_html,"pagination":pagination_final_string,"categories": &all_categories}),
             )
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -84,7 +80,6 @@ pub async fn get_all_categories(
 }
 
 pub async fn new_category(
-    config: web::Data<Configuration>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
 ) -> Result<HttpResponse, actix_web::Error> {
@@ -93,13 +88,8 @@ pub async fn new_category(
             .insert_header((http::header::LOCATION, "/"))
             .body(""));
     }
-    let db = &config.database_connection;
-    let all_category = all_categories_db(db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
     let html = handlebars
-        .render("new_category", &json!({"o":"ax","o":all_category}))
+        .render("new_category", &json!({}))
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
@@ -167,19 +157,15 @@ pub async fn edit_category(
     }
 
     let db = &config.database_connection;
-    let all_category = all_categories_db(db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
     let to_be_updated_category = *to_be_updated_category;
-    let posts = get_specific_category_posts(to_be_updated_category, db)
+    let category_old_name = get_specific_category_posts(to_be_updated_category, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
         .render(
             "update_category",
-            &json!({ "to_be_updated_post": &to_be_updated_category ,"o":all_category,"category_old_name":posts}),
+            &json!({ "category_old_name":category_old_name}),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

@@ -2,7 +2,7 @@ use crate::controllers::admin::posts_controller::number_posts_count;
 use crate::controllers::constants::Configuration;
 use crate::controllers::helpers::pagination_logic::{general_category, index_pagination};
 use crate::model::categories::{all_categories_db, category_db, category_pagination_logic};
-use crate::model::posts::{query_single_post, single_post_db, specific_page_posts};
+use crate::model::posts::{single_post_db, specific_page_posts};
 use actix_http::header::LOCATION;
 use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse, Responder};
@@ -32,7 +32,6 @@ pub async fn index(
     let param = params.into_inner();
     let current_page = param as usize;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    let sample: Vec<_> = (1..=posts_per_page).collect();
     let count_of_number_of_pages = pages_count.len();
     let current_page: usize = current_page;
 
@@ -55,44 +54,12 @@ pub async fn index(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let html = handlebars.render("common", &json!({"pagination":pagination_final_string,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category,"new_pagination":sample}))
+    let html = handlebars.render("common", &json!({"pagination":pagination_final_string,"posts":exact_posts_only,"categories":all_category}))
         .map_err( actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
         .content_type(ContentType::html())
         .body(html))
-}
-
-pub async fn index_redirect(
-    config: web::Data<Configuration>,
-    handlebars: web::Data<Handlebars<'_>>,
-) -> Result<HttpResponse, actix_web::Error> {
-    let db = &config.database_connection;
-    let total_posts_length = number_posts_count(db).await?;
-    let posts_per_page_constant = SET_POSTS_PER_PAGE;
-    let mut posts_per_page = total_posts_length / posts_per_page_constant;
-    let check_remainder = total_posts_length % posts_per_page_constant;
-    if check_remainder != 0 {
-        posts_per_page += 1;
-    }
-    let posts_per_page = posts_per_page as usize;
-    let param = 1;
-    let pages_count: Vec<_> = (1..=posts_per_page).collect();
-
-    let exact_posts_only = specific_page_posts(param, &db.clone())
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    let all_category = all_categories_db(db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    let htmls = handlebars.render("common", &json!({"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category,"current_page":param}))
-        .map_err( actix_web::error::ErrorInternalServerError)?;
-
-    Ok(HttpResponse::Ok()
-        .content_type(ContentType::html())
-        .body(htmls))
 }
 
 pub async fn show_posts(
@@ -102,9 +69,6 @@ pub async fn show_posts(
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
     let titles = path.parse::<i32>().unwrap_or_default();
-    let single_post = query_single_post(titles, db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let single_post_struct = single_post_db(titles, db)
         .await
@@ -117,7 +81,7 @@ pub async fn show_posts(
     let html = handlebars
         .render(
             "single",
-            &json!({"o":&single_post,"single_post":single_post_struct,"o":all_category}),
+            &json!({"single_post":single_post_struct,"categories":all_category}),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -176,7 +140,7 @@ pub async fn get_category_posts(
         let html = handlebars
             .render(
                 "category",
-                &json!({"pagination":pagination_final_string,"tiger":&category_postinng,"pages_count":&pages_count,"o":all_category}),
+                &json!({"pagination":pagination_final_string,"posts":&category_postinng,"categories":all_category}),
             )
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
