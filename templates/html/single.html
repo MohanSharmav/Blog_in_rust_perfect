@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <link rel="stylesheet" href="/assets/css/common.css" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
@@ -47,37 +46,30 @@
         </div>
     </div>
 </header>
-
 <!--nav-->
 <nav class="bossing">
     <h3>Categories </h3>
     <ul>
         {{#each categories}}
-            <li><a href="/posts/category/{{this.id}}/page/1">{{this.name}}</a></li>
+        <li><a href="/posts/category/{{this.id}}/page/1">{{this.name}}</a></li>
         {{/each}}
     </ul>
-
 </nav>
-
 <!-- Main Content-->
-
 <section class="home-section">
     <div class="home-content">
         <span class="text"></span>
     </div>
-
     <div class="Post_data" style="float:center">
         <h3 style="text-align:left;font-size:40px">
             {{#each single_post}}<br/>
-               <h1 style="text-align: center;font-size:80px"> {{this.title}}</h1>
-               <p style="text-align: center;font-size:35px"> &nbsp; {{this.description}}</p>
+            <h1 style="text-align: center;font-size:80px"> {{this.title}}</h1>
+            <p style="text-align: center;font-size:35px"> &nbsp; {{this.description}}</p>
             {{/each}}
         </h3>
-
     </div>
     </div>
 </section>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Core theme JS-->
 <script src="js/scripts.js"></script>
