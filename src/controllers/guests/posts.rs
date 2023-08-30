@@ -25,9 +25,9 @@ pub async fn index(
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
-    let total_posts_length = number_posts_count(db).await? +2 ;
+    let total_posts_length = number_posts_count(db).await? + 2;
     let posts_per_page_constant = SET_POSTS_PER_PAGE;
-    let posts_per_page = total_posts_length/ posts_per_page_constant;
+    let posts_per_page = total_posts_length / posts_per_page_constant;
     let posts_per_page = posts_per_page as usize;
     let param = params.into_inner();
     let current_page = param as usize;

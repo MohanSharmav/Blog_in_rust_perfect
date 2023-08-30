@@ -2,8 +2,8 @@ use crate::controllers::constants::Configuration;
 use crate::controllers::guests::posts::SET_POSTS_PER_PAGE;
 use crate::controllers::helpers::pagination_logic::admin_categories;
 use crate::model::categories::{
-     create_new_category_db, delete_category_db, get_all_categories_db,
-    get_specific_category_posts, update_category_db,
+    create_new_category_db, delete_category_db, get_all_categories_db, get_specific_category_posts,
+    update_category_db,
 };
 use actix_http::header::LOCATION;
 use actix_identity::Identity;
@@ -165,7 +165,7 @@ pub async fn edit_category(
     let html = handlebars
         .render(
             "update_category",
-            &json!({ "category_old_name":category_old_name}),
+            &json!({ "category_old_name": category_old_name }),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
