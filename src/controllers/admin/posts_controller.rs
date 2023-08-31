@@ -35,14 +35,14 @@ pub async fn get_new_post(
     }
     let db = &config.database_connection;
 
-    let all_category = all_categories_db(db)
+    let all_categories = all_categories_db(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
         .render(
             "new_post",
-            &json!({ "all_category": all_category,"categories":all_category }),
+            &json!({ "categories":all_categories }),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
