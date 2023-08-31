@@ -45,31 +45,40 @@ pub async fn login(
     config: web::Data<Configuration>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let username = &form.username;
-    let password = &form.password;
+    let password_input = &form.password;
     let db = &config.database_connection;
 
     let parsed_hash = password_check(username.clone(), db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let parsed_stored =
-        PasswordHash::new(&*parsed_hash).map_err(actix_web::error::ErrorInternalServerError)?;
-
-    let result = Argon2::default()
-        .verify_password(password.as_bytes(), parsed_stored.borrow())
-        .is_ok();
-
-    if result == true {
-        Identity::login(&req.extensions(), username.to_string())
-            .map_err(actix_web::error::ErrorInternalServerError)?;
-        Ok(HttpResponse::SeeOther()
-            .insert_header((LOCATION, "/admin/posts/page/1"))
-            .finish())
-    } else {
+    return if parsed_hash.is_none() {
         FlashMessage::error("Login Fail - Wrong Id or password!").send();
         Ok(HttpResponse::SeeOther()
             .insert_header((http::header::LOCATION, "/login"))
             .finish())
+    } else {
+        let struct_only = parsed_hash.unwrap_or_default();
+        let PasswordStruct { password } = struct_only;
+        let parsed_stored =
+            PasswordHash::new(&*password).map_err(actix_web::error::ErrorInternalServerError)?;
+
+        let result = Argon2::default()
+            .verify_password(password_input.as_bytes(), parsed_stored.borrow())
+            .is_ok();
+
+        if result == true {
+            Identity::login(&req.extensions(), username.to_string())
+                .map_err(actix_web::error::ErrorInternalServerError)?;
+            Ok(HttpResponse::SeeOther()
+                .insert_header((LOCATION, "/admin/posts/page/1"))
+                .finish())
+        } else {
+            FlashMessage::error("Login Fail - Wrong Id or password!").send();
+            Ok(HttpResponse::SeeOther()
+                .insert_header((http::header::LOCATION, "/login"))
+                .finish())
+        }
     }
 }
 pub async fn logout(id: Identity) -> impl Responder {
@@ -89,7 +98,15 @@ pub fn build_message_framework(signing_key: Key) -> FlashMessagesFramework {
     FlashMessagesFramework::builder(message_store).build()
 }
 
-#[derive(Deserialize, Debug, Clone, PartialEq, sqlx::FromRow, Default)]
-pub struct Password {
+#[derive(Deserialize, Debug, Clone, PartialEq, sqlx::FromRow, )]
+pub struct PasswordStruct {
     pub password: String,
+}
+
+impl Default for PasswordStruct {
+    fn default() -> Self {
+    PasswordStruct {
+    password: "password".to_string()
+    }
+    }
 }
