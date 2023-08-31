@@ -108,8 +108,7 @@ pub async fn get_category_posts(
     if check_remainder != 0 {
         posts_per_page += 1;
     }
-    let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    let mut count_of_number_of_pages = pages_count.len();
+    let mut count_of_number_of_pages = (1..=posts_per_page).collect::<Vec<_>>().len();
     let current_page: usize = par as usize;
     if count_of_number_of_pages == 0 {
         count_of_number_of_pages = 1;

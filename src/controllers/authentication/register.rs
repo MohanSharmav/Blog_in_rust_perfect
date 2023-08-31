@@ -9,7 +9,6 @@ use argon2::password_hash::SaltString;
 use argon2::{Argon2, PasswordHasher};
 use handlebars::Handlebars;
 use serde_json::json;
-use core::fmt::Error;
 
 pub async fn get_register(
     handlebars: web::Data<Handlebars<'_>>,
