@@ -12,10 +12,10 @@ pub async fn db_config() -> Result<String, anyhow::Error> {
 
     let db_hashmap = settings.try_deserialize::<HashMap<String, String>>()?;
     let default_url = "postgres://mohanvenkatesh:Msvmsd183!@localhost:5432/3_dummy".to_string();
-    let y = db_hashmap
+    let url = db_hashmap
         .get("db_url")
         .get_or_insert(&default_url)
         .to_string();
 
-    Ok(y.clone())
+    Ok(url.clone())
 }

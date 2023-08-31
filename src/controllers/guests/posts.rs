@@ -20,7 +20,7 @@ pub async fn redirect_user() -> impl Responder {
 pub const SET_POSTS_PER_PAGE: i64 = 3;
 
 pub async fn index(
-    params: web::Path<i32>,
+    param: web::Path<i32>,
     config: web::Data<Configuration>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
@@ -29,7 +29,7 @@ pub async fn index(
     let posts_per_page_constant = SET_POSTS_PER_PAGE;
     let posts_per_page = total_posts_length / posts_per_page_constant;
     let posts_per_page = posts_per_page as usize;
-    let param = params.into_inner();
+    let param = param.into_inner();
     let current_page = param as usize;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
     let count_of_number_of_pages = pages_count.len();
@@ -68,9 +68,9 @@ pub async fn show_posts(
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
-    let titles = path.parse::<i32>().unwrap_or_default();
+    let title = path.parse::<i32>().unwrap_or_default();
 
-    let single_post_struct = single_post_db(titles, db)
+    let post = single_post_db(title, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -81,7 +81,7 @@ pub async fn show_posts(
     let html = handlebars
         .render(
             "single",
-            &json!({"single_post":single_post_struct,"categories":all_category}),
+            &json!({"post":post,"categories":all_category}),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -144,7 +144,7 @@ pub async fn get_category_posts(
             )
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        Ok(HttpResponse::Ok()
+        return  Ok(HttpResponse::Ok()
             .content_type(ContentType::html())
             .body(html))
     }

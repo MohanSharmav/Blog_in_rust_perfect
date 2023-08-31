@@ -34,9 +34,6 @@ pub async fn get_new_post(
             .body(""));
     }
     let db = &config.database_connection;
-    let all_categories = all_categories_db(db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let all_category = all_categories_db(db)
         .await
@@ -45,7 +42,7 @@ pub async fn get_new_post(
     let html = handlebars
         .render(
             "new_post",
-            &json!({ "all_categories": all_categories,"categories":all_category }),
+            &json!({ "all_category": all_category,"categories":all_category }),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -132,7 +129,7 @@ pub async fn edit_post(
     let html = handlebars
         .render(
             "update_post",
-            &json!({"category_info": category_info,"current_post":single_post_struct,"categories":all_category }),
+            &json!({"category_info": category_info,"current_post":single_post_struct,"categories":all_category}),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -261,14 +258,14 @@ pub async fn get_categories_posts(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        let category_postinng = category_db(category_input, db, params, posts_per_page_constant)
+        let category_posts = category_db(category_input, db, params, posts_per_page_constant)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
         let html = handlebars
             .render(
                 "admin_separate_categories",
-                &json!({"pagination":pagination_final_string,"posts":&category_postinng}),
+                &json!({"pagination":pagination_final_string,"posts":&category_posts}),
             )
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -389,14 +386,14 @@ pub async fn number_posts_count(db: &Pool<Postgres>) -> Result<i64, actix_web::e
 }
 
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
-pub struct Posts {
+pub struct Post {
     pub(crate) id: i32,
     pub(crate) title: String,
     pub(crate) description: String,
 }
 
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
-pub struct PostsCategories {
+pub struct PostsCategory {
     pub title: String,
     pub id: i32,
     pub description: String,

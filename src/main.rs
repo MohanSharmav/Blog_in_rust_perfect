@@ -1,5 +1,6 @@
 mod controllers;
 mod model;
+mod routes;
 use crate::controllers::admin::categories_controller::{
     create_category, destroy_category, edit_category, get_all_categories, new_category,
     update_category,

@@ -1,4 +1,4 @@
-use crate::controllers::admin::posts_controller::PostsCategories;
+use crate::controllers::admin::posts_controller::PostsCategory;
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres, Row};
@@ -59,9 +59,9 @@ pub async fn category_db(
     db: &Pool<Postgres>,
     par: i32,
     posts_per_page: i64,
-) -> Result<Vec<PostsCategories>, anyhow::Error> {
+) -> Result<Vec<PostsCategory>, anyhow::Error> {
     let category_id = category_id.parse::<i32>()?;
-    let category_posts = sqlx::query_as::<_, PostsCategories>(
+    let category_posts = sqlx::query_as::<_, PostsCategory>(
         "select posts.title,posts.id,posts.description,categories.name  from posts,categories_posts,categories  where categories_posts.post_id=posts.id and categories.id=categories_posts.category_id and categories_posts.category_id=$1 Order By posts.id Asc  limit $3 offset($2-1)*$3"
     )
         .bind(category_id)

@@ -229,8 +229,8 @@
                         <div>
                             <h5 class="card-header"  style="float:left">Edit Post</h5>
                         </div>
-                        <form action="http://localhost:8080/admin/posts/{{to_be_updated_post}}/edit" method="post">
-                            {{#each current_post}}
+                        {{#each current_post}}
+                        <form action="http://localhost:8080/admin/posts/{{this.id}}/edit" method="post">
                             <div class="col-md-6">
                                 <div class="card mb-4">
                                     <h5 class="card-header"></h5>

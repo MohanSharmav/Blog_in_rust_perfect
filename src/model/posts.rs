@@ -1,4 +1,4 @@
-use crate::controllers::admin::posts_controller::Posts;
+use crate::controllers::admin::posts_controller::Post;
 use crate::controllers::guests::posts::SET_POSTS_PER_PAGE;
 use crate::model::categories::{GetCategoryId, GetId};
 use sqlx::{Pool, Postgres};
@@ -124,10 +124,10 @@ pub async fn category_id_from_post_id(
 pub async fn specific_page_posts(
     start_page: i32,
     db: &Pool<Postgres>,
-) -> Result<Vec<Posts>, anyhow::Error> {
+) -> Result<Vec<Post>, anyhow::Error> {
     let start_page = start_page;
     let posts_per_page = SET_POSTS_PER_PAGE;
-    let perfect_posts = sqlx::query_as::<_, Posts>(
+    let perfect_posts = sqlx::query_as::<_, Post>(
         "select * from posts Order By id Asc limit $1 OFFSET ($2-1)*$1 ",
     )
     .bind(posts_per_page)
@@ -138,9 +138,9 @@ pub async fn specific_page_posts(
     Ok(perfect_posts)
 }
 
-pub async fn single_post_db(titles: i32, db: &Pool<Postgres>) -> Result<Vec<Posts>, anyhow::Error> {
+pub async fn single_post_db(titles: i32, db: &Pool<Postgres>) -> Result<Vec<Post>, anyhow::Error> {
     let single_post =
-        sqlx::query_as::<_, Posts>("select id, title, description from posts  WHERE id=$1")
+        sqlx::query_as::<_, Post>("select id, title, description from posts  WHERE id=$1")
             .bind(titles)
             .fetch_all(db)
             .await?;
