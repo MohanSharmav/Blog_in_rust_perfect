@@ -9,6 +9,7 @@ use argon2::password_hash::SaltString;
 use argon2::{Argon2, PasswordHasher};
 use handlebars::Handlebars;
 use serde_json::json;
+use core::fmt::Error;
 
 pub async fn get_register(
     handlebars: web::Data<Handlebars<'_>>,
@@ -31,14 +32,10 @@ pub async fn register(
     let db = &config.database_connection;
     let salt = SaltString::generate(&mut OsRng);
     let argon2 = Argon2::default();
-    // let password_hash = argon2.hash_password("password".as_ref(), &salt)
-    //     .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let password_hash = argon2
         .hash_password(password.as_bytes(), &salt)
-        // .map_err(|e| PasswordError::Hash(e.to_string()))?;
-        .unwrap()
-        // .unwrap_or_else(|_|password_hash)
+        .map_err(|er|actix_web::error::ErrorInternalServerError(er) )?
         .to_string();
 
     register_user(user, password_hash, db)
