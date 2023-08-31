@@ -79,7 +79,7 @@ pub async fn login(
                 .insert_header((http::header::LOCATION, "/login"))
                 .finish())
         }
-    }
+    };
 }
 pub async fn logout(id: Identity) -> impl Responder {
     id.logout();
@@ -98,15 +98,15 @@ pub fn build_message_framework(signing_key: Key) -> FlashMessagesFramework {
     FlashMessagesFramework::builder(message_store).build()
 }
 
-#[derive(Deserialize, Debug, Clone, PartialEq, sqlx::FromRow, )]
+#[derive(Deserialize, Debug, Clone, PartialEq, sqlx::FromRow)]
 pub struct PasswordStruct {
     pub password: String,
 }
 
 impl Default for PasswordStruct {
     fn default() -> Self {
-    PasswordStruct {
-    password: "password".to_string()
-    }
+        PasswordStruct {
+            password: "password".to_string(),
+        }
     }
 }

@@ -34,7 +34,7 @@ pub async fn register(
 
     let password_hash = argon2
         .hash_password(password.as_bytes(), &salt)
-        .map_err(|er|actix_web::error::ErrorInternalServerError(er) )?
+        .map_err(|er| actix_web::error::ErrorInternalServerError(er))?
         .to_string();
 
     register_user(user, password_hash, db)

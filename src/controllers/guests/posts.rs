@@ -79,10 +79,7 @@ pub async fn show_posts(
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
-        .render(
-            "single",
-            &json!({"post":post,"categories":all_category}),
-        )
+        .render("single", &json!({"post":post,"categories":all_category}))
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
@@ -146,5 +143,5 @@ pub async fn get_category_posts(
         Ok(HttpResponse::Ok()
             .content_type(ContentType::html())
             .body(html))
-    }
+    };
 }

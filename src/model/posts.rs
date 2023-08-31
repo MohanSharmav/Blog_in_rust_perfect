@@ -127,13 +127,12 @@ pub async fn specific_page_posts(
 ) -> Result<Vec<Post>, anyhow::Error> {
     let start_page = start_page;
     let posts_per_page = SET_POSTS_PER_PAGE;
-    let perfect_posts = sqlx::query_as::<_, Post>(
-        "select * from posts Order By id Asc limit $1 OFFSET ($2-1)*$1 ",
-    )
-    .bind(posts_per_page)
-    .bind(start_page)
-    .fetch_all(db)
-    .await?;
+    let perfect_posts =
+        sqlx::query_as::<_, Post>("select * from posts Order By id Asc limit $1 OFFSET ($2-1)*$1 ")
+            .bind(posts_per_page)
+            .bind(start_page)
+            .fetch_all(db)
+            .await?;
 
     Ok(perfect_posts)
 }

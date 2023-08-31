@@ -40,10 +40,7 @@ pub async fn get_new_post(
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
-        .render(
-            "new_post",
-            &json!({ "categories":all_categories }),
-        )
+        .render("new_post", &json!({ "categories": all_categories }))
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
