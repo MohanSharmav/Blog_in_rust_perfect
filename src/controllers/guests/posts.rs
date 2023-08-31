@@ -1,7 +1,7 @@
-use crate::controllers::admin::posts_controller::number_posts_count;
+use crate::model::posts::number_posts_count;
 use crate::controllers::constants::Configuration;
 use crate::controllers::helpers::pagination_logic::{general_category, index_pagination};
-use crate::model::categories::{all_categories_db, category_db, category_pagination_logic};
+use crate::model::categories::{all_categories_db, category_db, individual_category_posts_count};
 use crate::model::posts::{single_post_db, specific_page_posts};
 use actix_http::header::LOCATION;
 use actix_web::http::header::ContentType;
@@ -87,7 +87,7 @@ pub async fn show_posts(
         .body(html))
 }
 
-pub async fn get_category_posts(
+pub async fn get_category_based_posts(
     info: web::Path<(String, u32)>,
     config: web::Data<Configuration>,
     handlebars: web::Data<Handlebars<'_>>,
@@ -96,7 +96,7 @@ pub async fn get_category_posts(
     let path = info.clone().0;
     let par = info.into_inner().1 as i32;
     let category_input: String = path;
-    let total_posts_length = category_pagination_logic(&category_input, db)
+    let total_posts_length = individual_category_posts_count(&category_input, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     let posts_per_page_constant = SET_POSTS_PER_PAGE;

@@ -1,7 +1,7 @@
 use crate::controllers::admin::posts_controller::Post;
 use crate::controllers::guests::posts::SET_POSTS_PER_PAGE;
 use crate::model::categories::{GetCategoryId, GetId};
-use sqlx::{Pool, Postgres};
+use sqlx::{Pool, Postgres, Row};
 
 pub async fn delete_post_db(to_delete: String, db: &Pool<Postgres>) -> Result<(), anyhow::Error> {
     let to_delete = to_delete.parse::<i32>()?;
@@ -167,4 +167,31 @@ pub async fn update_post_from_no_category(
         .await?;
 
     Ok(())
+}
+
+pub async fn number_posts_count(db: &Pool<Postgres>) -> Result<i64, actix_web::error::Error> {
+    let rows = sqlx::query("SELECT COUNT(*) FROM posts")
+        .fetch_all(db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    let counting_final: Vec<Result<i64, actix_web::Error>> = rows
+        .into_iter()
+        .map(|row| {
+            let final_count: i64 = row
+                .try_get("count")
+                .map_err(actix_web::error::ErrorInternalServerError)?;
+            Ok::<i64, actix_web::Error>(final_count)
+        })
+        .collect();
+
+    let before_remove_error = counting_final
+        .get(0)
+        .ok_or_else(|| actix_web::error::ErrorInternalServerError("error-1"))?;
+
+    let exact_value = before_remove_error
+        .as_ref()
+        .map_err(|_er| actix_web::error::ErrorInternalServerError("error-2"))?;
+
+    Ok(*exact_value)
 }

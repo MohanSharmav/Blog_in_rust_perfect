@@ -1,6 +1,7 @@
 use crate::controllers::constants::Configuration;
 use crate::controllers::guests::posts::SET_POSTS_PER_PAGE;
 use crate::controllers::helpers::pagination_logic::admin_categories;
+use crate::model::categories;
 use crate::model::categories::{
     create_new_category_db, delete_category_db, get_all_categories_db, get_specific_category_posts,
     update_category_db,
@@ -15,16 +16,14 @@ use anyhow::Result;
 use handlebars::Handlebars;
 use serde::Deserialize;
 use serde_json::json;
-use sqlx::{Pool, Postgres, Row};
 use std::fmt::Write;
-use std::result;
 use validator::Validate;
 
 pub async fn get_all_categories(
     config: web::Data<Configuration>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
-    params: web::Path<i32>,
+    param: web::Path<i32>,
     flash_message: IncomingFlashMessages,
 ) -> Result<HttpResponse, actix_web::Error> {
     if user.is_none() {
@@ -34,35 +33,29 @@ pub async fn get_all_categories(
     }
 
     let db = &config.database_connection;
-    let total_posts_length = get_pagination_for_all_categories_list(db).await?;
+    let total_posts = categories::categories_count(db).await? + 2;
     let posts_per_page_constant = SET_POSTS_PER_PAGE;
-    let mut posts_per_page = total_posts_length / posts_per_page_constant;
-    let check_remainder = total_posts_length % posts_per_page_constant;
-    if check_remainder != 0 {
-        posts_per_page += 1;
-    }
-    let posts_per_page = posts_per_page as usize;
-    let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    let posts_per_page_constant = SET_POSTS_PER_PAGE as i32;
-    let param = params.into_inner();
-    let count_of_number_of_pages = pages_count.len();
-    let current_page: usize = param as usize;
+    // calculate the count of pages  ex:- total categories are 15 /3 =5
+    // here 5 is total_pages_count
+    let total_pages_count = (total_posts / posts_per_page_constant) as usize;
+    let current_page = param.into_inner();
     let mut error_html = String::new();
+    // receive error messages from post method (check using loops)-> send to html pages
     for message in flash_message.iter() {
         writeln!(error_html, "{}", message.content())
             .map_err(actix_web::error::ErrorInternalServerError)?;
     }
-    if current_page == 0 || current_page > count_of_number_of_pages {
+    return if current_page == 0 || current_page > total_pages_count as i32 {
         Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/admin/categories/page/1"))
             .content_type(ContentType::html())
             .finish())
     } else {
-        let pagination_final_string = admin_categories(current_page, count_of_number_of_pages)
+        let pagination_final_string = admin_categories(current_page as usize, total_pages_count)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        let all_categories = get_all_categories_db(db, param, posts_per_page_constant)
+        let all_categories = get_all_categories_db(db, current_page, posts_per_page_constant)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -76,7 +69,7 @@ pub async fn get_all_categories(
         Ok(HttpResponse::Ok()
             .content_type(ContentType::html())
             .body(html))
-    }
+    };
 }
 
 pub async fn new_category(
@@ -88,6 +81,7 @@ pub async fn new_category(
             .insert_header((http::header::LOCATION, "/"))
             .body(""));
     }
+
     let html = handlebars
         .render("new_category", &json!({}))
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -103,10 +97,13 @@ pub async fn create_category(
 ) -> Result<HttpResponse, actix_web::Error> {
     let name = &form.name;
     let db = &config.database_connection;
+    // this function will check the user input with the struct
+    // and will get the error message from the struct
     let form_result = form.validate();
     let mut validation_errors = Vec::new();
     let mut flash_error_string = String::new();
-
+    // check if form_result return error
+    // use this loop and get all the errors from the struct
     if let Err(errors) = form_result {
         for error in errors.field_errors() {
             validation_errors.push(format!("{}: {:?}", error.0, error.1));
@@ -114,9 +111,10 @@ pub async fn create_category(
             flash_error_string = error_string;
         }
     }
-
+    // if validation_errors is not empty it will be filled with error message from struct
     if !validation_errors.is_empty() {
         FlashMessage::error(flash_error_string).send();
+
         return Ok(HttpResponse::SeeOther()
             .insert_header((http::header::LOCATION, "/admin/categories/page/1"))
             .finish());
@@ -126,10 +124,10 @@ pub async fn create_category(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    Ok(HttpResponse::SeeOther()
+    return Ok(HttpResponse::SeeOther()
         .insert_header((LOCATION, "/admin/categories/page/1"))
         .content_type(ContentType::html())
-        .finish())
+        .finish());
 }
 
 pub async fn destroy_category(
@@ -138,15 +136,17 @@ pub async fn destroy_category(
 ) -> Result<Redirect, actix_web::Error> {
     let to_delete_category = &id.into_inner();
     let db = &config.database_connection;
+
     delete_category_db(db, to_delete_category)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
+
     Ok(Redirect::to("/admin/categories/page/1"))
 }
 
 pub async fn edit_category(
     config: web::Data<Configuration>,
-    to_be_updated_category: web::Path<i32>,
+    category_to_update: web::Path<i32>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
 ) -> Result<HttpResponse, actix_web::Error> {
@@ -157,8 +157,9 @@ pub async fn edit_category(
     }
 
     let db = &config.database_connection;
-    let to_be_updated_category = *to_be_updated_category;
-    let category_old_name = get_specific_category_posts(to_be_updated_category, db)
+    let category_to_update = *category_to_update;
+
+    let category_old_name = get_specific_category_posts(category_to_update, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -213,37 +214,10 @@ pub async fn update_category(
         .finish())
 }
 
-pub async fn get_pagination_for_all_categories_list(
-    db: &Pool<Postgres>,
-) -> result::Result<i64, actix_web::error::Error> {
-    let rows = sqlx::query("SELECT COUNT(*) FROM categories")
-        .fetch_all(db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    let counting_final: Vec<result::Result<i64, actix_web::Error>> = rows
-        .into_iter()
-        .map(|row| {
-            let final_count: i64 = row
-                .try_get("count")
-                .map_err(actix_web::error::ErrorInternalServerError)?;
-            Ok::<i64, actix_web::Error>(final_count)
-        })
-        .collect();
-
-    let before_remove_error = counting_final
-        .get(0)
-        .ok_or_else(|| actix_web::error::ErrorInternalServerError("error-1"))?;
-
-    let exact_value = before_remove_error
-        .as_ref()
-        .map_err(|_er| actix_web::error::ErrorInternalServerError("error-2"))?;
-
-    Ok(*exact_value)
-}
-
 #[derive(Deserialize, Debug, Clone, PartialEq, sqlx::FromRow, Validate)]
 pub struct CreateNewCategory {
+    // #[validate --> will check the user input with this condition
+    // message the error message is to be prompted when the validation fail
     #[validate(length(
         min = 2,
         message = "category name cannot be empty and minimum should have 2 characters"

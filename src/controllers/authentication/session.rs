@@ -51,30 +51,35 @@ pub async fn login(
     let parsed_hash = password_check(username.clone(), db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-
+    // if no user exists then null will be returned from DB
+    // None will be returned if the user does not exist
     return if parsed_hash.is_none() {
         FlashMessage::error("Login Fail - Wrong Id or password!").send();
+
         Ok(HttpResponse::SeeOther()
             .insert_header((http::header::LOCATION, "/login"))
             .finish())
     } else {
         let struct_only = parsed_hash.unwrap_or_default();
         let PasswordStruct { password } = struct_only;
+        // insert password from DB to password hash
         let parsed_stored =
             PasswordHash::new(&*password).map_err(actix_web::error::ErrorInternalServerError)?;
-
-        let result = Argon2::default()
+        // check the user password and check the password from database
+        let valid_user = Argon2::default()
             .verify_password(password_input.as_bytes(), parsed_stored.borrow())
             .is_ok();
-
-        if result == true {
+        // if verify password is successful it return true
+        if valid_user == true {
             Identity::login(&req.extensions(), username.to_string())
                 .map_err(actix_web::error::ErrorInternalServerError)?;
+
             Ok(HttpResponse::SeeOther()
                 .insert_header((LOCATION, "/admin/posts/page/1"))
                 .finish())
         } else {
             FlashMessage::error("Login Fail - Wrong Id or password!").send();
+
             Ok(HttpResponse::SeeOther()
                 .insert_header((http::header::LOCATION, "/login"))
                 .finish())
@@ -87,6 +92,7 @@ pub async fn logout(id: Identity) -> impl Responder {
 }
 
 pub async fn check_user(user: Option<Identity>) -> impl Responder {
+    // check of the user exists by using cookie from browser
     if let Some(_user) = user {
         web::Redirect::to("/admin/posts/page/1")
     } else {

@@ -23,8 +23,8 @@ use actix_session::SessionMiddleware;
 use actix_web::cookie::Key;
 use actix_web::{web, App, HttpServer, Result};
 use controllers::admin::posts_controller::admin_index;
-use controllers::admin::posts_controller::{get_categories_posts, show_post};
-use controllers::guests::posts::{get_category_posts, show_posts};
+use controllers::admin::posts_controller::{categories_based_posts, show_post};
+use controllers::guests::posts::{get_category_based_posts, show_posts};
 use handlebars::Handlebars;
 use sqlx::postgres::PgPoolOptions;
 
@@ -101,7 +101,7 @@ async fn main() -> Result<(), anyhow::Error> {
             )
             .service(
                 web::resource("/admin/categories/{category_id}/page/{page_number}")
-                    .to(get_categories_posts),
+                    .to(categories_based_posts),
             )
             .service(
                 web::resource("/admin/category/{name}/delete")
@@ -121,7 +121,7 @@ async fn main() -> Result<(), anyhow::Error> {
             .service(web::resource("/posts/{post_id}").route(web::get().to(show_posts)))
             .service(
                 web::resource("/posts/category/{category_id}/page/{page_number}")
-                    .to(get_category_posts),
+                    .to(get_category_based_posts),
             )
             .service(web::resource("/posts/page/{page_number}").route(web::get().to(index)))
             .service(Files::new("/", "./templates").show_files_listing())

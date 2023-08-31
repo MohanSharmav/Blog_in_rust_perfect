@@ -2,6 +2,7 @@ use crate::controllers::admin::posts_controller::PostsCategory;
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres, Row};
+use std::result;
 
 pub async fn all_categories_db(db: &Pool<Postgres>) -> Result<Vec<Categories>, anyhow::Error> {
     let all_categories = sqlx::query_as::<_, Categories>("select name,id from categories")
@@ -76,7 +77,7 @@ pub async fn category_db(
 pub async fn get_all_categories_db(
     db: &Pool<Postgres>,
     parii: i32,
-    posts_per_page_constant: i32,
+    posts_per_page_constant: i64,
 ) -> Result<Vec<Categories>, anyhow::Error> {
     let all_categories = sqlx::query_as::<_, Categories>(
         "select name,id  from categories Order By id Asc limit $2 offset ($1-1)*$2",
@@ -102,7 +103,7 @@ pub async fn get_specific_category_posts(
     Ok(all_categories)
 }
 
-pub async fn category_pagination_logic(
+pub async fn individual_category_posts_count(
     category_input: &str,
     db: &Pool<Postgres>,
 ) -> Result<i64, anyhow::Error> {
@@ -168,4 +169,31 @@ pub struct GetId {
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
 pub struct GetCategoryId {
     pub category_id: i32,
+}
+
+pub async fn categories_count(db: &Pool<Postgres>) -> result::Result<i64, actix_web::error::Error> {
+    let rows = sqlx::query("SELECT COUNT(*) FROM categories")
+        .fetch_all(db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    let counting_final: Vec<result::Result<i64, actix_web::Error>> = rows
+        .into_iter()
+        .map(|row| {
+            let final_count: i64 = row
+                .try_get("count")
+                .map_err(actix_web::error::ErrorInternalServerError)?;
+            Ok::<i64, actix_web::Error>(final_count)
+        })
+        .collect();
+
+    let before_remove_error = counting_final
+        .get(0)
+        .ok_or_else(|| actix_web::error::ErrorInternalServerError("error-1"))?;
+
+    let exact_value = before_remove_error
+        .as_ref()
+        .map_err(|_er| actix_web::error::ErrorInternalServerError("error-2"))?;
+
+    Ok(*exact_value)
 }

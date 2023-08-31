@@ -31,7 +31,7 @@ pub async fn register(
     let db = &config.database_connection;
     let salt = SaltString::generate(&mut OsRng);
     let argon2 = Argon2::default();
-
+    // Convert raw password to encrypted or hashed password
     let password_hash = argon2
         .hash_password(password.as_bytes(), &salt)
         .map_err(|er| actix_web::error::ErrorInternalServerError(er))?
