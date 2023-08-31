@@ -114,14 +114,14 @@ pub async fn get_category_posts(
     if count_of_number_of_pages == 0 {
         count_of_number_of_pages = 1;
     }
-    if current_page == 0 || current_page > count_of_number_of_pages {
+    return if current_page == 0 || current_page > count_of_number_of_pages {
         let redirect_url =
             "/posts/category/".to_string() + &*category_input.clone() + &*"/page/1".to_string();
 
-        return Ok(HttpResponse::SeeOther()
+        Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, redirect_url))
             .content_type(ContentType::html())
-            .finish());
+            .finish())
     } else {
         let pagination_final_string =
             general_category(current_page, count_of_number_of_pages, &category_input)
@@ -144,7 +144,7 @@ pub async fn get_category_posts(
             )
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        return  Ok(HttpResponse::Ok()
+        Ok(HttpResponse::Ok()
             .content_type(ContentType::html())
             .body(html))
     }
