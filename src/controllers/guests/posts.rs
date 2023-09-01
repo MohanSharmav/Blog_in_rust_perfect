@@ -5,8 +5,7 @@ use crate::model::categories::{
 };
 use crate::model::posts::number_posts_count;
 use crate::model::posts::{single_post_db, specific_page_posts};
-use actix_http::header::LOCATION;
-use actix_web::http::header::ContentType;
+use actix_web::http::header::{ContentType, LOCATION};
 use actix_web::{web, HttpResponse, Responder};
 use handlebars::Handlebars;
 use serde_json::json;

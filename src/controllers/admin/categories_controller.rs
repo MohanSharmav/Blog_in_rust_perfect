@@ -6,9 +6,8 @@ use crate::model::categories::{
     create_new_category_db, delete_category_db, get_all_categories_db, get_specific_category_posts,
     update_category_db,
 };
-use actix_http::header::LOCATION;
 use actix_identity::Identity;
-use actix_web::http::header::ContentType;
+use actix_web::http::header::{ContentType, LOCATION};
 use actix_web::web::Redirect;
 use actix_web::{http, web, HttpResponse};
 use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages};

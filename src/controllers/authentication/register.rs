@@ -1,8 +1,7 @@
 use crate::controllers::authentication::session::User;
 use crate::controllers::constants::Configuration;
 use crate::model::authentication::register::register_user;
-use actix_http::header::LOCATION;
-use actix_web::http::header::ContentType;
+use actix_web::http::header::{ContentType, LOCATION};
 use actix_web::{web, HttpResponse};
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::SaltString;

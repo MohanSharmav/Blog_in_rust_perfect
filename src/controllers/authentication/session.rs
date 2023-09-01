@@ -1,9 +1,8 @@
 use crate::controllers::constants::Configuration;
 use crate::model::authentication::session::password_check;
-use actix_http::header::LOCATION;
 use actix_identity::Identity;
 use actix_web::cookie::Key;
-use actix_web::http::header::ContentType;
+use actix_web::http::header::{ContentType, LOCATION};
 use actix_web::{http, web, HttpResponse};
 use actix_web::{HttpMessage as _, HttpRequest, Responder};
 use actix_web_flash_messages::storage::CookieMessageStore;
@@ -30,6 +29,7 @@ pub async fn get_login(
         writeln!(error_html, "{}", message.content())
             .map_err(actix_web::error::ErrorInternalServerError)?;
     }
+
     let html = handlebars
         .render("auth-login-basic", &json!({ "message": error_html }))
         .map_err(actix_web::error::ErrorInternalServerError)?;

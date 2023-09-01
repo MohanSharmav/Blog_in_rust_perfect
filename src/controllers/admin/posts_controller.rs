@@ -11,9 +11,8 @@ use crate::model::posts::{
     specific_page_posts, update_post_db, update_post_without_category,
 };
 use crate::model::posts::{single_post_db, update_post_from_no_category};
-use actix_http::header::LOCATION;
 use actix_identity::Identity;
-use actix_web::http::header::ContentType;
+use actix_web::http::header::{ContentType, LOCATION};
 use actix_web::web::Redirect;
 use actix_web::{http, web, HttpResponse};
 use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages};
@@ -30,7 +29,7 @@ pub async fn get_new_post(
 ) -> Result<HttpResponse, actix_web::Error> {
     if user.is_none() {
         return Ok(HttpResponse::SeeOther()
-            .insert_header((http::header::LOCATION, "/"))
+            .insert_header((LOCATION, "/"))
             .body(""));
     }
     let db = &config.database_connection;
@@ -77,6 +76,7 @@ pub async fn new_post(
         create_post_without_category(title.clone(), description.clone(), db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
+
         Ok(HttpResponse::SeeOther()
             .insert_header((http::header::LOCATION, "/admin/posts/page/1"))
             .finish())
@@ -84,6 +84,7 @@ pub async fn new_post(
         create_post(title.clone(), description.clone(), &category_id.clone(), db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
+
         Ok(HttpResponse::SeeOther()
             .insert_header((http::header::LOCATION, "/admin/posts/page/1"))
             .finish())
