@@ -104,6 +104,8 @@ pub async fn check_user(user: Option<Identity>) -> impl Responder {
     }
 }
 pub fn build_message_framework(signing_key: Key) -> FlashMessagesFramework {
+    // send flash messages using cookies
+    // --> CookieMessageStore will send the data to the browser
     let message_store = CookieMessageStore::builder(signing_key).build();
     FlashMessagesFramework::builder(message_store).build()
 }
