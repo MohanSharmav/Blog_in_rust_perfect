@@ -34,7 +34,7 @@ pub async fn register(
     // Convert raw password to encrypted or hashed password
     let password_hash = argon2
         .hash_password(password.as_bytes(), &salt)
-        .map_err(|er| actix_web::error::ErrorInternalServerError(er))?
+        .map_err(actix_web::error::ErrorInternalServerError)?
         .to_string();
 
     register_user(user_name, password_hash, db)

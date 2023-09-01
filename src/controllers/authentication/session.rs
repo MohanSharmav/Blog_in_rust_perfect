@@ -65,13 +65,14 @@ pub async fn login(
         let PasswordStruct { password } = struct_only;
         // insert password from DB to password hash
         let parsed_stored =
-            PasswordHash::new(&*password).map_err(actix_web::error::ErrorInternalServerError)?;
+            PasswordHash::new(&password).map_err(actix_web::error::ErrorInternalServerError)?;
         // check the user password and check the password from database
         let valid_user = Argon2::default()
             .verify_password(password_input.as_bytes(), parsed_stored.borrow())
             .is_ok();
         // if verify password is successful it return true
-        if valid_user == true {
+        // check true
+        if valid_user {
             // this actix Identity will create automatically a session
             // for the user
             Identity::login(&req.extensions(), username.to_string())

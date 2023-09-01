@@ -58,10 +58,18 @@ async fn main() -> Result<(), anyhow::Error> {
 
     HttpServer::new(move || {
         App::new()
+            // in .app_data() you can pass any thing and use
+            // it directly in any function like
+            // function_name( handlebars: web::Data<Handlebars<'_>>)
+            // you need not pass it a parameter when you call a function
+            // https://docs.rs/actix-web/latest/actix_web/struct.App.html
             .app_data(web::Data::new(handlebars.clone()))
             .app_data(configuration.clone())
             .wrap(IdentityMiddleware::default())
             .wrap(message_framework.clone())
+            // actix session is used to create session and maintain it
+            // it is even used to pass cookie also
+            // https://docs.rs/actix-session/latest/actix_session/ --> refer this for more information
             .wrap(
                 SessionMiddleware::builder(CookieSessionStore::default(), secret_key.clone())
                     .cookie_secure(cookie_secure)

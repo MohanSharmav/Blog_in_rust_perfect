@@ -205,9 +205,8 @@ pub async fn update_post(
             .insert_header((LOCATION, "/admin/posts/page/1"))
             .content_type(ContentType::html())
             .finish())
-    } else
-    // update post from one category to another category
-    {
+    } else {
+        // update post from one category to another category
         update_post_db(title, description, post_id, category_id, db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
