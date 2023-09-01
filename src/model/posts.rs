@@ -118,7 +118,7 @@ pub async fn category_id_from_post_id(
     .fetch_all(db)
     .await
     .unwrap_or_default();
-
+    // remove option and get category_id
     let category_id = category_id_vec
         .get(0)
         .map(|value| value.category_id)
@@ -128,27 +128,27 @@ pub async fn category_id_from_post_id(
 }
 
 pub async fn specific_page_posts(
-    start_page: i32,
+    current_page: i32,
     db: &Pool<Postgres>,
 ) -> Result<Vec<Post>, anyhow::Error> {
-    let start_page = start_page;
     let posts_per_page = SET_POSTS_PER_PAGE;
     let perfect_posts =
         sqlx::query_as::<_, Post>("select * from posts Order By id Asc limit $1 OFFSET ($2-1)*$1 ")
             .bind(posts_per_page)
-            .bind(start_page)
+            .bind(current_page)
             .fetch_all(db)
             .await?;
 
     Ok(perfect_posts)
 }
 
-pub async fn single_post_db(titles: i32, db: &Pool<Postgres>) -> Result<Vec<Post>, anyhow::Error> {
+pub async fn single_post_db(post_id: i32, db: &Pool<Postgres>) -> Result<Vec<Post>, anyhow::Error> {
     let single_post =
         sqlx::query_as::<_, Post>("select id, title, description from posts  WHERE id=$1")
-            .bind(titles)
+            .bind(post_id)
             .fetch_all(db)
             .await?;
+
     Ok(single_post)
 }
 
@@ -165,7 +165,8 @@ pub async fn update_post_from_no_category(
         .bind(id)
         .execute(db)
         .await?;
-
+    // no category -> category
+    // so insert category id to 3rd table
     sqlx::query("insert into categories_posts values ($1,$2)")
         .bind(id)
         .bind(category_id)
@@ -180,7 +181,7 @@ pub async fn number_posts_count(db: &Pool<Postgres>) -> Result<i64, actix_web::e
         .fetch_all(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-
+    // use below lines to get PgRow from Vec<PgRow>
     let counting_final: Vec<Result<i64, actix_web::Error>> = rows
         .into_iter()
         .map(|row| {

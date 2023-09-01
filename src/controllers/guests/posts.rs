@@ -65,9 +65,9 @@ pub async fn show_post(
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
-    let title = path.parse::<i32>().unwrap_or_default();
+    let post_id = path.parse::<i32>().unwrap_or_default();
 
-    let post = single_post_db(title, db)
+    let post = single_post_db(post_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

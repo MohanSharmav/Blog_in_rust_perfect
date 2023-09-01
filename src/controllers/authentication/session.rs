@@ -72,6 +72,8 @@ pub async fn login(
             .is_ok();
         // if verify password is successful it return true
         if valid_user == true {
+            // this actix Identity will create automatically a session
+            // for the user
             Identity::login(&req.extensions(), username.to_string())
                 .map_err(actix_web::error::ErrorInternalServerError)?;
 

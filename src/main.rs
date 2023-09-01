@@ -35,6 +35,11 @@ async fn main() -> Result<(), anyhow::Error> {
     // this will show the rust operation in terminals
     std::env::set_var("RUST_LOG", "debug");
     env_logger::init();
+    // this secret key is used to send to the user
+    // and store in browser cookies
+    // key : value
+    // id : 0D37VD27Ki9hAvKbQ4u43JonbED8fc%2FnGeIvdpenYL8Yshq+NXqwe8neP6CLZ6gDGbJNJbhVEBG8NiHU4jXH
+    // this always generates a unique value
     let secret_key = Key::generate();
     let cookie_secure = true;
     let mut handlebars = Handlebars::new();
