@@ -129,6 +129,7 @@ async fn main() -> Result<(), anyhow::Error> {
                     .to(get_category_based_posts),
             )
             .service(web::resource("/posts/page/{page_number}").route(web::get().to(index)))
+            // this Files::new` is used access to hard files like .css .html and so on
             .service(Files::new("/", "./templates").show_files_listing())
     })
     .bind("127.0.0.1:8080")?
