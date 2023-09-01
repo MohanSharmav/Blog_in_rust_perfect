@@ -95,7 +95,7 @@ pub async fn create_category(
     form: web::Form<CreateNewCategory>,
     config: web::Data<Configuration>,
 ) -> Result<HttpResponse, actix_web::Error> {
-    let name = &form.name;
+    let category_name = &form.name;
     let db = &config.database_connection;
     // this function will check the user input with the struct
     // and will get the error message from the struct
@@ -120,7 +120,7 @@ pub async fn create_category(
             .finish());
     }
 
-    create_new_category_db(db, name)
+    create_new_category_db(db, category_name)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -178,12 +178,10 @@ pub async fn edit_category(
 pub async fn update_category(
     id: web::Path<i32>,
     form: web::Form<CreateNewCategory>,
-    current_category_name: web::Path<String>,
     config: web::Data<Configuration>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
-    let _current_post_name = &current_category_name.into_inner();
-    let name = &form.name;
+    let new_category_name = &form.name;
     let category_id = id.into_inner();
     let form_result = form.validate();
     let mut validation_errors = Vec::new();
@@ -204,7 +202,7 @@ pub async fn update_category(
             .finish());
     }
 
-    update_category_db(name, category_id, db)
+    update_category_db(new_category_name, category_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

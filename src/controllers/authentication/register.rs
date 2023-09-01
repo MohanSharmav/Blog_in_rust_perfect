@@ -26,7 +26,7 @@ pub async fn register(
     form: web::Form<User>,
     config: web::Data<Configuration>,
 ) -> Result<HttpResponse, actix_web::Error> {
-    let user = &form.username;
+    let user_name = &form.username;
     let password = &form.password;
     let db = &config.database_connection;
     let salt = SaltString::generate(&mut OsRng);
@@ -37,7 +37,7 @@ pub async fn register(
         .map_err(|er| actix_web::error::ErrorInternalServerError(er))?
         .to_string();
 
-    register_user(user, password_hash, db)
+    register_user(user_name, password_hash, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

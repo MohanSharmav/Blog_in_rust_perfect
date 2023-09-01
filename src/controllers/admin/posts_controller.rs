@@ -2,9 +2,10 @@ use crate::controllers::constants::Configuration;
 use crate::controllers::guests::posts::SET_POSTS_PER_PAGE;
 use crate::controllers::helpers::pagination_logic::{admin_category_posts, admin_main_page};
 use crate::model::categories::{
-    all_categories_db, all_categories_exception, category_db, get_specific_category_posts,
-    individual_category_posts_count,
+    all_categories_db, all_categories_exclusive, category_based_posts_db,
+    get_specific_category_posts, individual_category_posts_count,
 };
+use crate::model::posts;
 use crate::model::posts::{
     category_id_from_post_id, create_post, create_post_without_category, delete_post_db,
     specific_page_posts, update_post_db, update_post_without_category,
@@ -14,14 +15,13 @@ use actix_http::header::LOCATION;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
 use actix_web::web::Redirect;
-use actix_web::{http, HttpResponse, web};
+use actix_web::{http, web, HttpResponse};
 use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages};
 use handlebars::Handlebars;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::fmt::Write;
 use validator::Validate;
-use crate::model::posts;
 
 pub async fn get_new_post(
     config: web::Data<Configuration>,
@@ -91,11 +91,11 @@ pub async fn new_post(
 }
 
 pub async fn destroy_post(
-    to_delete: web::Path<String>,
+    post_id: web::Path<String>,
     config: web::Data<Configuration>,
 ) -> Result<Redirect, actix_web::Error> {
     let db = &config.database_connection;
-    let to_delete = to_delete.into_inner();
+    let to_delete = post_id.into_inner();
 
     delete_post_db(to_delete, db)
         .await
@@ -124,7 +124,7 @@ pub async fn edit_post(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let all_category = all_categories_exception(db, category_id)
+    let all_category = all_categories_exclusive(db, category_id)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -146,7 +146,7 @@ pub async fn update_post(
     _current_post_name: web::Path<String>,
     config: web::Data<Configuration>,
 ) -> Result<HttpResponse, actix_web::Error> {
-    let id = id.into_inner();
+    let post_id = id.into_inner();
     let db = &config.database_connection;
     let title = &form.title;
     let description = &form.description;
@@ -169,10 +169,13 @@ pub async fn update_post(
             .finish());
     }
 
-    let category_id_of_current_post = category_id_from_post_id(id, db).await.unwrap_or_default();
-
+    let category_id_of_current_post = category_id_from_post_id(post_id, db)
+        .await
+        .unwrap_or_default();
+    // update post from no category to no category
+    // no category id = 0
     if category_id_of_current_post == 0 && *category_id == 0_i32 {
-        update_post_without_category(title.clone(), description.clone(), id, db)
+        update_post_without_category(title.clone(), description.clone(), post_id, db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -181,8 +184,9 @@ pub async fn update_post(
             .content_type(ContentType::html())
             .finish());
     }
+    // update post from no category to category
     if category_id_of_current_post == 0 {
-        update_post_from_no_category(title, description, category_id, id, db)
+        update_post_from_no_category(title, description, category_id, post_id, db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -191,8 +195,9 @@ pub async fn update_post(
             .content_type(ContentType::html())
             .finish());
     }
+    // update post from category to no category
     return if *category_id == 0_i32 {
-        update_post_without_category(title.clone(), description.clone(), id, db)
+        update_post_without_category(title.clone(), description.clone(), post_id, db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -200,8 +205,10 @@ pub async fn update_post(
             .insert_header((LOCATION, "/admin/posts/page/1"))
             .content_type(ContentType::html())
             .finish())
-    } else {
-        update_post_db(title, description, id, category_id, db)
+    } else
+    // update post from one category to another category
+    {
+        update_post_db(title, description, post_id, category_id, db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -209,7 +216,7 @@ pub async fn update_post(
             .insert_header((LOCATION, "/admin/posts/page/1"))
             .content_type(ContentType::html())
             .finish())
-    }
+    };
 }
 
 pub async fn categories_based_posts(
@@ -226,11 +233,12 @@ pub async fn categories_based_posts(
 
     let db = &config.database_connection;
     let category_id: String = params.clone().0;
-    let current_page: usize =  params.into_inner().1 as usize;
+    let current_page: usize = params.into_inner().1 as usize;
 
     let total_posts = individual_category_posts_count(&category_id, db)
         .await
-        .map_err(actix_web::error::ErrorInternalServerError)?+2 ;
+        .map_err(actix_web::error::ErrorInternalServerError)?
+        + 2;
 
     let posts_per_page_constant = SET_POSTS_PER_PAGE;
     let total_pages_count = total_posts / posts_per_page_constant;
@@ -249,12 +257,17 @@ pub async fn categories_based_posts(
             total_pages_count as usize,
             category_id.clone(),
         )
-            .await
-            .map_err(actix_web::error::ErrorInternalServerError)?;
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        let category_posts = category_db(category_id, db, current_page as i32, posts_per_page_constant)
-            .await
-            .map_err(actix_web::error::ErrorInternalServerError)?;
+        let category_posts = category_based_posts_db(
+            category_id,
+            db,
+            current_page as i32,
+            posts_per_page_constant,
+        )
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
         let html = handlebars
             .render(
@@ -266,35 +279,7 @@ pub async fn categories_based_posts(
         Ok(HttpResponse::Ok()
             .content_type(ContentType::html())
             .body(html))
-    }
-}
-
-pub async fn show_post(
-    path: web::Path<String>,
-    config: web::Data<Configuration>,
-    handlebars: web::Data<Handlebars<'_>>,
-) -> Result<HttpResponse, actix_web::Error> {
-    let db = &config.database_connection;
-    let title = path.parse::<i32>().unwrap_or_default();
-
-    let all_category = all_categories_db(db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    let single_post_struct = single_post_db(title, db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    let html = handlebars
-        .render(
-            "admin_single_post",
-            &json!({"single_post":single_post_struct,"categories":all_category}),
-        )
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    Ok(HttpResponse::Ok()
-        .content_type(ContentType::html())
-        .body(html))
+    };
 }
 
 pub async fn admin_index(
@@ -310,25 +295,27 @@ pub async fn admin_index(
             .body(""));
     }
     let db = &config.database_connection;
-    let total_posts = posts::number_posts_count(db).await? +2;
+    let total_posts = posts::number_posts_count(db).await? + 2;
     let posts_per_page_constant = SET_POSTS_PER_PAGE;
-    let total_pages_count = total_posts / posts_per_page_constant ;
-    let current_page = param.into_inner() ;
+    let total_pages_count = total_posts / posts_per_page_constant;
+    let current_page = param.into_inner();
     let mut error_html = String::new();
     for message in flash_message.iter() {
         writeln!(error_html, "{}", message.content())
             .map_err(actix_web::error::ErrorInternalServerError)?;
     }
-
+    // if the user enters the wrong page number which is less than the 1 or greater total_pages_count
+    // then he will be redirected to the the page 1
     if current_page == 0 || current_page > total_pages_count as i32 {
         Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/admin/posts/page/1"))
             .content_type(ContentType::html())
             .finish())
     } else {
-        let pagination_final_string = admin_main_page(current_page as usize, total_pages_count as usize)
-            .await
-            .map_err(actix_web::error::ErrorInternalServerError)?;
+        let pagination_final_string =
+            admin_main_page(current_page as usize, total_pages_count as usize)
+                .await
+                .map_err(actix_web::error::ErrorInternalServerError)?;
 
         let exact_posts_only = specific_page_posts(current_page, db)
             .await

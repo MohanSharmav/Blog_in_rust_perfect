@@ -52,7 +52,8 @@ pub async fn login(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     // if no user exists then null will be returned from DB
-    // None will be returned if the user does not exist
+    // None will be returned in option if the user does not exist
+    // check is no user exits then throw a flash message
     return if parsed_hash.is_none() {
         FlashMessage::error("Login Fail - Wrong Id or password!").send();
 

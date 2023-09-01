@@ -1,6 +1,5 @@
 mod controllers;
 mod model;
-mod routes;
 use crate::controllers::admin::categories_controller::{
     create_category, destroy_category, edit_category, get_all_categories, new_category,
     update_category,
@@ -23,8 +22,8 @@ use actix_session::SessionMiddleware;
 use actix_web::cookie::Key;
 use actix_web::{web, App, HttpServer, Result};
 use controllers::admin::posts_controller::admin_index;
-use controllers::admin::posts_controller::{categories_based_posts, show_post};
-use controllers::guests::posts::{get_category_based_posts, show_posts};
+use controllers::admin::posts_controller::categories_based_posts;
+use controllers::guests::posts::{get_category_based_posts, show_post};
 use handlebars::Handlebars;
 use sqlx::postgres::PgPoolOptions;
 
@@ -33,17 +32,14 @@ pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
+    // this will show the rust operation in terminals
     std::env::set_var("RUST_LOG", "debug");
     env_logger::init();
     let secret_key = Key::generate();
-    #[cfg(feature = "cors_for_local_development")]
-    let cookie_secure = false;
-    #[cfg(not(feature = "cors_for_local_development"))]
     let cookie_secure = true;
     let mut handlebars = Handlebars::new();
     handlebars.register_templates_directory(".html", "./templates/html/")?;
-    let confi_db_url = db_config().await?;
-    let db_url = confi_db_url;
+    let db_url = db_config().await?;
     let pool = PgPoolOptions::new()
         .max_connections(100)
         .connect(&db_url)
@@ -51,19 +47,18 @@ async fn main() -> Result<(), anyhow::Error> {
     let config = Configuration {
         database_connection: pool,
     };
-    let confi = web::Data::new(config.clone());
+    let configuration = web::Data::new(config.clone());
     let signing_key = Key::generate();
     let message_framework = build_message_framework(signing_key);
 
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(handlebars.clone()))
-            .app_data(confi.clone())
+            .app_data(configuration.clone())
             .wrap(IdentityMiddleware::default())
             .wrap(message_framework.clone())
             .wrap(
                 SessionMiddleware::builder(CookieSessionStore::default(), secret_key.clone())
-                    .cookie_name("adf-obdd-service-auth".to_owned())
                     .cookie_secure(cookie_secure)
                     .session_lifecycle(PersistentSession::default().session_ttl(COOKIE_DURATION))
                     .build(),
@@ -88,9 +83,6 @@ async fn main() -> Result<(), anyhow::Error> {
             )
             .service(web::resource("/admin/posts/new").to(get_new_post))
             .service(web::resource("/admin/posts").route(web::post().to(new_post)))
-            .service(
-                web::resource("/admin/posts/{post_id}").route(web::get().to(show_post)), // .route(web::delete().to(delete_post))
-            )
             .service(
                 web::resource("/admin/posts/{post_id}/edit")
                     .route(web::get().to(edit_post))
@@ -118,7 +110,7 @@ async fn main() -> Result<(), anyhow::Error> {
                     .route(web::get().to(get_register))
                     .route(web::post().to(register)),
             )
-            .service(web::resource("/posts/{post_id}").route(web::get().to(show_posts)))
+            .service(web::resource("/posts/{post_id}").route(web::get().to(show_post)))
             .service(
                 web::resource("/posts/category/{category_id}/page/{page_number}")
                     .to(get_category_based_posts),
