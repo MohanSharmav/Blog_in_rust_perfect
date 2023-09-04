@@ -3,7 +3,7 @@ use crate::model::authentication::session::password_check;
 use actix_identity::Identity;
 use actix_web::cookie::Key;
 use actix_web::http::header::{ContentType, LOCATION};
-use actix_web::Responder;
+use actix_web::{HttpMessage, HttpRequest, Responder};
 use actix_web::{http, web, HttpResponse};
 use actix_web_flash_messages::storage::CookieMessageStore;
 use actix_web_flash_messages::{FlashMessage, FlashMessagesFramework, IncomingFlashMessages};
@@ -41,6 +41,7 @@ pub async fn get_login(
 
 pub async fn login(
     form: web::Form<User>,
+    req: HttpRequest,
     config: web::Data<Configuration>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let username = &form.username;
@@ -74,8 +75,8 @@ pub async fn login(
         if valid_user {
             // this actix Identity will create automatically a session
             // for the user
-            // Identity::login(&req.extensions(), username.to_string())
-            //     .map_err(actix_web::error::ErrorInternalServerError)?;
+            Identity::login(&req.extensions(), username.parse()?)
+                .map_err(actix_web::error::ErrorInternalServerError)?;
             Ok(HttpResponse::SeeOther()
                 .insert_header((LOCATION, "/admin/posts/page/1"))
                 .finish())

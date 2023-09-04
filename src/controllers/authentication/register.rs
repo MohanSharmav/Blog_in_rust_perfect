@@ -35,7 +35,7 @@ pub async fn register(
         .hash_password(password.as_bytes(), &salt)
         .map_err(actix_web::error::ErrorInternalServerError)?
         .to_string();
-
+    // store the hashed password in the database
     register_user(user_name, password_hash, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
