@@ -3,7 +3,7 @@ use sqlx::{Pool, Postgres};
 use std::option::Option;
 
 pub async fn password_check(
-    name: String,
+    name: &String,
     db: &Pool<Postgres>,
 ) -> Result<Option<PasswordStruct>, anyhow::Error> {
     // select password of the user and store it into option

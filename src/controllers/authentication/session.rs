@@ -48,7 +48,7 @@ pub async fn login(
     let password_input = &form.password;
     let db = &config.database_connection;
 
-    let parsed_hash = password_check(username.clone(), db)
+    let parsed_hash = password_check(username, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     // if no user exists then null will be returned from DB

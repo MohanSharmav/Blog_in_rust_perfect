@@ -11,7 +11,5 @@ pub async fn db_config() -> Result<String, anyhow::Error> {
         .build()?;
 
     let db_hashmap = settings.try_deserialize::<HashMap<String, String>>()?;
-    let db_url = db_hashmap.get("db_url").unwrap().to_string();
-
-    Ok(db_url)
+    Ok(db_hashmap.get("db_url").unwrap().into())
 }
