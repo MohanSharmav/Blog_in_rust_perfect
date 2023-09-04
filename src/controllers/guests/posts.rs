@@ -21,15 +21,14 @@ pub async fn redirect_user() -> impl Responder {
 pub const SET_POSTS_PER_PAGE: i64 = 3;
 
 pub async fn index(
-    param: web::Path<i32>,
+    current_page: web::Path<i32>,
     config: web::Data<Configuration>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
-    let total_posts = number_posts_count(db).await? + 2;
-    let posts_per_page_constant = SET_POSTS_PER_PAGE;
-    let total_pages_count = (total_posts / posts_per_page_constant) as usize;
-    let current_page = param.into_inner();
+    let total_posts = number_posts_count(db).await? + SET_POSTS_PER_PAGE - 1;
+    let total_pages_count = (total_posts / SET_POSTS_PER_PAGE) as usize;
+    let current_page = current_page.into_inner();
 
     if current_page > total_pages_count as i32 || current_page == 0 {
         return Ok(HttpResponse::SeeOther()
@@ -46,11 +45,11 @@ pub async fn index(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let all_category = all_categories_db(db)
+    let all_categories = all_categories_db(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let html = handlebars.render("common", &json!({"pagination":pagination_final_string,"posts":exact_posts_only,"categories":all_category}))
+    let html = handlebars.render("common", &json!({"pagination":pagination_final_string,"posts":exact_posts_only,"categories":all_categories}))
         .map_err( actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
@@ -59,12 +58,12 @@ pub async fn index(
 }
 
 pub async fn show_post(
-    path: web::Path<String>,
+    post_id: web::Path<String>,
     config: web::Data<Configuration>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
-    let post_id = path.parse::<i32>().unwrap_or_default();
+    let post_id = post_id.parse::<i32>().unwrap_or_default();
 
     let post = single_post_db(post_id, db)
         .await
@@ -97,13 +96,12 @@ pub async fn get_category_based_posts(
     let total_posts_length = individual_category_posts_count(&category_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?
-        + 2;
-    let posts_per_page_constant = SET_POSTS_PER_PAGE;
-    let total_pages_count = total_posts_length / posts_per_page_constant;
+        + SET_POSTS_PER_PAGE
+        - 1;
+    let total_pages_count = total_posts_length / SET_POSTS_PER_PAGE;
 
-    return if current_page == 0 || current_page > total_pages_count as i32 {
-        let redirect_url =
-            "/posts/category/".to_string() + &*category_id.clone() + &*"/page/1".to_string();
+    if current_page == 0 || current_page > total_pages_count as i32 {
+        let redirect_url = "/posts/category/".to_string() + &category_id + &"/page/1".to_string();
 
         Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, redirect_url))
@@ -122,24 +120,24 @@ pub async fn get_category_based_posts(
             category_id.to_string(),
             db,
             current_page,
-            posts_per_page_constant,
+            SET_POSTS_PER_PAGE,
         )
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        let all_category = all_categories_db(db)
+        let all_categories = all_categories_db(db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
         let html = handlebars
             .render(
                 "category",
-                &json!({"pagination":pagination_final_string,"posts":&category_based_posts,"categories":all_category}),
+                &json!({"pagination":pagination_final_string,"posts":&category_based_posts,"categories":all_categories}),
             )
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
         Ok(HttpResponse::Ok()
             .content_type(ContentType::html())
             .body(html))
-    };
+    }
 }

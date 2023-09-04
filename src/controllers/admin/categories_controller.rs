@@ -22,7 +22,7 @@ pub async fn get_all_categories(
     config: web::Data<Configuration>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
-    param: web::Path<i32>,
+    current_page: web::Path<i32>,
     flash_message: IncomingFlashMessages,
 ) -> Result<HttpResponse, actix_web::Error> {
     if user.is_none() {
@@ -30,21 +30,23 @@ pub async fn get_all_categories(
             .insert_header((http::header::LOCATION, "/"))
             .body(""));
     }
-
     let db = &config.database_connection;
-    let total_posts = categories::categories_count(db).await? + 2;
-    let posts_per_page_constant = SET_POSTS_PER_PAGE;
+    // set_posts_per_page -1 because
+    // if number of posts is 13 then
+    // 13/3= 4 pages but it should be 5
+    // so 13+ "2" = 15 /3 is which makes 5 pages so constant-1 is perfect logic
+    let total_posts = categories::categories_count(db).await? + SET_POSTS_PER_PAGE - 1;
     // calculate the count of pages  ex:- total categories are 15 /3 =5
     // here 5 is total_pages_count
-    let total_pages_count = (total_posts / posts_per_page_constant) as usize;
-    let current_page = param.into_inner();
+    let total_pages_count = (total_posts / SET_POSTS_PER_PAGE) as usize;
+    let current_page = current_page.into_inner();
     let mut error_html = String::new();
     // receive error messages from post method (check using loops)-> send to html pages
     for message in flash_message.iter() {
         writeln!(error_html, "{}", message.content())
             .map_err(actix_web::error::ErrorInternalServerError)?;
     }
-    return if current_page == 0 || current_page > total_pages_count as i32 {
+    if current_page == 0 || current_page > total_pages_count as i32 {
         Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/admin/categories/page/1"))
             .content_type(ContentType::html())
@@ -54,7 +56,7 @@ pub async fn get_all_categories(
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        let all_categories = get_all_categories_db(db, current_page, posts_per_page_constant)
+        let all_categories = get_all_categories_db(db, current_page, SET_POSTS_PER_PAGE)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -68,7 +70,7 @@ pub async fn get_all_categories(
         Ok(HttpResponse::Ok()
             .content_type(ContentType::html())
             .body(html))
-    };
+    }
 }
 
 pub async fn new_category(

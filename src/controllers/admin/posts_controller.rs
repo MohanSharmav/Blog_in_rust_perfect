@@ -96,9 +96,9 @@ pub async fn destroy_post(
     config: web::Data<Configuration>,
 ) -> Result<Redirect, actix_web::Error> {
     let db = &config.database_connection;
-    let to_delete = post_id.into_inner();
+    let post_id = post_id.into_inner();
 
-    delete_post_db(to_delete, db)
+    delete_post_db(post_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -106,12 +106,12 @@ pub async fn destroy_post(
 }
 
 pub async fn edit_post(
-    id: web::Path<i32>,
+    post_id: web::Path<i32>,
     config: web::Data<Configuration>,
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
-    let post_id = id.into_inner();
+    let post_id = post_id.into_inner();
 
     let single_post_struct = single_post_db(post_id, db)
         .await
@@ -125,14 +125,14 @@ pub async fn edit_post(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let all_category = all_categories_exclusive(db, category_id)
+    let all_categories = all_categories_exclusive(db, category_id)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
         .render(
             "update_post",
-            &json!({"category_info": category_info,"current_post":single_post_struct,"categories":all_category}),
+            &json!({"category_info": category_info,"current_post":single_post_struct,"categories":all_categories}),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -197,7 +197,7 @@ pub async fn update_post(
             .finish());
     }
     // update post from category to no category
-    return if *category_id == 0_i32 {
+    if *category_id == 0_i32 {
         update_post_without_category(title.clone(), description.clone(), post_id, db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -216,7 +216,7 @@ pub async fn update_post(
             .insert_header((LOCATION, "/admin/posts/page/1"))
             .content_type(ContentType::html())
             .finish())
-    };
+    }
 }
 
 pub async fn categories_based_posts(
@@ -238,14 +238,13 @@ pub async fn categories_based_posts(
     let total_posts = individual_category_posts_count(&category_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?
-        + 2;
+        + SET_POSTS_PER_PAGE
+        - 1;
 
-    let posts_per_page_constant = SET_POSTS_PER_PAGE;
-    let total_pages_count = total_posts / posts_per_page_constant;
+    let total_pages_count = total_posts / SET_POSTS_PER_PAGE;
 
-    return if current_page == 0 || current_page > total_pages_count as usize {
-        let redirect_url =
-            "/admin/categories/".to_string() + &*category_id.clone() + &*"/page/1".to_string();
+    if current_page == 0 || current_page > total_pages_count as usize {
+        let redirect_url = "/admin/categories/".to_string() + &category_id + &"/page/1".to_string();
 
         Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, redirect_url))
@@ -260,14 +259,10 @@ pub async fn categories_based_posts(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        let category_posts = category_based_posts_db(
-            category_id,
-            db,
-            current_page as i32,
-            posts_per_page_constant,
-        )
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
+        let category_posts =
+            category_based_posts_db(category_id, db, current_page as i32, SET_POSTS_PER_PAGE)
+                .await
+                .map_err(actix_web::error::ErrorInternalServerError)?;
 
         let html = handlebars
             .render(
@@ -279,14 +274,14 @@ pub async fn categories_based_posts(
         Ok(HttpResponse::Ok()
             .content_type(ContentType::html())
             .body(html))
-    };
+    }
 }
 
 pub async fn admin_index(
     config: web::Data<Configuration>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
-    param: web::Path<i32>,
+    current_page: web::Path<i32>,
     flash_message: IncomingFlashMessages,
 ) -> Result<HttpResponse, actix_web::Error> {
     if user.is_none() {
@@ -295,10 +290,9 @@ pub async fn admin_index(
             .body(""));
     }
     let db = &config.database_connection;
-    let total_posts = posts::number_posts_count(db).await? + 2;
-    let posts_per_page_constant = SET_POSTS_PER_PAGE;
-    let total_pages_count = total_posts / posts_per_page_constant;
-    let current_page = param.into_inner();
+    let total_posts = posts::number_posts_count(db).await? + SET_POSTS_PER_PAGE - 1;
+    let total_pages_count = total_posts / SET_POSTS_PER_PAGE;
+    let current_page = current_page.into_inner();
     let mut error_html = String::new();
     for message in flash_message.iter() {
         writeln!(error_html, "{}", message.content())

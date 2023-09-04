@@ -3,8 +3,8 @@ use crate::model::authentication::session::password_check;
 use actix_identity::Identity;
 use actix_web::cookie::Key;
 use actix_web::http::header::{ContentType, LOCATION};
+use actix_web::Responder;
 use actix_web::{http, web, HttpResponse};
-use actix_web::{HttpMessage as _, HttpRequest, Responder};
 use actix_web_flash_messages::storage::CookieMessageStore;
 use actix_web_flash_messages::{FlashMessage, FlashMessagesFramework, IncomingFlashMessages};
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
@@ -41,7 +41,6 @@ pub async fn get_login(
 
 pub async fn login(
     form: web::Form<User>,
-    req: HttpRequest,
     config: web::Data<Configuration>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let username = &form.username;
@@ -54,7 +53,7 @@ pub async fn login(
     // if no user exists then null will be returned from DB
     // None will be returned in option if the user does not exist
     // check is no user exits then throw a flash message
-    return if parsed_hash.is_none() {
+    if parsed_hash.is_none() {
         FlashMessage::error("Login Fail - Wrong Id or password!").send();
 
         Ok(HttpResponse::SeeOther()
@@ -75,9 +74,8 @@ pub async fn login(
         if valid_user {
             // this actix Identity will create automatically a session
             // for the user
-            Identity::login(&req.extensions(), username.to_string())
-                .map_err(actix_web::error::ErrorInternalServerError)?;
-
+            // Identity::login(&req.extensions(), username.to_string())
+            //     .map_err(actix_web::error::ErrorInternalServerError)?;
             Ok(HttpResponse::SeeOther()
                 .insert_header((LOCATION, "/admin/posts/page/1"))
                 .finish())
@@ -88,7 +86,7 @@ pub async fn login(
                 .insert_header((http::header::LOCATION, "/login"))
                 .finish())
         }
-    };
+    }
 }
 pub async fn logout(id: Identity) -> impl Responder {
     id.logout();
