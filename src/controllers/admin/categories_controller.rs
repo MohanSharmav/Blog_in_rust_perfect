@@ -39,7 +39,7 @@ pub async fn get_all_categories(
     // so 13+ "2" = 15 /3 is which makes 5 pages so constant-1 is perfect logic
     // calculate the count of pages  ex:- total categories are 15 /3 =5
     // here 5 is total_pages_count
-    let total_pages_count = (total_posts+SET_POSTS_PER_PAGE-1 )/ SET_POSTS_PER_PAGE;
+    let total_pages_count = (total_posts + SET_POSTS_PER_PAGE - 1) / SET_POSTS_PER_PAGE;
     let current_page = current_page.into_inner();
     let mut error_html = String::new();
     // receive error messages from post method (check using loops)-> send to html pages
@@ -53,9 +53,10 @@ pub async fn get_all_categories(
             .content_type(ContentType::html())
             .finish())
     } else {
-        let pagination_final_string = admin_categories(current_page as usize, total_pages_count as usize)
-            .await
-            .map_err(actix_web::error::ErrorInternalServerError)?;
+        let pagination_final_string =
+            admin_categories(current_page as usize, total_pages_count as usize)
+                .await
+                .map_err(actix_web::error::ErrorInternalServerError)?;
 
         let all_categories = get_all_categories_db(db, current_page, SET_POSTS_PER_PAGE)
             .await

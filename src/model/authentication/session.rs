@@ -1,7 +1,7 @@
 use crate::controllers::authentication::session::PasswordStruct;
+use serde::Deserialize;
 use sqlx::{Pool, Postgres};
 use std::option::Option;
-use serde::Deserialize;
 
 pub async fn password_check(
     name: &String,

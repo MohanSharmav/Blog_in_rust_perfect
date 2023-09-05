@@ -11,6 +11,7 @@ use crate::model::posts::{
     specific_page_posts, update_post_db, update_post_without_category,
 };
 use crate::model::posts::{single_post_db, update_post_from_no_category};
+use actix::fut::err;
 use actix_identity::Identity;
 use actix_web::http::header::{ContentType, LOCATION};
 use actix_web::web::Redirect;
@@ -18,9 +19,10 @@ use actix_web::{http, web, HttpResponse};
 use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages};
 use handlebars::Handlebars;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
+use serde_json::{json, to_string_pretty};
 use std::fmt::Write;
-use validator::Validate;
+use std::mem::zeroed;
+use validator::{Validate, ValidationErrors};
 
 pub async fn get_new_post(
     config: web::Data<Configuration>,
@@ -54,40 +56,40 @@ pub async fn new_post(
     let title = &form.title;
     let description = &form.description;
     let category_id = &form.category_id;
-    let mut validation_errors = Vec::new();
     let form_result = form.validate();
-    let mut flash_errors_string = String::new();
 
-    if let Err(errors) = form_result {
-        for error in errors.field_errors() {
-            validation_errors.push(format!("{} : {:?}", error.0, error.1));
-            let error_string = errors.to_string();
-            flash_errors_string = error_string;
+    match form_result {
+        Ok(_) => {
+            if *category_id == 0_i32 {
+                create_post_without_category(title.clone(), description.clone(), db)
+                    .await
+                    .map_err(actix_web::error::ErrorInternalServerError)?;
+
+                Ok(HttpResponse::SeeOther()
+                    .insert_header((http::header::LOCATION, "/admin/posts/page/1"))
+                    .finish())
+            } else {
+                create_post(title.clone(), description.clone(), &category_id.clone(), db)
+                    .await
+                    .map_err(actix_web::error::ErrorInternalServerError)?;
+
+                Ok(HttpResponse::SeeOther()
+                    .insert_header((http::header::LOCATION, "/admin/posts/page/1"))
+                    .finish())
+            }
         }
-    }
-    if !validation_errors.is_empty() {
-        FlashMessage::error(flash_errors_string).send();
-        return Ok(HttpResponse::SeeOther()
-            .insert_header((http::header::LOCATION, "/admin/posts/page/1"))
-            .finish());
-    }
+        Err(errors) => {
+            let mut string_form_result = String::new();
+            errors.field_errors().into_iter().for_each(|_| {
+                let tmp = errors.to_string();
+                string_form_result.push_str(&*tmp)
+            });
+            FlashMessage::error(string_form_result).send();
 
-    if *category_id == 0_i32 {
-        create_post_without_category(title.clone(), description.clone(), db)
-            .await
-            .map_err(actix_web::error::ErrorInternalServerError)?;
-
-        Ok(HttpResponse::SeeOther()
-            .insert_header((http::header::LOCATION, "/admin/posts/page/1"))
-            .finish())
-    } else {
-        create_post(title.clone(), description.clone(), &category_id.clone(), db)
-            .await
-            .map_err(actix_web::error::ErrorInternalServerError)?;
-
-        Ok(HttpResponse::SeeOther()
-            .insert_header((http::header::LOCATION, "/admin/posts/page/1"))
-            .finish())
+            return Ok(HttpResponse::SeeOther()
+                .insert_header((http::header::LOCATION, "/admin/posts/page/1"))
+                .finish());
+        }
     }
 }
 
@@ -237,11 +239,9 @@ pub async fn categories_based_posts(
 
     let total_posts = individual_category_posts_count(&category_id, db)
         .await
-        .map_err(actix_web::error::ErrorInternalServerError)?
-        + SET_POSTS_PER_PAGE
-        - 1;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let total_pages_count = total_posts / SET_POSTS_PER_PAGE;
+    let total_pages_count = (total_posts + SET_POSTS_PER_PAGE - 1) / SET_POSTS_PER_PAGE;
 
     if current_page == 0 || current_page > total_pages_count as usize {
         let redirect_url = "/admin/categories/".to_string() + &category_id + &"/page/1".to_string();
@@ -290,14 +290,14 @@ pub async fn admin_index(
             .body(""));
     }
     let db = &config.database_connection;
-    let total_posts = posts::number_posts_count(db).await? + SET_POSTS_PER_PAGE - 1;
-    let total_pages_count = total_posts / SET_POSTS_PER_PAGE;
+    let total_posts = posts::number_posts_count(db).await?;
+    let total_pages_count = (total_posts + SET_POSTS_PER_PAGE - 1) / SET_POSTS_PER_PAGE;
     let current_page = current_page.into_inner();
     let mut error_html = String::new();
-    for message in flash_message.iter() {
-        writeln!(error_html, "{}", message.content())
-            .map_err(actix_web::error::ErrorInternalServerError)?;
-    }
+
+     flash_message.iter().for_each(|message|{
+         error_html.push_str(&*message.content().to_string())
+    });
     // if the user enters the wrong page number which is less than the 1 or greater total_pages_count
     // then he will be redirected to the the page 1
     if current_page == 0 || current_page > total_pages_count as i32 {

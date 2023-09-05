@@ -169,7 +169,7 @@ pub struct GetId {
     pub id: i32,
 }
 
-#[derive(Deserialize,Default, Debug, Clone, PartialEq, sqlx::FromRow)]
+#[derive(Deserialize, Default, Debug, Clone, PartialEq, sqlx::FromRow)]
 pub struct GetCategoryId {
     pub category_id: i32,
 }

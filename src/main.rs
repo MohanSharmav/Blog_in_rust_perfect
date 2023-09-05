@@ -47,7 +47,6 @@ async fn main() -> Result<(), anyhow::Error> {
     // let r2 = FOO.get();
     // println!("{:?}",r2);
 
-
     // this secret key is used to send to the user
     // and store in browser cookies
     // key : value

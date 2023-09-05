@@ -27,7 +27,7 @@ pub async fn index(
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
     let total_posts = number_posts_count(db).await?;
-    let total_pages_count = (total_posts+SET_POSTS_PER_PAGE -1)/ SET_POSTS_PER_PAGE;
+    let total_pages_count = (total_posts + SET_POSTS_PER_PAGE - 1) / SET_POSTS_PER_PAGE;
     let current_page = current_page.into_inner();
 
     if current_page > total_pages_count as i32 || current_page == 0 {
@@ -37,9 +37,10 @@ pub async fn index(
             .finish());
     }
 
-    let pagination_final_string = index_pagination(current_page as usize, total_pages_count as usize)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
+    let pagination_final_string =
+        index_pagination(current_page as usize, total_pages_count as usize)
+            .await
+            .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let exact_posts_only = specific_page_posts(current_page, &db.clone())
         .await
@@ -63,8 +64,9 @@ pub async fn show_post(
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
-    let post_id = post_id.parse::<i32>()
-        .map_err( actix_web::error::ErrorInternalServerError)?;
+    let post_id = post_id
+        .parse::<i32>()
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let post = single_post_db(post_id, db)
         .await
@@ -97,7 +99,7 @@ pub async fn get_category_based_posts(
     let total_posts_length = individual_category_posts_count(&category_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    let total_pages_count =( total_posts_length + SET_POSTS_PER_PAGE -1)/ SET_POSTS_PER_PAGE;
+    let total_pages_count = (total_posts_length + SET_POSTS_PER_PAGE - 1) / SET_POSTS_PER_PAGE;
 
     if current_page == 0 || current_page > total_pages_count as i32 {
         let redirect_url = "/posts/category/".to_string() + &category_id + &"/page/1".to_string();

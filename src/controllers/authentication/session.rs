@@ -3,8 +3,8 @@ use crate::model::authentication::session::{password_check, User};
 use actix_identity::Identity;
 use actix_web::cookie::Key;
 use actix_web::http::header::{ContentType, LOCATION};
+use actix_web::{http, web, HttpResponse};
 use actix_web::{HttpMessage, HttpRequest, Responder};
-use actix_web::{http, HttpResponse, web};
 use actix_web_flash_messages::storage::CookieMessageStore;
 use actix_web_flash_messages::{FlashMessage, FlashMessagesFramework, IncomingFlashMessages};
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
@@ -39,8 +39,8 @@ pub async fn login(
     config: web::Data<Configuration>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let user = form.into_inner();
-   let username= user.password;
-      let password_input=  user.username;
+    let username = user.password;
+    let password_input = user.username;
     // let password_input = &form.into_inner().password;
     let db = &config.database_connection;
 
@@ -66,18 +66,18 @@ pub async fn login(
         let valid_user = Argon2::default()
             .verify_password(password_input.as_bytes(), parsed_stored.borrow())
             .is_ok();
-       // let x= match valid_user{
-       //      ()=>{
-       //          Identity::login(&req.extensions(), username)
-       //              .map_err(actix_web::error::ErrorInternalServerError)?;
-       //          Ok(HttpResponse::SeeOther()
-       //              .insert_header((LOCATION, "/admin/posts/page/1"))
-       //              .finish())
-       //      },
-       //      Err(e)=>{
-       //
-       //      }
-       //  }
+        // let x= match valid_user{
+        //      ()=>{
+        //          Identity::login(&req.extensions(), username)
+        //              .map_err(actix_web::error::ErrorInternalServerError)?;
+        //          Ok(HttpResponse::SeeOther()
+        //              .insert_header((LOCATION, "/admin/posts/page/1"))
+        //              .finish())
+        //      },
+        //      Err(e)=>{
+        //
+        //      }
+        //  }
         // if verify password is successful it return true
         // check true
         if valid_user {
