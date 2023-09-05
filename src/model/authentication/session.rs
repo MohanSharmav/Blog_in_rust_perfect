@@ -1,6 +1,7 @@
 use crate::controllers::authentication::session::PasswordStruct;
 use sqlx::{Pool, Postgres};
 use std::option::Option;
+use serde::Deserialize;
 
 pub async fn password_check(
     name: &String,
@@ -20,4 +21,10 @@ pub async fn password_check(
     .await?;
 
     Ok::<std::option::Option<PasswordStruct>, anyhow::Error>(login_result)
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+pub struct User {
+    pub(crate) username: String,
+    pub(crate) password: String,
 }

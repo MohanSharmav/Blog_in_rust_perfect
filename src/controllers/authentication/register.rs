@@ -1,4 +1,4 @@
-use crate::controllers::authentication::session::User;
+use crate::model::authentication::session::User;
 use crate::controllers::constants::Configuration;
 use crate::model::authentication::register::register_user;
 use actix_web::http::header::{ContentType, LOCATION};

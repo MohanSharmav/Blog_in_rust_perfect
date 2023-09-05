@@ -233,9 +233,11 @@
               <div class="card mb-4">
                 <div class="card-body">
                   <div class="form-floating">
-                    <form action="http://localhost:8080/admin/category/{{to_be_updated_post}}/edit" method="post">
-                      <div>
-                        {{#each category_old_name}}
+
+                      <form action="http://localhost:8080/admin/category/{{category_to_update}}/edit" method="post">
+                          {{#each category_old_name}}
+
+                          <div>
                         <input
                                 type="text"
                                 class="form-control"

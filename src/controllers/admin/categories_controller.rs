@@ -31,14 +31,15 @@ pub async fn get_all_categories(
             .body(""));
     }
     let db = &config.database_connection;
+
+    let total_posts = categories::categories_count(db).await?;
     // set_posts_per_page -1 because
     // if number of posts is 13 then
     // 13/3= 4 pages but it should be 5
     // so 13+ "2" = 15 /3 is which makes 5 pages so constant-1 is perfect logic
-    let total_posts = categories::categories_count(db).await? + SET_POSTS_PER_PAGE - 1;
     // calculate the count of pages  ex:- total categories are 15 /3 =5
     // here 5 is total_pages_count
-    let total_pages_count = (total_posts / SET_POSTS_PER_PAGE) as usize;
+    let total_pages_count = (total_posts+SET_POSTS_PER_PAGE-1 )/ SET_POSTS_PER_PAGE;
     let current_page = current_page.into_inner();
     let mut error_html = String::new();
     // receive error messages from post method (check using loops)-> send to html pages
@@ -52,7 +53,7 @@ pub async fn get_all_categories(
             .content_type(ContentType::html())
             .finish())
     } else {
-        let pagination_final_string = admin_categories(current_page as usize, total_pages_count)
+        let pagination_final_string = admin_categories(current_page as usize, total_pages_count as usize)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -156,7 +157,6 @@ pub async fn edit_category(
             .insert_header((http::header::LOCATION, "/"))
             .body(""));
     }
-
     let db = &config.database_connection;
     let category_to_update = *category_to_update;
 
@@ -167,7 +167,7 @@ pub async fn edit_category(
     let html = handlebars
         .render(
             "update_category",
-            &json!({ "category_old_name": category_old_name }),
+            &json!({ "category_old_name": category_old_name,"category_to_update":category_to_update }),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

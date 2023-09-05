@@ -116,8 +116,7 @@ pub async fn category_id_from_post_id(
     )
     .bind(post_id)
     .fetch_all(db)
-    .await
-    .unwrap_or_default();
+    .await?;
     // remove option and get category_id
     let category_id = category_id_vec
         .get(0)

@@ -1,10 +1,10 @@
 use crate::controllers::constants::Configuration;
-use crate::model::authentication::session::password_check;
+use crate::model::authentication::session::{password_check, User};
 use actix_identity::Identity;
 use actix_web::cookie::Key;
 use actix_web::http::header::{ContentType, LOCATION};
 use actix_web::{HttpMessage, HttpRequest, Responder};
-use actix_web::{http, web, HttpResponse};
+use actix_web::{http, HttpResponse, web};
 use actix_web_flash_messages::storage::CookieMessageStore;
 use actix_web_flash_messages::{FlashMessage, FlashMessagesFramework, IncomingFlashMessages};
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
@@ -13,12 +13,6 @@ use serde::Deserialize;
 use serde_json::json;
 use std::borrow::Borrow;
 use std::fmt::Write;
-
-#[derive(Debug, Clone, PartialEq, Deserialize)]
-pub struct User {
-    pub(crate) username: String,
-    pub(crate) password: String,
-}
 
 pub async fn get_login(
     handlebars: web::Data<Handlebars<'_>>,
@@ -44,11 +38,13 @@ pub async fn login(
     req: HttpRequest,
     config: web::Data<Configuration>,
 ) -> Result<HttpResponse, actix_web::Error> {
-    let username = &form.username;
-    let password_input = &form.password;
+    let user = form.into_inner();
+   let username= user.password;
+      let password_input=  user.username;
+    // let password_input = &form.into_inner().password;
     let db = &config.database_connection;
 
-    let parsed_hash = password_check(username, db)
+    let parsed_hash = password_check(&username, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     // if no user exists then null will be returned from DB
@@ -70,12 +66,24 @@ pub async fn login(
         let valid_user = Argon2::default()
             .verify_password(password_input.as_bytes(), parsed_stored.borrow())
             .is_ok();
+       // let x= match valid_user{
+       //      ()=>{
+       //          Identity::login(&req.extensions(), username)
+       //              .map_err(actix_web::error::ErrorInternalServerError)?;
+       //          Ok(HttpResponse::SeeOther()
+       //              .insert_header((LOCATION, "/admin/posts/page/1"))
+       //              .finish())
+       //      },
+       //      Err(e)=>{
+       //
+       //      }
+       //  }
         // if verify password is successful it return true
         // check true
         if valid_user {
             // this actix Identity will create automatically a session
             // for the user
-            Identity::login(&req.extensions(), username.parse()?)
+            Identity::login(&req.extensions(), username)
                 .map_err(actix_web::error::ErrorInternalServerError)?;
             Ok(HttpResponse::SeeOther()
                 .insert_header((LOCATION, "/admin/posts/page/1"))
