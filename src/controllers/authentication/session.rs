@@ -12,17 +12,15 @@ use handlebars::Handlebars;
 use serde::Deserialize;
 use serde_json::json;
 use std::borrow::Borrow;
-use std::fmt::Write;
 
 pub async fn get_login(
     handlebars: web::Data<Handlebars<'_>>,
     flash_message: IncomingFlashMessages,
 ) -> Result<HttpResponse, actix_web::Error> {
     let mut error_html = String::new();
-    for message in flash_message.iter() {
-        writeln!(error_html, "{}", message.content())
-            .map_err(actix_web::error::ErrorInternalServerError)?;
-    }
+    flash_message
+        .iter()
+        .for_each(|message| error_html.push_str(&*message.content().to_string()));
 
     let html = handlebars
         .render("auth-login-basic", &json!({ "message": error_html }))
@@ -65,35 +63,25 @@ pub async fn login(
         // check the user password and check the password from database
         let valid_user = Argon2::default()
             .verify_password(password_input.as_bytes(), parsed_stored.borrow())
-            .is_ok();
-        // let x= match valid_user{
-        //      ()=>{
-        //          Identity::login(&req.extensions(), username)
-        //              .map_err(actix_web::error::ErrorInternalServerError)?;
-        //          Ok(HttpResponse::SeeOther()
-        //              .insert_header((LOCATION, "/admin/posts/page/1"))
-        //              .finish())
-        //      },
-        //      Err(e)=>{
-        //
-        //      }
-        //  }
-        // if verify password is successful it return true
-        // check true
-        if valid_user {
-            // this actix Identity will create automatically a session
-            // for the user
-            Identity::login(&req.extensions(), username)
-                .map_err(actix_web::error::ErrorInternalServerError)?;
-            Ok(HttpResponse::SeeOther()
-                .insert_header((LOCATION, "/admin/posts/page/1"))
-                .finish())
-        } else {
-            FlashMessage::error("Login Fail - Wrong Id or password!").send();
+            .map_err(actix_web::error::ErrorInternalServerError);
+        //check the verify_password is successful
+        // or failure using match
+        match valid_user {
+            Ok(_) => {
+                Identity::login(&req.extensions(), username)
+                    .map_err(actix_web::error::ErrorInternalServerError)?;
 
-            Ok(HttpResponse::SeeOther()
-                .insert_header((http::header::LOCATION, "/login"))
-                .finish())
+                Ok(HttpResponse::SeeOther()
+                    .insert_header((LOCATION, "/admin/posts/page/1"))
+                    .finish())
+            }
+            Err(_) => {
+                FlashMessage::error("Login Fail - Wrong Id or password!").send();
+
+                Ok(HttpResponse::SeeOther()
+                    .insert_header((http::header::LOCATION, "/login"))
+                    .finish())
+            }
         }
     }
 }

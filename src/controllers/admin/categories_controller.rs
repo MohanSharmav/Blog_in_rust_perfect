@@ -15,7 +15,6 @@ use anyhow::Result;
 use handlebars::Handlebars;
 use serde::Deserialize;
 use serde_json::json;
-use std::fmt::Write;
 use validator::Validate;
 
 pub async fn get_all_categories(
@@ -43,10 +42,9 @@ pub async fn get_all_categories(
     let current_page = current_page.into_inner();
     let mut error_html = String::new();
     // receive error messages from post method (check using loops)-> send to html pages
-    for message in flash_message.iter() {
-        writeln!(error_html, "{}", message.content())
-            .map_err(actix_web::error::ErrorInternalServerError)?;
-    }
+    flash_message
+        .iter()
+        .for_each(|message| error_html.push_str(&*message.content().to_string()));
     if current_page == 0 || current_page > total_pages_count as i32 {
         Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/admin/categories/page/1"))
@@ -101,22 +99,15 @@ pub async fn create_category(
     let category_name = &form.name;
     let db = &config.database_connection;
     // this function will check the user input with the struct
-    // and will get the error message from the struct
+    // and validate the from
     let form_result = form.validate();
-    let mut validation_errors = Vec::new();
-    let mut flash_error_string = String::new();
-    // check if form_result return error
-    // use this loop and get all the errors from the struct
+
+    // if form_result is result type --> if it returns ValidationError then
+    // this error shall be passed to the front end using actix message
+    // error shall be converted to string and passed
+
     if let Err(errors) = form_result {
-        for error in errors.field_errors() {
-            validation_errors.push(format!("{}: {:?}", error.0, error.1));
-            let error_string = errors.to_string();
-            flash_error_string = error_string;
-        }
-    }
-    // if validation_errors is not empty it will be filled with error message from struct
-    if !validation_errors.is_empty() {
-        FlashMessage::error(flash_error_string).send();
+        FlashMessage::error(errors.to_string()).send();
 
         return Ok(HttpResponse::SeeOther()
             .insert_header((http::header::LOCATION, "/admin/categories/page/1"))
@@ -186,21 +177,11 @@ pub async fn update_category(
     let new_category_name = &form.name;
     let category_id = id.into_inner();
     let form_result = form.validate();
-    let mut validation_errors = Vec::new();
-    let mut flash_error_string = String::new();
-
     if let Err(errors) = form_result {
-        for error in errors.field_errors() {
-            validation_errors.push(format!("{}: {:?}", error.0, error.1));
-            let error_string = errors.to_string();
-            flash_error_string = error_string;
-        }
-    }
+        FlashMessage::error(errors.to_string()).send();
 
-    if !validation_errors.is_empty() {
-        FlashMessage::error(flash_error_string).send();
         return Ok(HttpResponse::SeeOther()
-            .insert_header((http::header::LOCATION, "/admin/categories/page/1"))
+            .insert_header((http::header::LOCATION, "/admin/posts/page/1"))
             .finish());
     }
 
@@ -218,6 +199,8 @@ pub async fn update_category(
 pub struct CreateNewCategory {
     // #[validate --> will check the user input with this condition
     // message the error message is to be prompted when the validation fail
+    // .validate() will check the message
+    // this same message is sent front end with flash-message
     #[validate(length(
         min = 2,
         message = "category name cannot be empty and minimum should have 2 characters"
