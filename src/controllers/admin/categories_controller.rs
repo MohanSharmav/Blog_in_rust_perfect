@@ -101,7 +101,6 @@ pub async fn create_category(
     // this function will check the user input with the struct
     // and validate the from
     let form_result = form.validate();
-
     // if form_result is result type --> if it returns ValidationError then
     // this error shall be passed to the front end using actix message
     // error shall be converted to string and passed
@@ -128,7 +127,7 @@ pub async fn destroy_category(
     id: web::Path<String>,
     config: web::Data<Configuration>,
 ) -> Result<Redirect, actix_web::Error> {
-    let to_delete_category = &id.into_inner();
+    let to_delete_category = id.into_inner();
     let db = &config.database_connection;
 
     delete_category_db(db, to_delete_category)

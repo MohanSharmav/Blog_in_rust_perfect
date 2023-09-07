@@ -18,6 +18,8 @@ pub async fn get_login(
     flash_message: IncomingFlashMessages,
 ) -> Result<HttpResponse, actix_web::Error> {
     let mut error_html = String::new();
+    // check any flash messages have been received
+    // iterate through flash messages and add it to the string
     flash_message
         .iter()
         .for_each(|message| error_html.push_str(&*message.content().to_string()));
@@ -64,7 +66,7 @@ pub async fn login(
         let valid_user = Argon2::default()
             .verify_password(password_input.as_bytes(), parsed_stored.borrow())
             .map_err(actix_web::error::ErrorInternalServerError);
-        //check the verify_password is successful
+        // check the verify_password is successful
         // or failure using match
         match valid_user {
             Ok(_) => {

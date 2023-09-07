@@ -104,7 +104,7 @@ pub async fn get_category_based_posts(
     let total_pages_count = (total_posts_length + SET_POSTS_PER_PAGE - 1) / SET_POSTS_PER_PAGE;
 
     if current_page == 0 || current_page > total_pages_count as i32 {
-        let redirect_url = "/posts/category/".to_string() + &category_id + &"/page/1".to_string();
+        let redirect_url = "/posts/category/".to_string() + &category_id + "/page/1";
 
         Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, redirect_url))

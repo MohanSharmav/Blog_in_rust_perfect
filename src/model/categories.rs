@@ -26,7 +26,7 @@ pub async fn create_new_category_db(
 
 pub async fn delete_category_db(
     db: &Pool<Postgres>,
-    category_id: &str,
+    category_id: String,
 ) -> Result<(), anyhow::Error> {
     let category_id: i32 = category_id.parse::<i32>()?;
     // delete id from 3rd table [categories_posts]
