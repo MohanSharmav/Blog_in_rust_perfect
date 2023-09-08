@@ -28,6 +28,7 @@ use handlebars::Handlebars;
 use sqlx::postgres::PgPoolOptions;
 use std::cell::OnceCell;
 use std::sync::OnceLock;
+use serde::__private::de::borrow_cow_str;
 
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
@@ -43,10 +44,20 @@ async fn main() -> Result<(), anyhow::Error> {
     //
     // let r = FOO.get_or_init(||3);
     // println!("{:?}",r);
-
     // let r2 = FOO.get();
     // println!("{:?}",r2);
 
+
+    static CELL: OnceLock<i32> = OnceLock::new();
+
+    std::thread::spawn(|| {
+        let value: &i32 = CELL.get_or_init(|| {
+            3
+        });
+    }).join().unwrap();
+
+    let value: Option<&i32> = CELL.get();
+    pub const POST_PER_PAGE: usize =value;
     // this secret key is used to send to the user
     // and store in browser cookies
     // key : value

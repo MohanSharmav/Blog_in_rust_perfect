@@ -24,10 +24,11 @@ pub async fn posts_per_page() -> i32 {
         .build()
         .unwrap();
 
-    let db_hashmap = settings
+    let config_hashmap = settings
         .try_deserialize::<HashMap<String, String>>()
         .unwrap();
-    let x = db_hashmap.get("SET_POSTS_PER_PAGE").unwrap().to_string();
-    let y = x.parse().unwrap();
-    y
+    let post_per_page_const = config_hashmap.get("SET_POSTS_PER_PAGE").unwrap().parse::<i32>().unwrap_or_default(); ;
+
+    // let y = .parse().unwrap();
+    post_per_page_const
 }

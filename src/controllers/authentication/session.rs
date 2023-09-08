@@ -12,6 +12,7 @@ use handlebars::Handlebars;
 use serde::Deserialize;
 use serde_json::json;
 use std::borrow::Borrow;
+use web_sys::Storage;
 
 pub async fn get_login(
     handlebars: web::Data<Handlebars<'_>>,
@@ -70,6 +71,7 @@ pub async fn login(
         // or failure using match
         match valid_user {
             Ok(_) => {
+                // local_storage().map(|storage| storage.set_item("ASDSAd", "value")).map_err(actix_web::error::ErrorInternalServer);
                 Identity::login(&req.extensions(), username)
                     .map_err(actix_web::error::ErrorInternalServerError)?;
 
