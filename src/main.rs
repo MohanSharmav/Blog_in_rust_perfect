@@ -21,14 +21,16 @@ use actix_session::storage::CookieSessionStore;
 use actix_session::SessionMiddleware;
 use actix_web::cookie::Key;
 use actix_web::{web, App, HttpServer, Result};
+use config::Config;
 use controllers::admin::posts_controller::admin_index;
 use controllers::admin::posts_controller::categories_based_posts;
 use controllers::guests::posts::{get_category_based_posts, show_post};
 use handlebars::Handlebars;
-use sqlx::postgres::PgPoolOptions;
-use std::cell::OnceCell;
-use std::sync::OnceLock;
+use once_cell::sync::Lazy;
 use serde::__private::de::borrow_cow_str;
+use sqlx::postgres::PgPoolOptions;
+use std::collections::HashMap;
+use std::sync::OnceLock;
 
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
@@ -47,17 +49,40 @@ async fn main() -> Result<(), anyhow::Error> {
     // let r2 = FOO.get();
     // println!("{:?}",r2);
 
+    static POST_PER_PAGE_TEST: Lazy<i32> = Lazy::new(|| {
+        let base_path = std::env::current_dir().unwrap();
+        let configuration_directory = base_path.join("configuration");
+        let settings = Config::builder()
+            .add_source(config::File::from(
+                configuration_directory.join("db_configuration.toml"),
+            ))
+            .build()
+            .unwrap();
 
-    static CELL: OnceLock<i32> = OnceLock::new();
+        let config_hashmap = settings
+            .try_deserialize::<HashMap<String, String>>()
+            .unwrap();
+        let post_per_page_const = config_hashmap
+            .get("SET_POSTS_PER_PAGE")
+            .unwrap()
+            .parse::<i32>()
+            .unwrap_or_default();
 
-    std::thread::spawn(|| {
-        let value: &i32 = CELL.get_or_init(|| {
-            3
-        });
-    }).join().unwrap();
+        post_per_page_const
+    });
+    // println!("ready");
 
-    let value: Option<&i32> = CELL.get();
-    pub const POST_PER_PAGE: usize =value;
+    // std::thread::spawn(|| {
+    //
+    //         // Lazy::force(&lazy);
+    //         //     static value:i32= *Lazy::force(&POST_PER_PAGE_TEST);
+    //     //         //POST_PER_PAGE_TEST.to_owned();
+    //     //         println!("----{:?}", value);
+    //     // x :Option<&i32>=HASHMAP.get("Spica");
+    // })
+    // .join()
+    // .unwrap();
+
     // this secret key is used to send to the user
     // and store in browser cookies
     // key : value

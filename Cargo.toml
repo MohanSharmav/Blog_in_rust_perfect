@@ -25,3 +25,4 @@ argon2 = { version = "0.5.1", features = ["std"] }
 config = "0.13"
 puffin = "0.16.0"
 web-sys = {verion="0.3.64", features = ["Storage"]}
+once_cell = "1.18.0"

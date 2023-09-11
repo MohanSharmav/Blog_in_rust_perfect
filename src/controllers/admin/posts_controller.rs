@@ -19,6 +19,7 @@ use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages};
 use handlebars::Handlebars;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use tokio::join;
 use validator::Validate;
 
 pub async fn get_new_post(
@@ -48,6 +49,7 @@ pub async fn get_new_post(
 pub async fn new_post(
     form: web::Form<CreateNewPost>,
     config: web::Data<Configuration>,
+    handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
     let title = &form.title;
