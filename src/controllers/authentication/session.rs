@@ -44,7 +44,6 @@ pub async fn login(
     let password_input = user.username;
     // let password_input = &form.into_inner().password;
     let db = &config.database_connection;
-
     let parsed_hash = password_check(&username, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;

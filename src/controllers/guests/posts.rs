@@ -10,6 +10,7 @@ use actix_web::{web, HttpResponse, Responder};
 use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages};
 use handlebars::Handlebars;
 use serde_json::json;
+use crate::SET_POSTS_PER_PAGE;
 
 // @desc    Redirect user to index
 // @route   GET /
@@ -19,8 +20,6 @@ pub async fn redirect_user() -> impl Responder {
     web::Redirect::to("/posts/page/1")
 }
 
-pub const SET_POSTS_PER_PAGE: i64 = 3;
-
 pub async fn index(
     current_page: web::Path<i32>,
     config: web::Data<Configuration>,
@@ -29,7 +28,7 @@ pub async fn index(
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
     let total_posts = number_posts_count(db).await?;
-    let total_pages_count = (total_posts + SET_POSTS_PER_PAGE - 1) / SET_POSTS_PER_PAGE;
+    let total_pages_count = (total_posts + *SET_POSTS_PER_PAGE- 1) / *SET_POSTS_PER_PAGE;
     let current_page = current_page.into_inner();
     let mut error_html = String::new();
     //display the flash message
@@ -110,7 +109,7 @@ pub async fn get_category_based_posts(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let total_pages_count = (total_posts_length + SET_POSTS_PER_PAGE - 1) / SET_POSTS_PER_PAGE;
+    let total_pages_count = (total_posts_length + *SET_POSTS_PER_PAGE - 1) / *SET_POSTS_PER_PAGE;
 
     if current_page == 0 || current_page > total_pages_count as i32 {
         let redirect_url = "/posts/category/".to_string() + &category_id + "/page/1";
@@ -132,7 +131,7 @@ pub async fn get_category_based_posts(
             category_id.to_string(),
             db,
             current_page,
-            SET_POSTS_PER_PAGE,
+            *SET_POSTS_PER_PAGE,
         )
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;

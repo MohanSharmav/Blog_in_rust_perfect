@@ -1,7 +1,7 @@
 use crate::controllers::admin::posts_controller::Post;
-use crate::controllers::guests::posts::SET_POSTS_PER_PAGE;
 use crate::model::categories::{GetCategoryId, GetId};
 use sqlx::{Pool, Postgres, Row};
+use crate::SET_POSTS_PER_PAGE;
 
 pub async fn delete_post_db(post_id: String, db: &Pool<Postgres>) -> Result<(), anyhow::Error> {
     let to_delete = post_id.parse::<i32>()?;
@@ -130,7 +130,7 @@ pub async fn specific_page_posts(
     current_page: i32,
     db: &Pool<Postgres>,
 ) -> Result<Vec<Post>, anyhow::Error> {
-    let posts_per_page = SET_POSTS_PER_PAGE;
+    let posts_per_page = *SET_POSTS_PER_PAGE;
     let perfect_posts =
         sqlx::query_as::<_, Post>("select * from posts Order By id Asc limit $1 OFFSET ($2-1)*$1 ")
             .bind(posts_per_page)

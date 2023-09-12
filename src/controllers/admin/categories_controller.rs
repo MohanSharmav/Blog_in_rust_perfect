@@ -1,5 +1,4 @@
 use crate::controllers::constants::Configuration;
-use crate::controllers::guests::posts::SET_POSTS_PER_PAGE;
 use crate::controllers::helpers::pagination_logic::admin_categories;
 use crate::model::categories;
 use crate::model::categories::{
@@ -16,6 +15,7 @@ use handlebars::Handlebars;
 use serde::Deserialize;
 use serde_json::json;
 use validator::Validate;
+use crate::SET_POSTS_PER_PAGE;
 
 pub async fn get_all_categories(
     config: web::Data<Configuration>,
@@ -38,7 +38,7 @@ pub async fn get_all_categories(
     // so 13+ "2" = 15 /3 is which makes 5 pages so constant-1 is perfect logic
     // calculate the count of pages  ex:- total categories are 15 /3 =5
     // here 5 is total_pages_count
-    let total_pages_count = (total_posts + SET_POSTS_PER_PAGE - 1) / SET_POSTS_PER_PAGE;
+    let total_pages_count = (total_posts + *SET_POSTS_PER_PAGE - 1) / *SET_POSTS_PER_PAGE;
     let current_page = current_page.into_inner();
     let mut error_html = String::new();
     // receive error messages from post method (check using loops)-> send to html pages
@@ -56,7 +56,7 @@ pub async fn get_all_categories(
                 .await
                 .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        let all_categories = get_all_categories_db(db, current_page, SET_POSTS_PER_PAGE)
+        let all_categories = get_all_categories_db(db, current_page, *SET_POSTS_PER_PAGE)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 

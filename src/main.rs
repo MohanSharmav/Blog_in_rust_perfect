@@ -35,6 +35,29 @@ use std::sync::OnceLock;
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
 
+
+static SET_POSTS_PER_PAGE: Lazy<i64> = Lazy::new(|| {
+    let base_path = std::env::current_dir().unwrap();
+    let configuration_directory = base_path.join("configuration");
+    let settings = Config::builder()
+        .add_source(config::File::from(
+            configuration_directory.join("db_configuration.toml"),
+        ))
+        .build()
+        .unwrap();
+
+    let config_hashmap = settings
+        .try_deserialize::<HashMap<String, String>>()
+        .unwrap();
+    let post_per_page_const = config_hashmap
+        .get("SET_POSTS_PER_PAGE")
+        .unwrap()
+        .parse::<i64>()
+        .unwrap_or_default();
+
+    post_per_page_const
+});
+
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
     // this will show the rust operation in terminals
@@ -49,27 +72,6 @@ async fn main() -> Result<(), anyhow::Error> {
     // let r2 = FOO.get();
     // println!("{:?}",r2);
 
-    static POST_PER_PAGE_TEST: Lazy<i32> = Lazy::new(|| {
-        let base_path = std::env::current_dir().unwrap();
-        let configuration_directory = base_path.join("configuration");
-        let settings = Config::builder()
-            .add_source(config::File::from(
-                configuration_directory.join("db_configuration.toml"),
-            ))
-            .build()
-            .unwrap();
-
-        let config_hashmap = settings
-            .try_deserialize::<HashMap<String, String>>()
-            .unwrap();
-        let post_per_page_const = config_hashmap
-            .get("SET_POSTS_PER_PAGE")
-            .unwrap()
-            .parse::<i32>()
-            .unwrap_or_default();
-
-        post_per_page_const
-    });
     // println!("ready");
 
     // std::thread::spawn(|| {

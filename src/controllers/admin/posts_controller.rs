@@ -1,5 +1,4 @@
 use crate::controllers::constants::Configuration;
-use crate::controllers::guests::posts::SET_POSTS_PER_PAGE;
 use crate::controllers::helpers::pagination_logic::{admin_category_posts, admin_main_page};
 use crate::model::categories::{
     all_categories_db, all_categories_exclusive, category_based_posts_db,
@@ -21,6 +20,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tokio::join;
 use validator::Validate;
+use crate::SET_POSTS_PER_PAGE;
 
 pub async fn get_new_post(
     config: web::Data<Configuration>,
@@ -227,7 +227,7 @@ pub async fn categories_based_posts(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let total_pages_count = (total_posts + SET_POSTS_PER_PAGE - 1) / SET_POSTS_PER_PAGE;
+    let total_pages_count = (total_posts + *SET_POSTS_PER_PAGE - 1) / *SET_POSTS_PER_PAGE;
 
     if current_page == 0 || current_page > total_pages_count as usize {
         let redirect_url = "/admin/categories/".to_string() + &category_id + &"/page/1".to_string();
@@ -246,7 +246,7 @@ pub async fn categories_based_posts(
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
         let category_posts =
-            category_based_posts_db(category_id, db, current_page as i32, SET_POSTS_PER_PAGE)
+            category_based_posts_db(category_id, db, current_page as i32, *SET_POSTS_PER_PAGE)
                 .await
                 .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -277,7 +277,7 @@ pub async fn admin_index(
     }
     let db = &config.database_connection;
     let total_posts = posts::number_posts_count(db).await?;
-    let total_pages_count = (total_posts + SET_POSTS_PER_PAGE - 1) / SET_POSTS_PER_PAGE;
+    let total_pages_count = (total_posts + *SET_POSTS_PER_PAGE - 1) / *SET_POSTS_PER_PAGE;
     let current_page = current_page.into_inner();
     let mut error_html = String::new();
 
