@@ -80,9 +80,7 @@ pub async fn new_post(
         Err(errors) => {
             FlashMessage::error(errors.to_string()).send();
 
-            return Ok(HttpResponse::SeeOther()
-                .insert_header((http::header::LOCATION, "/admin/posts/page/1"))
-                .finish());
+            return Ok(HttpResponse::SeeOther().finish());
         }
     }
 }
