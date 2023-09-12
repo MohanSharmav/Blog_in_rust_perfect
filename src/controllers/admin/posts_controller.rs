@@ -12,6 +12,7 @@ use crate::model::posts::{
 };
 use crate::model::posts::{single_post_db, update_post_from_no_category};
 use actix_identity::Identity;
+use actix_session::Session;
 use actix_web::http::header::{ContentType, LOCATION};
 use actix_web::web::Redirect;
 use actix_web::{http, web, HttpResponse};
@@ -268,15 +269,16 @@ pub async fn categories_based_posts(
 pub async fn admin_index(
     config: web::Data<Configuration>,
     handlebars: web::Data<Handlebars<'_>>,
-    user: Option<Identity>,
+    // user: Option<Identity>,
+    session: Session,
     current_page: web::Path<i32>,
     flash_message: IncomingFlashMessages,
 ) -> Result<HttpResponse, actix_web::Error> {
-    if user.is_none() {
-        return Ok(HttpResponse::SeeOther()
-            .insert_header((http::header::LOCATION, "/"))
-            .body(""));
-    }
+    // if user.is_none() {
+    //     return Ok(HttpResponse::SeeOther()
+    //         .insert_header((http::header::LOCATION, "/"))
+    //         .body(""));
+    // }
     let db = &config.database_connection;
     let total_posts = posts::number_posts_count(db).await?;
     let total_pages_count = (total_posts + SET_POSTS_PER_PAGE - 1) / SET_POSTS_PER_PAGE;

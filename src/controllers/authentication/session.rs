@@ -13,6 +13,7 @@ use serde::Deserialize;
 use serde_json::json;
 use std::borrow::Borrow;
 use web_sys::Storage;
+use actix_session::Session;
 
 pub async fn get_login(
     handlebars: web::Data<Handlebars<'_>>,
@@ -37,6 +38,7 @@ pub async fn get_login(
 pub async fn login(
     form: web::Form<User>,
     req: HttpRequest,
+    session: Session,
     config: web::Data<Configuration>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let user = form.into_inner();
@@ -72,8 +74,9 @@ pub async fn login(
         match valid_user {
             Ok(_) => {
                 // local_storage().map(|storage| storage.set_item("ASDSAd", "value")).map_err(actix_web::error::ErrorInternalServer);
-                Identity::login(&req.extensions(), username)
-                    .map_err(actix_web::error::ErrorInternalServerError)?;
+                // Identity::login(&req.extensions(), username)
+                //     .map_err(actix_web::error::ErrorInternalServerError)?;
+                session.insert("counter", 1)?;
 
                 Ok(HttpResponse::SeeOther()
                     .insert_header((LOCATION, "/admin/posts/page/1"))
