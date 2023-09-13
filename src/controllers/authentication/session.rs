@@ -23,7 +23,6 @@ pub async fn get_login(
     flash_message
         .iter()
         .for_each(|message| error_html.push_str(message.content()));
-
     let html = handlebars
         .render("auth-login-basic", &json!({ "message": error_html }))
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -53,7 +52,7 @@ pub async fn login(
         FlashMessage::error("Login Fail - Wrong Id or password!").send();
 
         Ok(HttpResponse::SeeOther()
-            .insert_header((http::header::LOCATION, "/login"))
+            .insert_header((LOCATION, "/login"))
             .finish())
     } else {
         let struct_only = parsed_hash.unwrap_or_default();
@@ -69,8 +68,6 @@ pub async fn login(
         // or failure using match
         match valid_user {
             Ok(_) => {
-                // session.insert("counter", count + 1)?;
-
                 Identity::login(&req.extensions(), username)
                     .map_err(actix_web::error::ErrorInternalServerError)?;
 

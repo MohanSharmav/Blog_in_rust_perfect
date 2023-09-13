@@ -6,7 +6,6 @@ pub async fn index_pagination(
     let start_tag = r#"
       <br>
       <div class="paginations">"#;
-
     let mut pagination_string = String::new();
     pagination_string.push_str(start_tag);
     // use for loop so that it will act as an array
@@ -58,9 +57,7 @@ pub async fn general_category(
         <br>
         <div class="paginations">
         "#;
-
     pagination_string.push_str(end_tags);
-
     for index in 1..total_pages_count + 1 {
         if index == current_page {
             let tag_and_url = r#"<a class="active"  href="/posts/category/"#;
@@ -108,7 +105,6 @@ pub async fn admin_categories(
                       <nav aria-label="Page navigation">
                        <ul class="pagination">
                         "#;
-
     let mut pagination_string = String::new();
     pagination_string.push_str(start_tag);
     for index in 1..total_pages_count + 1 {
@@ -154,7 +150,6 @@ pub async fn admin_main_page(
                         <nav aria-label="Page navigation">
                         <ul class="pagination">
                         "#;
-
     pagination_string.push_str(start_tag);
     for index in 1..total_pages_count + 1 {
         if index == current_page {
@@ -202,7 +197,6 @@ pub async fn admin_category_posts(
    <!-- Basic Pagination -->
     <nav aria-label="Page navigation">
   <ul class="pagination">"#;
-
     let mut pagination_string = String::new();
     pagination_string.push_str(initial_tag);
     for index in 1..total_pages_count + 1 {

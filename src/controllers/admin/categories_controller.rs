@@ -44,7 +44,9 @@ pub async fn get_all_categories(
     flash_message
         .iter()
         .for_each(|message| error_html.push_str(message.content()));
+
     if current_page == 0 || current_page > total_pages_count as i32 {
+
         Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/admin/categories/page/1"))
             .content_type(ContentType::html())
@@ -54,11 +56,9 @@ pub async fn get_all_categories(
             admin_categories(current_page as usize, total_pages_count as usize)
                 .await
                 .map_err(actix_web::error::ErrorInternalServerError)?;
-
         let all_categories = get_all_categories_db(db, current_page, *SET_POSTS_PER_PAGE)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
-
         let html = handlebars
             .render(
                 "admin_category_table",
@@ -81,7 +81,6 @@ pub async fn new_category(
             .insert_header((http::header::LOCATION, "/"))
             .body(""));
     }
-
     let html = handlebars
         .render("new_category", &json!({}))
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -103,7 +102,6 @@ pub async fn create_category(
     // if form_result is result type --> if it returns ValidationError then
     // this error shall be passed to the front end using actix message
     // error shall be converted to string and passed
-
     if let Err(errors) = form_result {
         FlashMessage::error(errors.to_string()).send();
 
@@ -111,7 +109,6 @@ pub async fn create_category(
             .insert_header((http::header::LOCATION, "/admin/categories/page/1"))
             .finish());
     }
-
     create_new_category_db(db, category_name)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -128,7 +125,6 @@ pub async fn destroy_category(
 ) -> Result<Redirect, actix_web::Error> {
     let to_delete_category = id.into_inner();
     let db = &config.database_connection;
-
     delete_category_db(db, to_delete_category)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -149,11 +145,9 @@ pub async fn edit_category(
     }
     let db = &config.database_connection;
     let category_to_update = *category_to_update;
-
     let category_old_name = get_specific_category_posts(category_to_update, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-
     let html = handlebars
         .render(
             "update_category",

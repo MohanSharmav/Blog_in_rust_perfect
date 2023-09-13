@@ -13,7 +13,7 @@ use crate::controllers::authentication::session::{
 };
 use crate::controllers::constants::Configuration;
 use crate::controllers::guests::posts::{index, redirect_user};
-use crate::controllers::helpers::config::{db_config };
+use crate::controllers::helpers::config::db_config;
 use actix_files::Files;
 use actix_identity::IdentityMiddleware;
 use actix_session::config::PersistentSession;
@@ -60,7 +60,6 @@ async fn main() -> Result<(), anyhow::Error> {
     // this will show the rust operation in terminals
     std::env::set_var("RUST_LOG", "debug");
     env_logger::init();
-
     // this secret key is used to send to the user
     // and store in browser cookies
     // key : value

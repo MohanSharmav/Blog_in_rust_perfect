@@ -9,7 +9,6 @@ pub async fn db_config() -> Result<String, anyhow::Error> {
             configuration_directory.join("db_configuration.toml"),
         ))
         .build()?;
-
     let db_hashmap = settings.try_deserialize::<HashMap<String, String>>()?;
     Ok(db_hashmap.get("db_url").unwrap().into())
 }

@@ -190,11 +190,9 @@ pub async fn number_posts_count(db: &Pool<Postgres>) -> Result<i64, actix_web::e
             Ok::<i64, actix_web::Error>(final_count)
         })
         .collect();
-
     let before_remove_error = counting_final
         .get(0)
         .ok_or_else(|| actix_web::error::ErrorInternalServerError("error-1"))?;
-
     let exact_value = before_remove_error
         .as_ref()
         .map_err(|_er| actix_web::error::ErrorInternalServerError("error-2"))?;

@@ -12,10 +12,6 @@ use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages};
 use handlebars::Handlebars;
 use serde_json::json;
 
-// @desc    Redirect user to index
-// @route   GET /
-// @access  Public
-
 pub async fn redirect_user() -> impl Responder {
     web::Redirect::to("/posts/page/1")
 }
@@ -32,11 +28,9 @@ pub async fn index(
     let current_page = current_page.into_inner();
     let mut error_html = String::new();
     //display the flash message
-
     flash_message
         .iter()
         .for_each(|message| error_html.push_str(message.content()));
-
     if current_page > total_pages_count as i32 || current_page == 0 {
         FlashMessage::error("wrong page number").send();
 
@@ -49,15 +43,12 @@ pub async fn index(
         index_pagination(current_page as usize, total_pages_count as usize)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
-
     let exact_posts_only = specific_page_posts(current_page, &db.clone())
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-
     let all_categories = all_categories_db(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-
     let html = handlebars.render("common", &json!({"message":error_html,"pagination":pagination_final_string,"posts":exact_posts_only,"categories":all_categories}))
         .map_err( actix_web::error::ErrorInternalServerError)?;
 
@@ -75,15 +66,12 @@ pub async fn show_post(
     let post_id = post_id
         .parse::<i32>()
         .map_err(actix_web::error::ErrorInternalServerError)?;
-
     let post = single_post_db(post_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-
     let all_categories = all_categories_db(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-
     let html = handlebars
         .render(
             "single_post",
@@ -104,15 +92,13 @@ pub async fn get_category_based_posts(
     let db = &config.database_connection;
     let category_id = params.clone().0;
     let current_page = params.into_inner().1 as i32;
-
     let mut total_posts_length = individual_category_posts_count(&category_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    if total_posts_length==0{
-        total_posts_length+=1;
+    if total_posts_length == 0 {
+        total_posts_length += 1;
     }
     let total_pages_count = (total_posts_length + *SET_POSTS_PER_PAGE - 1) / *SET_POSTS_PER_PAGE;
-
     if current_page == 0 || current_page > total_pages_count as i32 {
         let redirect_url = "/posts/category/".to_string() + &category_id + "/page/1";
 
@@ -141,7 +127,6 @@ pub async fn get_category_based_posts(
         let all_categories = all_categories_db(db)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
-
         let html = handlebars
             .render(
                 "category",

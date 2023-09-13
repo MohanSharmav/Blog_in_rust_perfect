@@ -114,7 +114,6 @@ pub async fn individual_category_posts_count(
         .bind(category_id)
         .fetch_all(db)
         .await?;
-
     let counting_final: Vec<Result<i64, anyhow::Error>> = rows
         .into_iter()
         .map(|row| {
@@ -124,7 +123,6 @@ pub async fn individual_category_posts_count(
             Ok::<i64, anyhow::Error>(counting_final)
         })
         .collect();
-
     let before_remove_error = counting_final.get(0).ok_or(anyhow!("{}", "error"))?;
     let exact_value = before_remove_error
         .as_ref()
@@ -179,7 +177,6 @@ pub async fn categories_count(db: &Pool<Postgres>) -> result::Result<i64, actix_
         .fetch_all(db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-
     let counting_final: Vec<result::Result<i64, actix_web::Error>> = rows
         .into_iter()
         .map(|row| {
@@ -189,11 +186,9 @@ pub async fn categories_count(db: &Pool<Postgres>) -> result::Result<i64, actix_
             Ok::<i64, actix_web::Error>(final_count)
         })
         .collect();
-
     let before_remove_error = counting_final
         .get(0)
         .ok_or_else(|| actix_web::error::ErrorInternalServerError("error-1"))?;
-
     let exact_value = before_remove_error
         .as_ref()
         .map_err(|_er| actix_web::error::ErrorInternalServerError("error-2"))?;
