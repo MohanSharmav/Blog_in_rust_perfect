@@ -223,10 +223,13 @@ pub async fn categories_based_posts(
     let category_id: String = params.clone().0;
     let current_page: usize = params.into_inner().1 as usize;
 
-    let total_posts = individual_category_posts_count(&category_id, db)
+    let mut total_posts = individual_category_posts_count(&category_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-
+    println!("Total posts:------------------ {}", total_posts);
+    if total_posts==0 {
+        total_posts+=1;
+    }
     let total_pages_count = (total_posts + *SET_POSTS_PER_PAGE - 1) / *SET_POSTS_PER_PAGE;
 
     if current_page == 0 || current_page > total_pages_count as usize {

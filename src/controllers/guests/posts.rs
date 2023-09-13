@@ -105,10 +105,12 @@ pub async fn get_category_based_posts(
     let category_id = params.clone().0;
     let current_page = params.into_inner().1 as i32;
 
-    let total_posts_length = individual_category_posts_count(&category_id, db)
+    let mut total_posts_length = individual_category_posts_count(&category_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
-
+    if total_posts_length==0{
+        total_posts_length+=1;
+    }
     let total_pages_count = (total_posts_length + *SET_POSTS_PER_PAGE - 1) / *SET_POSTS_PER_PAGE;
 
     if current_page == 0 || current_page > total_pages_count as i32 {
