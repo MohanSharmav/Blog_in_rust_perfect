@@ -10,6 +10,7 @@ use crate::model::posts::{
     specific_page_posts, update_post_db, update_post_without_category,
 };
 use crate::model::posts::{single_post_db, update_post_from_no_category};
+use crate::SET_POSTS_PER_PAGE;
 use actix_identity::Identity;
 use actix_web::http::header::{ContentType, LOCATION};
 use actix_web::web::Redirect;
@@ -18,9 +19,7 @@ use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages};
 use handlebars::Handlebars;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use tokio::join;
-use validator::Validate;
-use crate::SET_POSTS_PER_PAGE;
+use validator::{Validate};
 
 pub async fn get_new_post(
     config: web::Data<Configuration>,
@@ -49,7 +48,6 @@ pub async fn get_new_post(
 pub async fn new_post(
     form: web::Form<CreateNewPost>,
     config: web::Data<Configuration>,
-    handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
     let title = &form.title;
@@ -78,9 +76,11 @@ pub async fn new_post(
             }
         }
         Err(errors) => {
-            FlashMessage::error(errors.to_string()).send();
 
-            return Ok(HttpResponse::SeeOther().finish());
+            FlashMessage::error(errors.to_string()).send();
+            return Ok(HttpResponse::SeeOther()
+                .insert_header((http::header::LOCATION, "/admin/posts/page/1"))
+                .finish());
         }
     }
 }
@@ -230,7 +230,7 @@ pub async fn categories_based_posts(
     let total_pages_count = (total_posts + *SET_POSTS_PER_PAGE - 1) / *SET_POSTS_PER_PAGE;
 
     if current_page == 0 || current_page > total_pages_count as usize {
-        let redirect_url = "/admin/categories/".to_string() + &category_id + &"/page/1".to_string();
+        let redirect_url = "/admin/categories/".to_string() + &category_id + "/page/1";
 
         Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, redirect_url))
@@ -283,7 +283,7 @@ pub async fn admin_index(
 
     flash_message
         .iter()
-        .for_each(|message| error_html.push_str(&*message.content().to_string()));
+        .for_each(|message| error_html.push_str(message.content()));
     // if the user enters the wrong page number which is less than the 1 or greater total_pages_count
     // then he will be redirected to the the page 1
     if current_page == 0 || current_page > total_pages_count as i32 {

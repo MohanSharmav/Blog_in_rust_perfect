@@ -12,7 +12,6 @@ use handlebars::Handlebars;
 use serde::Deserialize;
 use serde_json::json;
 use std::borrow::Borrow;
-use web_sys::Storage;
 
 pub async fn get_login(
     handlebars: web::Data<Handlebars<'_>>,
@@ -23,7 +22,7 @@ pub async fn get_login(
     // iterate through flash messages and add it to the string
     flash_message
         .iter()
-        .for_each(|message| error_html.push_str(&*message.content().to_string()));
+        .for_each(|message| error_html.push_str(message.content()));
 
     let html = handlebars
         .render("auth-login-basic", &json!({ "message": error_html }))

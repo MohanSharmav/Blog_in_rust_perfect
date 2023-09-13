@@ -5,12 +5,12 @@ use crate::model::categories::{
 };
 use crate::model::posts::number_posts_count;
 use crate::model::posts::{single_post_db, specific_page_posts};
+use crate::SET_POSTS_PER_PAGE;
 use actix_web::http::header::{ContentType, LOCATION};
 use actix_web::{web, HttpResponse, Responder};
 use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages};
 use handlebars::Handlebars;
 use serde_json::json;
-use crate::SET_POSTS_PER_PAGE;
 
 // @desc    Redirect user to index
 // @route   GET /
@@ -28,14 +28,14 @@ pub async fn index(
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
     let total_posts = number_posts_count(db).await?;
-    let total_pages_count = (total_posts + *SET_POSTS_PER_PAGE- 1) / *SET_POSTS_PER_PAGE;
+    let total_pages_count = (total_posts + *SET_POSTS_PER_PAGE - 1) / *SET_POSTS_PER_PAGE;
     let current_page = current_page.into_inner();
     let mut error_html = String::new();
     //display the flash message
 
     flash_message
         .iter()
-        .for_each(|message| error_html.push_str(&message.content().to_string()));
+        .for_each(|message| error_html.push_str(message.content()));
 
     if current_page > total_pages_count as i32 || current_page == 0 {
         FlashMessage::error("wrong page number").send();

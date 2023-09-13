@@ -13,7 +13,7 @@ use crate::controllers::authentication::session::{
 };
 use crate::controllers::constants::Configuration;
 use crate::controllers::guests::posts::{index, redirect_user};
-use crate::controllers::helpers::config::{db_config, posts_per_page};
+use crate::controllers::helpers::config::{db_config };
 use actix_files::Files;
 use actix_identity::IdentityMiddleware;
 use actix_session::config::PersistentSession;
@@ -27,14 +27,11 @@ use controllers::admin::posts_controller::categories_based_posts;
 use controllers::guests::posts::{get_category_based_posts, show_post};
 use handlebars::Handlebars;
 use once_cell::sync::Lazy;
-use serde::__private::de::borrow_cow_str;
 use sqlx::postgres::PgPoolOptions;
 use std::collections::HashMap;
-use std::sync::OnceLock;
 
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
-
 
 static SET_POSTS_PER_PAGE: Lazy<i64> = Lazy::new(|| {
     let base_path = std::env::current_dir().unwrap();
@@ -63,27 +60,6 @@ async fn main() -> Result<(), anyhow::Error> {
     // this will show the rust operation in terminals
     std::env::set_var("RUST_LOG", "debug");
     env_logger::init();
-    // // pub const SET_POSTS_PER_PAGES: i32 = posts_per_page();
-    // static FOO: OnceLock<i32> = OnceLock::from(posts_per_page());
-    // // static FOO: OnceLock<i32> = OnceLock::new();
-    //
-    // let r = FOO.get_or_init(||3);
-    // println!("{:?}",r);
-    // let r2 = FOO.get();
-    // println!("{:?}",r2);
-
-    // println!("ready");
-
-    // std::thread::spawn(|| {
-    //
-    //         // Lazy::force(&lazy);
-    //         //     static value:i32= *Lazy::force(&POST_PER_PAGE_TEST);
-    //     //         //POST_PER_PAGE_TEST.to_owned();
-    //     //         println!("----{:?}", value);
-    //     // x :Option<&i32>=HASHMAP.get("Spica");
-    // })
-    // .join()
-    // .unwrap();
 
     // this secret key is used to send to the user
     // and store in browser cookies

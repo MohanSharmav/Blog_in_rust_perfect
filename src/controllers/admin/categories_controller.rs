@@ -5,6 +5,7 @@ use crate::model::categories::{
     create_new_category_db, delete_category_db, get_all_categories_db, get_specific_category_posts,
     update_category_db,
 };
+use crate::SET_POSTS_PER_PAGE;
 use actix_identity::Identity;
 use actix_web::http::header::{ContentType, LOCATION};
 use actix_web::web::Redirect;
@@ -15,7 +16,6 @@ use handlebars::Handlebars;
 use serde::Deserialize;
 use serde_json::json;
 use validator::Validate;
-use crate::SET_POSTS_PER_PAGE;
 
 pub async fn get_all_categories(
     config: web::Data<Configuration>,
@@ -30,7 +30,6 @@ pub async fn get_all_categories(
             .body(""));
     }
     let db = &config.database_connection;
-
     let total_posts = categories::categories_count(db).await?;
     // set_posts_per_page -1 because
     // if number of posts is 13 then
@@ -44,7 +43,7 @@ pub async fn get_all_categories(
     // receive error messages from post method (check using loops)-> send to html pages
     flash_message
         .iter()
-        .for_each(|message| error_html.push_str(&*message.content().to_string()));
+        .for_each(|message| error_html.push_str(message.content()));
     if current_page == 0 || current_page > total_pages_count as i32 {
         Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/admin/categories/page/1"))
