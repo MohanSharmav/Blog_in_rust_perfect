@@ -90,8 +90,8 @@ pub async fn get_category_based_posts(
     handlebars: web::Data<Handlebars<'_>>,
 ) -> anyhow::Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
-    let category_id = params.clone().0;
-    let current_page = params.into_inner().1 as i32;
+
+    let (category_id, current_page) = params.into_inner();
     let mut total_posts_length = individual_category_posts_count(&category_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -99,7 +99,7 @@ pub async fn get_category_based_posts(
         total_posts_length += 1;
     }
     let total_pages_count = (total_posts_length + *SET_POSTS_PER_PAGE - 1) / *SET_POSTS_PER_PAGE;
-    if current_page == 0 || current_page > total_pages_count as i32 {
+    if current_page == 0 || current_page > total_pages_count as u32 {
         let redirect_url = "/posts/category/".to_string() + &category_id + "/page/1";
 
         Ok(HttpResponse::SeeOther()
@@ -118,7 +118,7 @@ pub async fn get_category_based_posts(
         let category_based_posts = category_based_posts_db(
             category_id.to_string(),
             db,
-            current_page,
+            current_page as i32,
             *SET_POSTS_PER_PAGE,
         )
         .await

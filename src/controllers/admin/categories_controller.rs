@@ -46,7 +46,6 @@ pub async fn get_all_categories(
         .for_each(|message| error_html.push_str(message.content()));
 
     if current_page == 0 || current_page > total_pages_count as i32 {
-
         Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/admin/categories/page/1"))
             .content_type(ContentType::html())
@@ -113,10 +112,10 @@ pub async fn create_category(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    return Ok(HttpResponse::SeeOther()
+    Ok(HttpResponse::SeeOther()
         .insert_header((LOCATION, "/admin/categories/page/1"))
         .content_type(ContentType::html())
-        .finish());
+        .finish())
 }
 
 pub async fn destroy_category(
@@ -134,7 +133,7 @@ pub async fn destroy_category(
 
 pub async fn edit_category(
     config: web::Data<Configuration>,
-    category_to_update: web::Path<i32>,
+    category_id: web::Path<i32>,
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
 ) -> Result<HttpResponse, actix_web::Error> {
@@ -144,14 +143,14 @@ pub async fn edit_category(
             .body(""));
     }
     let db = &config.database_connection;
-    let category_to_update = *category_to_update;
-    let category_old_name = get_specific_category_posts(category_to_update, db)
+    let category_id = *category_id;
+    let category_old_name = get_specific_category_posts(category_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     let html = handlebars
         .render(
             "update_category",
-            &json!({ "category_old_name": category_old_name,"category_to_update":category_to_update }),
+            &json!({ "category_old_name": category_old_name,"category_to_update":category_id }),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

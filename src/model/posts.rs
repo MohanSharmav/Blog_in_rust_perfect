@@ -19,8 +19,8 @@ pub async fn delete_post_db(post_id: String, db: &Pool<Postgres>) -> Result<(), 
 }
 
 pub async fn update_post_db(
-    title: &String,
-    description: &String,
+    title: &str,
+    description: &str,
     post_id: i32,
     category_id: &i32,
     db: &Pool<Postgres>,
@@ -55,16 +55,14 @@ pub async fn create_post(
     )
     .bind(title)
     .bind(description)
-    .fetch_all(db)
+    .fetch_one(db)
     .await?;
-    // remove id from vector
-    let post_id: &GetId = &post_id[0];
     let GetId { id } = post_id;
     // insert the dynamically generated id and category_id to 3rd table and link
     sqlx::query("insert into categories_posts values ($1,$2)")
         .bind(id)
         .bind(category_id)
-        .fetch_all(db)
+        .fetch_one(db)
         .await?;
 
     Ok(())
@@ -111,17 +109,13 @@ pub async fn category_id_from_post_id(
     post_id: i32,
     db: &Pool<Postgres>,
 ) -> Result<i32, anyhow::Error> {
-    let category_id_vec = sqlx::query_as::<_, GetCategoryId>(
+    let category_id = sqlx::query_as::<_, GetCategoryId>(
         "select category_id from categories_posts where post_id=$1",
     )
     .bind(post_id)
-    .fetch_all(db)
+    .fetch_one(db)
     .await?;
-    // remove option and get category_id
-    let category_id = category_id_vec
-        .get(0)
-        .map(|value| value.category_id)
-        .unwrap_or_default();
+    let GetCategoryId { category_id } = category_id;
 
     Ok(category_id)
 }
@@ -152,8 +146,8 @@ pub async fn single_post_db(post_id: i32, db: &Pool<Postgres>) -> Result<Vec<Pos
 }
 
 pub async fn update_post_from_no_category(
-    title: &String,
-    description: &String,
+    title: &str,
+    description: &str,
     category_id: &i32,
     id: i32,
     db: &Pool<Postgres>,
