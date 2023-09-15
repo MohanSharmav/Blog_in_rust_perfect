@@ -1,5 +1,5 @@
 use crate::controllers::constants::Configuration;
-use crate::controllers::helpers::pagination_logic::admin_categories;
+use crate::controllers::helpers::pagination_logic::admin_posts_categories;
 use crate::model::categories;
 use crate::model::categories::{
     create_new_category_db, delete_category_db, get_all_categories_db, get_specific_category_posts,
@@ -51,10 +51,13 @@ pub async fn get_all_categories(
             .content_type(ContentType::html())
             .finish())
     } else {
-        let pagination_final_string =
-            admin_categories(current_page as usize, total_pages_count as usize)
-                .await
-                .map_err(actix_web::error::ErrorInternalServerError)?;
+        let pagination_final_string = admin_posts_categories(
+            current_page as usize,
+            total_pages_count as usize,
+            "category",
+        )
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
         let all_categories = get_all_categories_db(db, current_page, *SET_POSTS_PER_PAGE)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;

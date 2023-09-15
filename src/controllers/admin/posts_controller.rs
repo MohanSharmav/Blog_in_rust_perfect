@@ -1,5 +1,5 @@
 use crate::controllers::constants::Configuration;
-use crate::controllers::helpers::pagination_logic::{admin_category_posts, admin_main_page};
+use crate::controllers::helpers::pagination_logic::{admin_category_posts, admin_posts_categories};
 use crate::model::categories::{
     all_categories_db, all_categories_exclusive, category_based_posts_db,
     get_specific_category_posts, individual_category_posts_count,
@@ -284,7 +284,7 @@ pub async fn admin_index(
             .finish())
     } else {
         let pagination_final_string =
-            admin_main_page(current_page as usize, total_pages_count as usize)
+            admin_posts_categories(current_page as usize, total_pages_count as usize, "post")
                 .await
                 .map_err(actix_web::error::ErrorInternalServerError)?;
         let exact_posts_only = specific_page_posts(current_page, db)

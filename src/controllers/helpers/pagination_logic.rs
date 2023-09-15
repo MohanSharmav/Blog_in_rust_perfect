@@ -95,9 +95,10 @@ pub async fn general_category(
     Ok(pagination_string)
 }
 
-pub async fn admin_categories(
+pub async fn admin_posts_categories(
     current_page: usize,
     total_pages_count: usize,
+    category_or_post: &str,
 ) -> Result<String, actix_web::Error> {
     let start_tag = r#"<div class="card mb-4">
                        <!-- Basic Pagination -->
@@ -105,84 +106,63 @@ pub async fn admin_categories(
                       <nav aria-label="Page navigation">
                        <ul class="pagination">
                         "#;
-    let mut pagination_string = String::new();
-    pagination_string.push_str(start_tag);
-    for index in 1..total_pages_count + 1 {
-        if index == current_page {
-            let tag_and_url = r#"
-              <li class="page-item active">
-              <a class="page-link "   href="/admin/categories/page/"#;
-            pagination_string.push_str(tag_and_url);
-            let href_link = index.to_string();
-            pagination_string.push_str(&href_link);
-            let page_constant = r#"">"#;
-            pagination_string.push_str(page_constant);
-            let text_inside_tag = index.to_string();
-            pagination_string.push_str(&text_inside_tag);
-            let close_tag = r#"</a>"#;
-            pagination_string.push_str(close_tag);
-        } else {
-            let tag_and_url = r#"
-              <li class="page-item">
-              <a class="page-link "   href="/admin/categories/page/"#;
-            pagination_string.push_str(tag_and_url);
-            let href_link = index.to_string();
-            pagination_string.push_str(&href_link);
-            let page_constant = r#"">"#;
-            pagination_string.push_str(page_constant);
-            let text_inside_tag = index.to_string();
-            pagination_string.push_str(&text_inside_tag);
-            let close_tag = r#"</a>"#;
-            pagination_string.push_str(close_tag);
-        }
-    }
-    Ok(pagination_string)
-}
-
-pub async fn admin_main_page(
-    current_page: usize,
-    total_pages_count: usize,
-) -> Result<String, actix_web::Error> {
-    let mut pagination_string = String::new();
-    let start_tag = r#"<div class="card mb-4">
-                        <!-- Basic Pagination -->
-                        <!-- Basic Pagination -->
-                        <nav aria-label="Page navigation">
-                        <ul class="pagination">
-                        "#;
-    pagination_string.push_str(start_tag);
-    for index in 1..total_pages_count + 1 {
-        if index == current_page {
-            let tag_and_url = r#"
+    let mut active_tag_and_url = String::new();
+    let mut tag_and_url = String::new();
+    if category_or_post == "post" {
+        active_tag_and_url.push_str(
+            r#"
              <li class="page-item active">
-              <a class="page-link "   href="/admin/posts/page/"#;
-            pagination_string.push_str(tag_and_url);
+              <a class="page-link "   href="/admin/posts/page/"#,
+        );
+        tag_and_url.push_str(
+            r#"
+             <li class="page-item">
+              <a class="page-link "   href="/admin/posts/page/"#,
+        );
+    } else {
+        active_tag_and_url.push_str(
+            r#"
+              <li class="page-item active">
+              <a class="page-link "   href="/admin/categories/page/"#,
+        );
+        tag_and_url.push_str(
+            r#"
+              <li class="page-item">
+              <a class="page-link "   href="/admin/categories/page/"#,
+        );
+    }
+
+    let mut pagination_string = String::new();
+    pagination_string.push_str(start_tag);
+    for index in 1..total_pages_count + 1 {
+        if index == current_page {
+            pagination_string.push_str(&*tag_and_url);
             let href_link = index.to_string();
             pagination_string.push_str(&href_link);
-            let end_of_tag = r#"">"#;
-            pagination_string.push_str(end_of_tag);
+            let page_constant = r#"">"#;
+            pagination_string.push_str(page_constant);
             let text_inside_tag = index.to_string();
             pagination_string.push_str(&text_inside_tag);
-            let close_tag = r#"</a></li>"#;
+            let close_tag = r#"</a>"#;
             pagination_string.push_str(close_tag);
         } else {
-            let tag_and_url = r#"
-             <li class="page-item">
-              <a class="page-link "   href="/admin/posts/page/"#;
-            pagination_string.push_str(tag_and_url);
+            // let tag_and_url = r#"
+            //   <li class="page-item">
+            //   <a class="page-link "   href="/admin/categories/page/"#;
+            // let tag_and_url = r#"
+            //  <li class="page-item">
+            //   <a class="page-link "   href="/admin/posts/page/"#;
+            pagination_string.push_str(&*tag_and_url);
             let href_link = index.to_string();
             pagination_string.push_str(&href_link);
-            let end_of_tag = r#"">"#;
-            pagination_string.push_str(end_of_tag);
+            let page_constant = r#"">"#;
+            pagination_string.push_str(page_constant);
             let text_inside_tag = index.to_string();
             pagination_string.push_str(&text_inside_tag);
-            let close_tag = r#"</a></li>"#;
+            let close_tag = r#"</a>"#;
             pagination_string.push_str(close_tag);
         }
     }
-    let end_tag = r#"</ul>
-        </nav>"#;
-    pagination_string.push_str(end_tag);
     Ok(pagination_string)
 }
 
