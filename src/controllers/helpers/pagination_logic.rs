@@ -136,7 +136,7 @@ pub async fn admin_posts_categories(
     pagination_string.push_str(start_tag);
     for index in 1..total_pages_count + 1 {
         if index == current_page {
-            pagination_string.push_str(&*tag_and_url);
+            pagination_string.push_str(&*active_tag_and_url);
             let href_link = index.to_string();
             pagination_string.push_str(&href_link);
             let page_constant = r#"">"#;
@@ -146,12 +146,6 @@ pub async fn admin_posts_categories(
             let close_tag = r#"</a>"#;
             pagination_string.push_str(close_tag);
         } else {
-            // let tag_and_url = r#"
-            //   <li class="page-item">
-            //   <a class="page-link "   href="/admin/categories/page/"#;
-            // let tag_and_url = r#"
-            //  <li class="page-item">
-            //   <a class="page-link "   href="/admin/posts/page/"#;
             pagination_string.push_str(&*tag_and_url);
             let href_link = index.to_string();
             pagination_string.push_str(&href_link);

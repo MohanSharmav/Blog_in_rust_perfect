@@ -1,6 +1,7 @@
 use crate::controllers::admin::posts_controller::Post;
 use crate::model::categories::{GetCategoryId, GetId};
 use crate::SET_POSTS_PER_PAGE;
+use serde::de::Unexpected::Option;
 use sqlx::{Pool, Postgres, Row};
 
 pub async fn delete_post_db(post_id: String, db: &Pool<Postgres>) -> Result<(), anyhow::Error> {
@@ -109,13 +110,17 @@ pub async fn category_id_from_post_id(
     post_id: i32,
     db: &Pool<Postgres>,
 ) -> Result<i32, anyhow::Error> {
-    let category_id = sqlx::query_as::<_, GetCategoryId>(
+    let category_id_vec = sqlx::query_as::<_, GetCategoryId>(
         "select category_id from categories_posts where post_id=$1",
     )
     .bind(post_id)
-    .fetch_one(db)
+    .fetch_all(db)
     .await?;
-    let GetCategoryId { category_id } = category_id;
+
+    let category_id = category_id_vec
+        .get(0)
+        .map(|value| value.category_id)
+        .unwrap_or_default();
 
     Ok(category_id)
 }
