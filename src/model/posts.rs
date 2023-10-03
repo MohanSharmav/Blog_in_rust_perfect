@@ -1,7 +1,6 @@
 use crate::controllers::admin::posts_controller::Post;
 use crate::model::categories::{GetCategoryId, GetId};
 use crate::SET_POSTS_PER_PAGE;
-use serde::de::Unexpected::Option;
 use sqlx::{Pool, Postgres, Row};
 
 pub async fn delete_post_db(post_id: String, db: &Pool<Postgres>) -> Result<(), anyhow::Error> {
