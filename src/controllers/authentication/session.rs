@@ -38,10 +38,10 @@ pub async fn login(
     config: web::Data<Configuration>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let user = form.into_inner();
-    let username = user.password;
-    let password_input = user.username;
+    let user_password = user.password;
+    let username = user.username;
     let db = &config.database_connection;
-    let parsed_hash = password_check(&username, db)
+    let parsed_hash = password_check(&user_password, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     // if no user exists then null will be returned from DB
@@ -61,7 +61,7 @@ pub async fn login(
             PasswordHash::new(&password).map_err(actix_web::error::ErrorInternalServerError)?;
         // check the user password and check the password from database
         let valid_user = Argon2::default()
-            .verify_password(password_input.as_bytes(), parsed_stored.borrow())
+            .verify_password(user_password.as_bytes(), parsed_stored.borrow())
             .map_err(actix_web::error::ErrorInternalServerError);
         // check the verify_password is successful
         // or failure using match
