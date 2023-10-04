@@ -22,21 +22,18 @@ pub async fn get_register(
 }
 
 pub async fn register(
-    form: web::Form<User>,
+    web::Form(User { username, password }): web::Form<User>,
     config: web::Data<Configuration>,
 ) -> Result<HttpResponse, actix_web::Error> {
-    let user_name = &form.username;
-    let password = &form.password;
     let db = &config.database_connection;
     let salt = SaltString::generate(&mut OsRng);
-    let argon2 = Argon2::default();
     // Convert raw password to encrypted or hashed password
-    let password_hash = argon2
+    let password_hash = Argon2::default()
         .hash_password(password.as_bytes(), &salt)
         .map_err(actix_web::error::ErrorInternalServerError)?
         .to_string();
     // store the hashed password in the database
-    register_user(user_name, password_hash, db)
+    register_user(&username, password_hash, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 

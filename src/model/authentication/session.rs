@@ -10,7 +10,7 @@ pub async fn password_check(
     // select password of the user and store it into option
     // if user exists, then Option<"argon_sting">
     // if no user exists, then Option<None>
-    let login_result = sqlx::query_as::<_, PasswordStruct>(
+    sqlx::query_as::<_, PasswordStruct>(
         "SELECT  password
             FROM users
             WHERE name = $1
@@ -18,9 +18,8 @@ pub async fn password_check(
     )
     .bind(name)
     .fetch_optional(db)
-    .await?;
-
-    Ok::<std::option::Option<PasswordStruct>, anyhow::Error>(login_result)
+    .await
+    .map_err(Into::into)
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]

@@ -1,15 +1,13 @@
 use crate::controllers::admin::posts_controller::PostsCategory;
-use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres, Row};
 use std::result;
 
-pub async fn all_categories_db(db: &Pool<Postgres>) -> Result<Vec<Category>, anyhow::Error> {
-    let all_categories = sqlx::query_as::<_, Category>("select name,id from categories")
+pub async fn all_categories(db: &Pool<Postgres>) -> Result<Vec<Category>, anyhow::Error> {
+    sqlx::query_as::<_, Category>("select name,id from categories")
         .fetch_all(db)
-        .await?;
-
-    Ok(all_categories)
+        .await
+        .map_err(anyhow::Error::new)
 }
 
 pub async fn create_new_category_db(
@@ -63,73 +61,50 @@ pub async fn category_based_posts_db(
     par: i32,
     posts_per_page: i64,
 ) -> Result<Vec<PostsCategory>, anyhow::Error> {
-    let category_id = category_id.parse::<i32>()?;
-    let category_posts = sqlx::query_as::<_, PostsCategory>(
+    sqlx::query_as::<_, PostsCategory>(
         "select posts.title,posts.id,posts.description,categories.name  from posts,categories_posts,categories  where categories_posts.post_id=posts.id and categories.id=categories_posts.category_id and categories_posts.category_id=$1 Order By posts.id Asc  limit $3 offset($2-1)*$3"
     )
-        .bind(category_id)
+        .bind(category_id.parse::<i32>()?)
         .bind(par)
         .bind(posts_per_page)
         .fetch_all(db)
-        .await?;
-
-    Ok(category_posts)
+        .await
+        .map_err(Into::into)
 }
 
 pub async fn get_all_categories_db(
     db: &Pool<Postgres>,
-    current_page: i32,
-    posts_per_page_constant: i64,
+    cur_page: i32,
+    posts_per_page: i64,
 ) -> Result<Vec<Category>, anyhow::Error> {
-    let all_categories = sqlx::query_as::<_, Category>(
+    sqlx::query_as::<_, Category>(
         "select name,id  from categories Order By id Asc limit $2 offset ($1-1)*$2",
     )
-    .bind(current_page)
-    .bind(posts_per_page_constant)
+    .bind(cur_page)
+    .bind(posts_per_page)
     .fetch_all(db)
-    .await?;
-
-    Ok(all_categories)
+    .await
+    .map_err(Into::into)
 }
 
-pub async fn get_specific_category_posts(
-    id: i32,
-    db: &Pool<Postgres>,
-) -> Result<Vec<Category>, anyhow::Error> {
-    let all_categories =
-        sqlx::query_as::<_, Category>("select name,id from categories where id=$1")
-            .bind(id)
-            .fetch_all(db)
-            .await?;
-
-    Ok(all_categories)
+pub async fn find_categories(id: i32, db: &Pool<Postgres>) -> Result<Vec<Category>, anyhow::Error> {
+    sqlx::query_as::<_, Category>("select name,id from categories where id=$1")
+        .bind(id)
+        .fetch_all(db)
+        .await
+        .map_err(Into::into)
 }
 
 pub async fn individual_category_posts_count(
     category_input: &str,
     db: &Pool<Postgres>,
 ) -> Result<i64, anyhow::Error> {
-    let category_id = category_input.parse::<i32>()?;
-    let rows = sqlx::query("SELECT COUNT(*) FROM categories_posts where category_id=$1")
-        .bind(category_id)
-        .fetch_all(db)
-        .await?;
-    let counting_final: Vec<Result<i64, anyhow::Error>> = rows
-        .into_iter()
-        .map(|row| {
-            let counting_final: i64 = row
-                .try_get("count")
-                .map_err(|_e| anyhow::Error::msg("failed"))?;
-            Ok::<i64, anyhow::Error>(counting_final)
-        })
-        .collect();
-    let before_remove_error = counting_final.get(0).ok_or(anyhow!("{}", "error"))?;
-    let exact_value = before_remove_error
-        .as_ref()
-        .map(|i| *i)
-        .map_err(|_e| anyhow::Error::msg("failed"))?;
-
-    Ok(exact_value)
+    sqlx::query("SELECT COUNT(*) FROM categories_posts where category_id=$1")
+        .bind(category_input.parse::<i32>()?)
+        .fetch_one(db)
+        .await
+        .and_then(|inner| inner.try_get("count"))
+        .map_err(Into::into)
 }
 
 pub async fn all_categories_exclusive(
@@ -137,12 +112,11 @@ pub async fn all_categories_exclusive(
     category_id: i32,
 ) -> Result<Vec<Category>, anyhow::Error> {
     // Get all categories name expect the given category_id
-    let all_categories = sqlx::query_as::<_, Category>(" select * from categories where Not id=$1")
+    sqlx::query_as::<_, Category>(" select * from categories where Not id=$1")
         .bind(category_id)
         .fetch_all(db)
-        .await?;
-
-    Ok(all_categories)
+        .await
+        .map_err(Into::into)
 }
 
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
@@ -173,25 +147,9 @@ pub struct GetCategoryId {
 }
 
 pub async fn categories_count(db: &Pool<Postgres>) -> result::Result<i64, actix_web::error::Error> {
-    let rows = sqlx::query("SELECT COUNT(*) FROM categories")
-        .fetch_all(db)
+    sqlx::query("SELECT COUNT(*) FROM categories")
+        .fetch_one(db)
         .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-    let counting_final: Vec<result::Result<i64, actix_web::Error>> = rows
-        .into_iter()
-        .map(|row| {
-            let final_count: i64 = row
-                .try_get("count")
-                .map_err(actix_web::error::ErrorInternalServerError)?;
-            Ok::<i64, actix_web::Error>(final_count)
-        })
-        .collect();
-    let before_remove_error = counting_final
-        .get(0)
-        .ok_or_else(|| actix_web::error::ErrorInternalServerError("error-1"))?;
-    let exact_value = before_remove_error
-        .as_ref()
-        .map_err(|_er| actix_web::error::ErrorInternalServerError("error-2"))?;
-
-    Ok(*exact_value)
+        .and_then(|row| row.try_get("count"))
+        .map_err(|err| actix_web::error::ErrorInternalServerError(err))
 }

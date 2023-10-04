@@ -42,23 +42,23 @@ pub async fn update_post_db(
 }
 
 pub async fn create_post(
-    title: String,
-    description: String,
+    title: &str,
+    description: &str,
     category_id: &i32,
     db: &Pool<Postgres>,
 ) -> Result<(), anyhow::Error> {
     // use this query to get the id of the newly created post
     // this is because id is generated dynamically
     // you need post_id to link it with the category_id in 3rd table categories_posts
-    let post_id = sqlx::query_as::<_, GetId>(
+    let GetId { id } = sqlx::query_as::<_, GetId>(
         "insert into posts(title,description) values($1,$2) returning id",
     )
     .bind(title)
     .bind(description)
     .fetch_one(db)
     .await?;
-    let GetId { id } = post_id;
     // insert the dynamically generated id and category_id to 3rd table and link
+
     sqlx::query("insert into categories_posts values ($1,$2)")
         .bind(id)
         .bind(category_id)
@@ -69,8 +69,8 @@ pub async fn create_post(
 }
 
 pub async fn create_post_without_category(
-    title: String,
-    description: String,
+    title: &str,
+    description: &str,
     db: &Pool<Postgres>,
 ) -> Result<(), anyhow::Error> {
     // do not touch 3rd table because post has no categroy
@@ -109,44 +109,34 @@ pub async fn category_id_from_post_id(
     post_id: i32,
     db: &Pool<Postgres>,
 ) -> Result<i32, anyhow::Error> {
-    let category_id_vec = sqlx::query_as::<_, GetCategoryId>(
+    Ok(sqlx::query_as::<_, GetCategoryId>(
         "select category_id from categories_posts where post_id=$1",
     )
     .bind(post_id)
-    .fetch_all(db)
-    .await?;
-
-    let category_id = category_id_vec
-        .get(0)
-        .map(|value| value.category_id)
-        .unwrap_or_default();
-
-    Ok(category_id)
+    .fetch_optional(db)
+    .await?
+    .map(|inner| inner.category_id)
+    .unwrap_or_default())
 }
 
 pub async fn specific_page_posts(
-    current_page: i32,
+    cur_page: i32,
     db: &Pool<Postgres>,
 ) -> Result<Vec<Post>, anyhow::Error> {
-    let posts_per_page = *SET_POSTS_PER_PAGE;
-    let perfect_posts =
-        sqlx::query_as::<_, Post>("select * from posts Order By id Asc limit $1 OFFSET ($2-1)*$1 ")
-            .bind(posts_per_page)
-            .bind(current_page)
-            .fetch_all(db)
-            .await?;
-
-    Ok(perfect_posts)
+    sqlx::query_as::<_, Post>("select * from posts Order By id Asc limit $1 OFFSET ($2-1)*$1 ")
+        .bind(*SET_POSTS_PER_PAGE)
+        .bind(cur_page)
+        .fetch_all(db)
+        .await
+        .map_err(Into::into)
 }
 
-pub async fn single_post_db(post_id: i32, db: &Pool<Postgres>) -> Result<Vec<Post>, anyhow::Error> {
-    let single_post =
-        sqlx::query_as::<_, Post>("select id, title, description from posts  WHERE id=$1")
-            .bind(post_id)
-            .fetch_all(db)
-            .await?;
-
-    Ok(single_post)
+pub async fn find_post(post_id: i32, db: &Pool<Postgres>) -> Result<Vec<Post>, anyhow::Error> {
+    sqlx::query_as::<_, Post>("select id, title, description from posts  WHERE id=$1")
+        .bind(post_id)
+        .fetch_all(db)
+        .await
+        .map_err(Into::into)
 }
 
 pub async fn update_post_from_no_category(
@@ -174,26 +164,9 @@ pub async fn update_post_from_no_category(
 }
 
 pub async fn number_posts_count(db: &Pool<Postgres>) -> Result<i64, actix_web::error::Error> {
-    let rows = sqlx::query("SELECT COUNT(*) FROM posts")
-        .fetch_all(db)
+    sqlx::query("SELECT COUNT(*) FROM posts")
+        .fetch_one(db)
         .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-    // use below lines to get PgRow from Vec<PgRow>
-    let counting_final: Vec<Result<i64, actix_web::Error>> = rows
-        .into_iter()
-        .map(|row| {
-            let final_count: i64 = row
-                .try_get("count")
-                .map_err(actix_web::error::ErrorInternalServerError)?;
-            Ok::<i64, actix_web::Error>(final_count)
-        })
-        .collect();
-    let before_remove_error = counting_final
-        .get(0)
-        .ok_or_else(|| actix_web::error::ErrorInternalServerError("error-1"))?;
-    let exact_value = before_remove_error
-        .as_ref()
-        .map_err(|_er| actix_web::error::ErrorInternalServerError("error-2"))?;
-
-    Ok(*exact_value)
+        .and_then(|row| row.try_get("count"))
+        .map_err(actix_web::error::ErrorInternalServerError)
 }
