@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
+    <!--    <link rel="stylesheet" href="/assets/css/common.css" />-->
     <link rel="stylesheet" href="/assets/css/common.css" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
@@ -16,8 +16,10 @@
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css" />
     <!-- Core theme CSS (includes Bootstrap)-->
     <link href="css/styles.css" rel="stylesheet" />
+    <script></script>
 </head>
 <body>
+
 <!-- Navigation-->
 <nav class="navbar navbar-expand-lg navbar-light" id="mainNav">
     <div class="container px-4 px-lg-5">
@@ -34,6 +36,8 @@
         </div>
     </div>
 </nav>
+
+
 <!-- Page Header-->
 <header class="masthead" style="background-image: url('assets/img/home-bg.jpg')">
     <div class="container position-relative px-4 px-lg-5">
@@ -47,39 +51,65 @@
         </div>
     </div>
 </header>
-
 <!--nav-->
 <nav class="bossing">
     <h3>Categories </h3>
     <ul>
-        {{#each o}}
-            <li><a href="/posts/category/{{this.id}}/page/1">{{this.name}}</a></li>
+        {{#each categories}}
+        <li><a href="/posts/category/{{this.id}}/page/1">{{this.name}}</a></li>
         {{/each}}
     </ul>
-
 </nav>
+<div class="col-md">
 
+{{#if message}}
+<div class="alert alert-info alert-dismissible" role="alert">
+    {{message}}
+    {{/if}}
+</div>
+</div>
 <!-- Main Content-->
-
-<section class="home-section">
-    <div class="home-content">
-        <span class="text"></span>
+<article>
+    <div class="container px-4 px-lg-5">
+        <!--    <div class="container px-8 px-lg-8">-->
+        <div class="container px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+                <div class="col-md-10 col-lg-8 col-xl-7">
+                    <!-- Post preview-->
+                    {{#each posts}}
+                    <div class="post-preview">
+                        <a href="post.html">
+                            <a href="/posts/{{this.id}}">
+                                <h1 class="post-title"> {{this.title}}</h1>
+                            </a>
+                            <a href="/posts/{{this.id}}">
+                                <h3 class="post-subtitle">{{this.description}}</h3>
+                            </a>
+                        </a>
+                    </div>
+                    <!--
+                       Divider-->
+                    <hr class="my-4" />
+                    {{/each}}
+                </div>
+            </div>
+            <!--            <div class="all_pagination ">-->
+            <!--                <div class="pagination ">-->
+            <!--                    {{{pagination}}}-->
+            <!--                </div>-->
+            <!--            </div>-->
+            <div class="pagi">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination">
+                        &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp     &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp  &nbsp&nbsp&nbsp&nbsp&nbsp {{{pagination}}}
+                    </ul>
+                </nav>
+            </div>
+        </div>
     </div>
-
-    <div class="Post_data" style="float:center">
-        <h3 style="text-align:left;font-size:40px">
-            {{#each single_post}}<br/>
-               <h1 style="text-align: center;font-size:80px"> {{this.title}}</h1>
-               <p style="text-align: center;font-size:35px"> &nbsp; {{this.description}}</p>
-            {{/each}}
-        </h3>
-
-    </div>
-    </div>
-</section>
-
+</article>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-<!-- Core theme JS-->
+<
 <script src="js/scripts.js"></script>
 </body>
 </html>

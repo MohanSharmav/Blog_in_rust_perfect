@@ -1,0 +1,2 @@
+db_url = "postgres://mohanvenkatesh:Msvmsd183!@localhost:5432/3_dummy"
+SET_POSTS_PER_PAGE = 3

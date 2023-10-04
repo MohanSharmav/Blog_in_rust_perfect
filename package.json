@@ -1,5 +1,8 @@
 {
   "dependencies": {
     "handlebars-paginate": "^0.1.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.0.2"
   }
 }

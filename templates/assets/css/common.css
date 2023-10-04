@@ -10842,9 +10842,7 @@ header.masthead .post-heading .meta a {
 
 .dropdown:hover .dropbtn {background-color: #42aaf5;}
 
-
-        .bossing
-          {
+.bossing {
   float: right;
   width: 20%;
   height: 500px; /* only for demonstration, should be removed */
@@ -10901,7 +10899,6 @@ article {
 .paginations a.active {
   background-color: #11101d;
   color: white;
-    border: 1px solid #4CAF50;
 
 }
 

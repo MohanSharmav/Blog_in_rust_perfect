@@ -2,12 +2,11 @@
 <html lang="en">
 <head>
     <link rel="stylesheet" href="/assets/css/common.css" />
-
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta name="description" content="" />
     <meta name="author" content="" />
-    <title>Clean Blog - Start Bootstrap Theme</title>
+    <title>Clean Blog</title>
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
     <!-- Font Awesome icons (free version)-->
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
@@ -47,66 +46,30 @@
         </div>
     </div>
 </header>
-
 <!--nav-->
 <nav class="bossing">
     <h3>Categories </h3>
     <ul>
-        {{#each o}}
-            <li><a href="/posts/category/{{this.id}}/page/1">{{this.name}}</a></li>
+        {{#each categories}}
+        <li><a href="/posts/category/{{this.id}}/page/1">{{this.name}}</a></li>
         {{/each}}
     </ul>
-
 </nav>
-
 <!-- Main Content-->
-<article>
-    <div class="container px-4 px-lg-5">
-
-        <!--    <div class="container px-8 px-lg-8">-->
-
-        <div class="container px-4 px-lg-5">
-            <div class="row gx-4 gx-lg-5 justify-content-center">
-                <div class="col-md-10 col-lg-8 col-xl-7">
-                    <!-- Post preview-->
-                    {{#each tiger}}
-
-                        <div class="post-preview">
-                            <a href="post.html">
-
-
-                                <a href="/posts/{{this.id}}">  <h1 class="post-title"> {{this.title}}</h1></a>
-                                <a href="/posts/{{this.id}}">  <h3 class="post-subtitle">{{this.description}}</h3></a>
-                            </a>
-                        </div>
-
-                        <!-- Divider-->
-                        <hr class="my-4" />
-                    {{/each}}
-                </div>
-            </div>
-<!--            <div class="pagination_numbers">-->
-<!--                <nav aria-label="Page navigation example">-->
-<!--                    <ul class="pagination">-->
-<!--                        {{#each pages_count }}-->
-<!--                            <li class="page-item"><a class="page-link" href="{{this}}">{{this}}</a></li>-->
-<!--                        {{/each}}-->
-<!--                    </ul>-->
-<!--                </nav>-->
-
-<!--            </div>-->
-            <div class="pagi">
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination">
-                        &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp     &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp  &nbsp&nbsp&nbsp&nbsp&nbsp {{{pagination}}}
-
-                    </ul>
-                </nav>
-            </div>
-        </div>
+<section class="home-section">
+    <div class="home-content">
+        <span class="text"></span>
     </div>
-</article>
-
+    <div class="Post_data" style="float:center">
+        <h3 style="text-align:left;font-size:40px">
+            {{#each post}}<br/>
+            <h1 style="text-align: center;font-size:80px"> {{this.title}}</h1>
+            <p style="text-align: center;font-size:35px"> &nbsp; {{this.description}}</p>
+            {{/each}}
+        </h3>
+    </div>
+    </div>
+</section>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Core theme JS-->
 <script src="js/scripts.js"></script>

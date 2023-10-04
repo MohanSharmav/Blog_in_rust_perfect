@@ -1,15 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-<!--    <link rel="stylesheet" href="/assets/css/common.css" />-->
     <link rel="stylesheet" href="/assets/css/common.css" />
-
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta name="description" content="" />
     <meta name="author" content="" />
-    <title>Clean Blog</title>
+    <title>Clean Blog - Start Bootstrap Theme</title>
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
     <!-- Font Awesome icons (free version)-->
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
@@ -18,11 +15,6 @@
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css" />
     <!-- Core theme CSS (includes Bootstrap)-->
     <link href="css/styles.css" rel="stylesheet" />
-
-
-    <script>
-
-</script>
 </head>
 <body>
 <!-- Navigation-->
@@ -54,67 +46,58 @@
         </div>
     </div>
 </header>
-
 <!--nav-->
 <nav class="bossing">
     <h3>Categories </h3>
     <ul>
-        {{#each o}}
-            <li><a href="/posts/category/{{this.id}}/page/1">{{this.name}}</a></li>
+        {{#each categories}}
+        <li><a href="/posts/category/{{this.id}}/page/1">{{this.name}}</a></li>
         {{/each}}
     </ul>
-
 </nav>
-
 <!-- Main Content-->
 <article>
     <div class="container px-4 px-lg-5">
-
         <!--    <div class="container px-8 px-lg-8">-->
-
         <div class="container px-4 px-lg-5">
             <div class="row gx-4 gx-lg-5 justify-content-center">
                 <div class="col-md-10 col-lg-8 col-xl-7">
                     <!-- Post preview-->
-                    {{#each tiger}}
-
-                        <div class="post-preview">
-                            <a href="post.html">
-
-
-                                <a href="/posts/{{this.id}}">  <h1 class="post-title"> {{this.title}}</h1></a>
-                                <a href="/posts/{{this.id}}">  <h3 class="post-subtitle">{{this.description}}</h3></a>
+                    {{#each posts}}
+                    <div class="post-preview">
+                        <a href="post.html">
+                            <a href="/posts/{{this.id}}">
+                                <h1 class="post-title"> {{this.title}}</h1>
                             </a>
-                        </div>
-
-                        <!--
-                         Divider-->
-                        <hr class="my-4" />
+                            <a href="/posts/{{this.id}}">
+                                <h3 class="post-subtitle">{{this.description}}</h3>
+                            </a>
+                        </a>
+                    </div>
+                    <!-- Divider-->
+                    <hr class="my-4" />
                     {{/each}}
                 </div>
             </div>
-
-
-<!--            <div class="all_pagination ">-->
-<!--                <div class="pagination ">-->
-<!--                    {{{pagination}}}-->
-<!--                </div>-->
-<!--            </div>-->
+            <!--            <div class="pagination_numbers">-->
+            <!--                <nav aria-label="Page navigation example">-->
+            <!--                    <ul class="pagination">-->
+            <!--                        {{#each pages_count }}-->
+            <!--                            <li class="page-item"><a class="page-link" href="{{this}}">{{this}}</a></li>-->
+            <!--                        {{/each}}-->
+            <!--                    </ul>-->
+            <!--                </nav>-->
+            <!--            </div>-->
             <div class="pagi">
-            <nav aria-label="Page navigation example">
-                <ul class="pagination">
-                    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp     &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp  &nbsp&nbsp&nbsp&nbsp&nbsp {{{pagination}}}
-
-                </ul>
-            </nav>
+                    <ul class="pagination">
+                        &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp   &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp     &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp  &nbsp&nbsp&nbsp&nbsp&nbsp {{{pagination}}}
+                    </ul>
             </div>
-    </div>
+        </div>
     </div>
 </article>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<
+<!-- Core theme JS-->
 <script src="js/scripts.js"></script>
 </body>
 </html>
