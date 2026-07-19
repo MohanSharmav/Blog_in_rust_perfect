@@ -1,6 +1,9 @@
 use crate::controllers::constants::Configuration;
-use crate::controllers::guests::posts::{SET_POSTS_PER_PAGE};
-use crate::controllers::helpers::pagination_logic::admin_categories;
+use crate::controllers::guests::posts::SET_POSTS_PER_PAGE;
+use crate::controllers::helpers::auth_guard::require_login;
+use crate::controllers::helpers::flash::render_flash_messages;
+use crate::controllers::helpers::pagination_logic::{admin_categories, resolve_current_page};
+use crate::controllers::helpers::validated_form::validate_or_redirect;
 use crate::model::categories::{
     all_categories_db, create_new_category_db, delete_category_db, get_all_categories_db,
     get_specific_category_posts, update_category_db,
@@ -10,15 +13,12 @@ use actix_http::header::LOCATION;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
 use actix_web::web::Redirect;
-use actix_web::{http, web, HttpResponse};
-use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages};
+use actix_web::{web, HttpResponse};
+use actix_web_flash_messages::IncomingFlashMessages;
 use anyhow::Result;
 use handlebars::Handlebars;
 use serde_json::json;
-use sqlx::{Pool, Postgres, Row};
-use std::fmt::Write;
-use std::result;
-use validator::Validate;
+use sqlx::{Pool, Postgres};
 
 pub async fn get_all_categories(
     config: web::Data<Configuration>,
@@ -27,60 +27,52 @@ pub async fn get_all_categories(
     params: web::Path<i32>,
     flash_message: IncomingFlashMessages,
 ) -> Result<HttpResponse, actix_web::Error> {
-    if user.is_none() {
-        return Ok(HttpResponse::SeeOther()
-            .insert_header((http::header::LOCATION, "/"))
-            .body(""));
+    if let Some(redirect) = require_login(&user) {
+        return Ok(redirect);
     }
 
     let db = &config.database_connection;
     let total_posts_length = get_pagination_for_all_categories_list(db).await?;
     let posts_per_page_constant = SET_POSTS_PER_PAGE;
-    let mut posts_per_page = total_posts_length / posts_per_page_constant;
-    let check_remainder = total_posts_length % posts_per_page_constant;
-    if check_remainder != 0 {
-        posts_per_page += 1;
-    }
-    let posts_per_page = posts_per_page as usize;
-    let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    let posts_per_page_constant = SET_POSTS_PER_PAGE as i32;
     let param = params.into_inner();
-    let count_of_number_of_pages = pages_count.len();
-    let current_page: usize = param as usize;
-    let mut error_html = String::new();
-    for message in flash_message.iter() {
-        writeln!(error_html, "{}", message.content())
-            .map_err(actix_web::error::ErrorInternalServerError)?;
-    }
-    if current_page == 0 || current_page > count_of_number_of_pages {
-        Ok(HttpResponse::SeeOther()
-            .insert_header((LOCATION, "/admin/categories/page/1"))
-            .content_type(ContentType::html())
-            .finish())
-    } else {
-        let pagination_final_string = admin_categories(current_page, count_of_number_of_pages)
-            .await
-            .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        let all_category = all_categories_db(db)
-            .await
-            .map_err(actix_web::error::ErrorInternalServerError)?;
+    let (current_page, count_of_number_of_pages) = match resolve_current_page(
+        param as i64,
+        total_posts_length,
+        posts_per_page_constant,
+        false,
+        "/admin/categories/page/1",
+    ) {
+        Ok(resolved) => resolved,
+        Err(redirect) => return Ok(redirect),
+    };
 
-        let all_categories = get_all_categories_db(db, param, posts_per_page_constant)
-            .await
-            .map_err(actix_web::error::ErrorInternalServerError)?;
+    let pages_count: Vec<_> = (1..=count_of_number_of_pages).collect();
+    let posts_per_page_constant = SET_POSTS_PER_PAGE as i32;
+    let error_html = render_flash_messages(&flash_message)?;
 
-        let html = handlebars
-            .render(
-                "admin_category_table",
-                &json!({"message": error_html,"pagination":pagination_final_string,"z": &all_categories,"o":all_category,"pages_count":pages_count}),
-            )
-            .map_err(actix_web::error::ErrorInternalServerError)?;
+    let pagination_final_string = admin_categories(current_page, count_of_number_of_pages)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        Ok(HttpResponse::Ok()
-            .content_type(ContentType::html())
-            .body(html))
-    }
+    let all_category = all_categories_db(db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    let all_categories = get_all_categories_db(db, param, posts_per_page_constant)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    let html = handlebars
+        .render(
+            "admin_category_table",
+            &json!({"message": error_html,"pagination":pagination_final_string,"z": &all_categories,"o":all_category,"pages_count":pages_count}),
+        )
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    Ok(HttpResponse::Ok()
+        .content_type(ContentType::html())
+        .body(html))
 }
 
 pub async fn new_category(
@@ -88,10 +80,8 @@ pub async fn new_category(
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
 ) -> Result<HttpResponse, actix_web::Error> {
-    if user.is_none() {
-        return Ok(HttpResponse::SeeOther()
-            .insert_header((http::header::LOCATION, "/"))
-            .body(""));
+    if let Some(redirect) = require_login(&user) {
+        return Ok(redirect);
     }
     let db = &config.database_connection;
     let all_category = all_categories_db(db)
@@ -99,7 +89,7 @@ pub async fn new_category(
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     let html = handlebars
-        .render("new_category", &json!({"o":"ax","o":all_category}))
+        .render("new_category", &json!({"o":all_category}))
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
@@ -113,23 +103,9 @@ pub async fn create_category(
 ) -> Result<HttpResponse, actix_web::Error> {
     let name = &form.name;
     let db = &config.database_connection;
-    let form_result = form.validate();
-    let mut validation_errors = Vec::new();
-    let mut flash_error_string = String::new();
 
-    if let Err(errors) = form_result {
-        for error in errors.field_errors() {
-            validation_errors.push(format!("{}: {:?}", error.0, error.1));
-            let error_string = errors.to_string();
-            flash_error_string = error_string;
-        }
-    }
-
-    if !validation_errors.is_empty() {
-        FlashMessage::error(flash_error_string).send();
-        return Ok(HttpResponse::SeeOther()
-            .insert_header((http::header::LOCATION, "/admin/categories/page/1"))
-            .finish());
+    if let Some(redirect) = validate_or_redirect(&*form, "/admin/categories/page/1") {
+        return Ok(redirect);
     }
 
     create_new_category_db(db, name)
@@ -160,10 +136,8 @@ pub async fn edit_category(
     handlebars: web::Data<Handlebars<'_>>,
     user: Option<Identity>,
 ) -> Result<HttpResponse, actix_web::Error> {
-    if user.is_none() {
-        return Ok(HttpResponse::SeeOther()
-            .insert_header((http::header::LOCATION, "/"))
-            .body(""));
+    if let Some(redirect) = require_login(&user) {
+        return Ok(redirect);
     }
 
     let db = &config.database_connection;
@@ -199,23 +173,8 @@ pub async fn update_category(
     let name = &form.name;
     let category_id = id.into_inner();
 
-    let form_result = form.validate();
-    let mut validation_errors = Vec::new();
-    let mut flash_error_string = String::new();
-
-    if let Err(errors) = form_result {
-        for error in errors.field_errors() {
-            validation_errors.push(format!("{}: {:?}", error.0, error.1));
-            let error_string = errors.to_string();
-            flash_error_string = error_string;
-        }
-    }
-
-    if !validation_errors.is_empty() {
-        FlashMessage::error(flash_error_string).send();
-        return Ok(HttpResponse::SeeOther()
-            .insert_header((http::header::LOCATION, "/admin/categories/page/1"))
-            .finish());
+    if let Some(redirect) = validate_or_redirect(&*form, "/admin/categories/page/1") {
+        return Ok(redirect);
     }
 
     update_category_db(name, category_id, db)
@@ -230,29 +189,9 @@ pub async fn update_category(
 
 pub async fn get_pagination_for_all_categories_list(
     db: &Pool<Postgres>,
-) -> result::Result<i64, actix_web::error::Error> {
-    let rows = sqlx::query("SELECT COUNT(*) FROM categories")
-        .fetch_all(db)
+) -> Result<i64, actix_web::error::Error> {
+    sqlx::query_scalar("SELECT COUNT(*) FROM categories")
+        .fetch_one(db)
         .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-    let counting_final: Vec<result::Result<i64, actix_web::Error>> = rows
-        .into_iter()
-        .map(|row| {
-            let final_count: i64 = row
-                .try_get("count")
-                .map_err(actix_web::error::ErrorInternalServerError)?;
-            Ok::<i64, actix_web::Error>(final_count)
-        })
-        .collect();
-
-    let before_remove_error = counting_final
-        .get(0)
-        .ok_or_else(|| actix_web::error::ErrorInternalServerError("error-1"))?;
-
-    let exact_value = before_remove_error
-        .as_ref()
-        .map_err(|_er| actix_web::error::ErrorInternalServerError("error-2"))?;
-
-    Ok(*exact_value)
+        .map_err(actix_web::error::ErrorInternalServerError)
 }

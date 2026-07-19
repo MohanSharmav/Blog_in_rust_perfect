@@ -1,4 +1,5 @@
 use crate::controllers::constants::Configuration;
+use crate::controllers::helpers::flash::render_flash_messages;
 use crate::model::authentication::session::login_database;
 use crate::model::structs::LoginCheck;
 use actix_http::header::LOCATION;
@@ -13,7 +14,6 @@ use handlebars::Handlebars;
 use magic_crypt::MagicCryptTrait;
 use serde::Deserialize;
 use serde_json::json;
-use std::fmt::Write;
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct User {
@@ -24,11 +24,7 @@ pub async fn get_login(
     handlebars: web::Data<Handlebars<'_>>,
     flash_message: IncomingFlashMessages,
 ) -> Result<HttpResponse, actix_web::Error> {
-    let mut error_html = String::new();
-    for message in flash_message.iter() {
-        writeln!(error_html, "{}", message.content())
-            .map_err(actix_web::error::ErrorInternalServerError)?;
-    }
+    let error_html = render_flash_messages(&flash_message)?;
     let html = handlebars
         .render("auth-login-basic", &json!({ "message": error_html }))
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -44,7 +40,7 @@ pub async fn login(
     config: web::Data<Configuration>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let username = &form.username;
-    let password = &form.password.to_string();
+    let password = &form.password;
     let mcrypt = &config.magic_key;
     let encrypted_password = mcrypt.encrypt_str_to_base64(password);
     let db = &config.database_connection;
@@ -54,7 +50,7 @@ pub async fn login(
 
     let logic_check_value = LoginCheck { value: 1 };
     if login_result == logic_check_value {
-        Identity::login(&req.extensions(), username.to_string())
+        Identity::login(&req.extensions(), username.clone())
             .map_err(actix_web::error::ErrorInternalServerError)?;
         Ok(HttpResponse::SeeOther()
             .insert_header((LOCATION, "/admin/posts/page/1"))

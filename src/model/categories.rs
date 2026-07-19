@@ -1,6 +1,5 @@
 use crate::model::structs::{Categories, PostsCategories};
-use anyhow::anyhow;
-use sqlx::{Pool, Postgres, Row};
+use sqlx::{Pool, Postgres};
 
 pub async fn all_categories_db(db: &Pool<Postgres>) -> Result<Vec<Categories>, anyhow::Error> {
     let all_categories = sqlx::query_as::<_, Categories>("select name,id from categories")
@@ -56,7 +55,7 @@ pub async fn update_category_db(
 pub async fn category_db(
     category_id: String,
     db: &Pool<Postgres>,
-    par: i32,
+    page_number: i32,
     posts_per_page: i64,
 ) -> Result<Vec<PostsCategories>, anyhow::Error> {
     let category_id = category_id.parse::<i32>()?;
@@ -64,7 +63,7 @@ pub async fn category_db(
         "select posts.title,posts.id,posts.description,categories.name  from posts,categories_posts,categories  where categories_posts.post_id=posts.id and categories.id=categories_posts.category_id and categories_posts.category_id=$1 Order By posts.id Asc  limit $3 offset($2-1)*$3"
     )
         .bind(category_id)
-        .bind(par)
+        .bind(page_number)
         .bind(posts_per_page)
         .fetch_all(db)
         .await?;
@@ -74,13 +73,13 @@ pub async fn category_db(
 
 pub async fn get_all_categories_db(
     db: &Pool<Postgres>,
-    parii: i32,
+    page_number: i32,
     posts_per_page_constant: i32,
 ) -> Result<Vec<Categories>, anyhow::Error> {
     let all_categories = sqlx::query_as::<_, Categories>(
         "select name,id  from categories Order By id Asc limit $2 offset ($1-1)*$2",
     )
-    .bind(parii)
+    .bind(page_number)
     .bind(posts_per_page_constant)
     .fetch_all(db)
     .await?;
@@ -106,28 +105,12 @@ pub async fn category_pagination_logic(
     db: &Pool<Postgres>,
 ) -> Result<i64, anyhow::Error> {
     let category_id = category_input.parse::<i32>()?;
-    let rows = sqlx::query("SELECT COUNT(*) FROM categories_posts where category_id=$1")
+    let count = sqlx::query_scalar("SELECT COUNT(*) FROM categories_posts where category_id=$1")
         .bind(category_id)
-        .fetch_all(db)
+        .fetch_one(db)
         .await?;
 
-    let counting_final: Vec<Result<i64, anyhow::Error>> = rows
-        .into_iter()
-        .map(|row| {
-            let counting_final: i64 = row
-                .try_get("count")
-                .map_err(|_e| anyhow::Error::msg("failed"))?;
-            Ok::<i64, anyhow::Error>(counting_final)
-        })
-        .collect();
-
-    let before_remove_error = counting_final.get(0).ok_or(anyhow!("{}", "error"))?;
-    let exact_value = before_remove_error
-        .as_ref()
-        .map(|i| *i)
-        .map_err(|_e| anyhow::Error::msg("failed"))?;
-
-    Ok(exact_value)
+    Ok(count)
 }
 pub async fn all_categories_exception(
     db: &Pool<Postgres>,

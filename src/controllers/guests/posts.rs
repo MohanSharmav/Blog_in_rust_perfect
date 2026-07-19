@@ -1,14 +1,14 @@
 use crate::controllers::admin::posts_controller::number_posts_count;
 use crate::controllers::constants::Configuration;
-use crate::controllers::helpers::pagination_logic::{general_category, index_pagination};
+use crate::controllers::helpers::pagination_logic::{
+    general_category, index_pagination, resolve_current_page, total_pages,
+};
 use crate::model::categories::{all_categories_db, category_db, category_pagination_logic};
-use crate::model::posts::{query_single_post, single_post_db, specific_page_posts};
-use actix_http::header::LOCATION;
+use crate::model::posts::{single_post_db, specific_page_posts};
 use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse, Responder};
 use handlebars::Handlebars;
 use serde_json::json;
-
 
 // @desc    Redirect user to index
 // @route   GET /
@@ -20,7 +20,7 @@ pub async fn redirect_user() -> impl Responder {
     web::Redirect::to("/posts/page/1")
 }
 
-pub const SET_POSTS_PER_PAGE:i64=3;
+pub const SET_POSTS_PER_PAGE: i64 = 3;
 
 pub async fn index(
     params: web::Path<i32>,
@@ -30,31 +30,25 @@ pub async fn index(
     let db = &config.database_connection;
     let total_posts_length = number_posts_count(db).await?;
     let posts_per_page_constant = SET_POSTS_PER_PAGE;
-    let mut posts_per_page = total_posts_length / posts_per_page_constant;
-    let check_remainder = total_posts_length % posts_per_page_constant;
-    if check_remainder != 0 {
-        posts_per_page += 1;
-    }
-    let posts_per_page = posts_per_page as usize;
-    let param = params.into_inner();
-    let current_page = param as usize;
-    let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    let sample: Vec<_> = (1..=posts_per_page).collect();
-    let count_of_number_of_pages = pages_count.len();
-    let current_page: usize = current_page;
+    let page_number = params.into_inner();
 
-    if current_page > count_of_number_of_pages || current_page == 0 {
-        return Ok(HttpResponse::SeeOther()
-            .insert_header((LOCATION, "/posts/page/1"))
-            .content_type(ContentType::html())
-            .finish());
-    }
+    let (current_page, count_of_number_of_pages) = match resolve_current_page(
+        page_number as i64,
+        total_posts_length,
+        posts_per_page_constant,
+        false,
+        "/posts/page/1",
+    ) {
+        Ok(resolved) => resolved,
+        Err(redirect) => return Ok(redirect),
+    };
+    let pages_count: Vec<_> = (1..=count_of_number_of_pages).collect();
 
     let pagination_final_string = index_pagination(current_page, count_of_number_of_pages)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let exact_posts_only = specific_page_posts(param, &db.clone())
+    let exact_posts_only = specific_page_posts(page_number, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -62,7 +56,7 @@ pub async fn index(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let htmls = handlebars.render("common", &json!({"pagination":pagination_final_string,"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category,"new_pagination":sample}))
+    let htmls = handlebars.render("common", &json!({"pagination":pagination_final_string,"tt":&total_posts_length,"pages_count":&pages_count,"tiger":exact_posts_only,"o":all_category,"new_pagination":&pages_count}))
         .map_err( actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
@@ -77,16 +71,11 @@ pub async fn index_redirect(
     let db = &config.database_connection;
     let total_posts_length = number_posts_count(db).await?;
     let posts_per_page_constant = SET_POSTS_PER_PAGE;
-    let mut posts_per_page = total_posts_length / posts_per_page_constant;
-    let check_remainder = total_posts_length % posts_per_page_constant;
-    if check_remainder != 0 {
-        posts_per_page += 1;
-    }
-    let posts_per_page = posts_per_page as usize;
-    let param = 1;
+    let posts_per_page = total_pages(total_posts_length, posts_per_page_constant) as usize;
+    let first_page = 1;
     let pages_count: Vec<_> = (1..=posts_per_page).collect();
 
-    let exact_posts_only = specific_page_posts(param, &db.clone())
+    let exact_posts_only = specific_page_posts(first_page, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -94,7 +83,7 @@ pub async fn index_redirect(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    let htmls = handlebars.render("common", &json!({"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category,"current_page":param}))
+    let htmls = handlebars.render("common", &json!({"tt":&total_posts_length,"pages_count":pages_count,"tiger":exact_posts_only,"o":all_category,"current_page":first_page}))
         .map_err( actix_web::error::ErrorInternalServerError)?;
 
     Ok(HttpResponse::Ok()
@@ -108,12 +97,9 @@ pub async fn show_posts(
     handlebars: web::Data<Handlebars<'_>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
-    let titles = path.parse::<i32>().unwrap_or_default();
-    let single_post = query_single_post(titles, db)
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
+    let post_id = path.parse::<i32>().unwrap_or_default();
 
-    let single_post_struct = single_post_db(titles, db)
+    let single_post_struct = single_post_db(post_id, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -124,7 +110,7 @@ pub async fn show_posts(
     let html = handlebars
         .render(
             "single",
-            &json!({"o":&single_post,"single_post":single_post_struct,"o":all_category}),
+            &json!({"single_post":single_post_struct,"o":all_category}),
         )
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
@@ -139,61 +125,69 @@ pub async fn get_category_posts(
     handlebars: web::Data<Handlebars<'_>>,
 ) -> anyhow::Result<HttpResponse, actix_web::Error> {
     let db = &config.database_connection;
-    let path = info.clone().0;
-    let par = info.into_inner().1 as i32;
-    let category_input: String = path;
+    let (category_input, page_number) = info.into_inner();
+    let page_number = page_number as i32;
     let total_posts_length = category_pagination_logic(&category_input, db)
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
     let posts_per_page_constant = SET_POSTS_PER_PAGE;
-    let mut posts_per_page = total_posts_length / posts_per_page_constant;
-    let check_remainder = total_posts_length % posts_per_page_constant;
-    if check_remainder != 0 {
-        posts_per_page += 1;
-    }
-    let pages_count: Vec<_> = (1..=posts_per_page).collect();
-    let mut count_of_number_of_pages = pages_count.len();
-    let current_page: usize = par as usize;
-    let admin = false;
-    if count_of_number_of_pages == 0 {
-        count_of_number_of_pages = 1;
-    }
-    if current_page == 0 || current_page > count_of_number_of_pages {
-        let redirect_url =
-            "/posts/category/".to_string() + &*category_input.clone() + &*"/page/1".to_string();
+    let pages_count: Vec<_> =
+        (1..=total_pages(total_posts_length, posts_per_page_constant)).collect();
+    let redirect_url = format!("/posts/category/{category_input}/page/1");
+    let (current_page, count_of_number_of_pages) = match resolve_current_page(
+        page_number as i64,
+        total_posts_length,
+        posts_per_page_constant,
+        true,
+        &redirect_url,
+    ) {
+        Ok(resolved) => resolved,
+        Err(redirect) => return Ok(redirect),
+    };
 
-        return Ok(HttpResponse::SeeOther()
-            .insert_header((LOCATION, redirect_url))
-            .content_type(ContentType::html())
-            .finish());
-    } else {
-        let pagination_final_string = general_category(
-            current_page,
-            count_of_number_of_pages,
-            &category_input,
-            admin,
-        )
-        .await
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-
-        let category_postinng =
-            category_db(category_input.to_string(), db, par, posts_per_page_constant)
-                .await
-                .map_err(actix_web::error::ErrorInternalServerError)?;
-
-        let all_category = all_categories_db(db)
+    let pagination_final_string =
+        general_category(current_page, count_of_number_of_pages, &category_input)
             .await
             .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        let html = handlebars
-            .render(
-                "category",
-                &json!({"pagination":pagination_final_string,"tiger":&category_postinng,"pages_count":&pages_count,"o":all_category}),
-            )
-            .map_err(actix_web::error::ErrorInternalServerError)?;
+    let category_postinng = category_db(category_input, db, page_number, posts_per_page_constant)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
 
-        Ok(HttpResponse::Ok()
-            .content_type(ContentType::html())
-            .body(html))
+    let all_category = all_categories_db(db)
+        .await
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    let html = handlebars
+        .render(
+            "category",
+            &json!({"pagination":pagination_final_string,"tiger":&category_postinng,"pages_count":&pages_count,"o":all_category}),
+        )
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    Ok(HttpResponse::Ok()
+        .content_type(ContentType::html())
+        .body(html))
+}
+
+#[cfg(test)]
+mod integration_tests {
+    use super::*;
+    use actix_web::{test, web, App};
+
+    #[actix_web::test]
+    async fn test_redirect_user_integration() {
+        let app =
+            test::init_service(App::new().service(web::resource("/").to(redirect_user))).await;
+
+        let req = test::TestRequest::get().uri("/").to_request();
+        let resp = test::call_service(&app, req).await;
+
+        assert!(resp.status().is_redirection());
+        let headers = resp.headers();
+        assert_eq!(
+            headers.get("location").unwrap().to_str().unwrap(),
+            "/posts/page/1"
+        );
     }
 }

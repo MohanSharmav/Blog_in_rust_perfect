@@ -25,14 +25,6 @@ pub struct PostsCategories {
     pub name: String,
 }
 
-#[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
-pub struct CreatePost {
-    pub id: i32,
-    pub title: String,
-    pub description: String,
-    pub category_id: i32,
-}
-
 #[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow, Validate)]
 pub struct CreateNewPost {
     #[validate(length(min = 1, message = "title cannot be empty"))]
@@ -42,16 +34,6 @@ pub struct CreateNewPost {
     pub category_id: i32,
 }
 
-#[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
-pub struct CreateNewPostWithoutCategory {
-    pub title: String,
-    pub description: String,
-}
-
-#[derive(Deserialize, Debug, Clone, PartialEq, Serialize, sqlx::FromRow)]
-pub struct CreateNewPostWithNullCategory {
-    pub category_id: i32,
-}
 #[derive(Deserialize, Debug, Clone, PartialEq, sqlx::FromRow, Validate)]
 pub struct CreateNewCategory {
     #[validate(length(
