@@ -7,7 +7,8 @@ pub fn render_flash_messages(
 ) -> Result<String, actix_web::Error> {
     let mut html = String::new();
     for message in flash_message.iter() {
-        writeln!(html, "{}", message.content()).map_err(actix_web::error::ErrorInternalServerError)?;
+        writeln!(html, "{}", message.content())
+            .map_err(actix_web::error::ErrorInternalServerError)?;
     }
     Ok(html)
 }
