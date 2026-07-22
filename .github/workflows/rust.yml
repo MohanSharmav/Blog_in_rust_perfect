@@ -1,26 +1,119 @@
-name: Rust
+name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
-
+  fmt:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v3
-    - name: Build
-      run: cargo build --verbose
-    - name: Format
-      run: cargo fmt
-    - name: Clippy
-      run: cargo clippy
-    - name: Run tests
-      run: cargo test --verbose
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - run: cargo fmt --all -- --check
+
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: clippy (blog-storage, postgres)
+        run: cargo clippy -p blog-storage --features postgres --all-targets -- -D warnings
+      - name: clippy (blog-storage, sqlite)
+        run: cargo clippy -p blog-storage --features sqlite --all-targets -- -D warnings
+      - name: clippy (blog-core)
+        run: cargo clippy -p blog-core --features blog-storage/postgres --all-targets -- -D warnings
+      - name: clippy (blog-views)
+        run: cargo clippy -p blog-views --all-targets -- -D warnings
+      - name: clippy (blog-server, postgres)
+        run: cargo clippy -p blog-server --features postgres --all-targets -- -D warnings
+      - name: clippy (blog-server, sqlite)
+        run: cargo clippy -p blog-server --no-default-features --features sqlite --all-targets -- -D warnings
+      - name: clippy (blog-client, blog-cli)
+        run: cargo clippy -p blog-client -p blog-cli --all-targets -- -D warnings
+      - name: clippy (blog-tests)
+        run: cargo clippy -p blog-tests --all-targets -- -D warnings
+
+  # Runs the blog-storage integration tests against a real, on-disk SQLite
+  # database — full CRUD through every repository, not just a type-check.
+  test-sqlite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: test blog-storage (sqlite)
+        run: cargo test -p blog-storage --features sqlite
+      - name: test blog-server (sqlite)
+        run: cargo test -p blog-server --no-default-features --features sqlite
+
+  # Runs the same integration tests against a real Postgres service
+  # container — full CRUD through every repository, not just a type-check.
+  test-postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: blog_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/blog_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: test blog-storage (postgres, integration)
+        run: cargo test -p blog-storage --features postgres
+      - name: test blog-server (postgres)
+        run: cargo test -p blog-server --features postgres
+
+  test-core-and-views:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: test blog-core
+        run: cargo test -p blog-core --features blog-storage/postgres
+      - name: test blog-views
+        run: cargo test -p blog-views
+
+  test-client-cli:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test -p blog-client -p blog-cli
+
+  # Black-box: builds the real `blog-server`/`blog-cli` binaries and drives
+  # them as subprocesses over HTTP (via blog-client and via the CLI itself),
+  # against a scratch SQLite database. Catches wiring mistakes unit tests
+  # can't — wrong bind address, cookie/CORS settings, route typos, CLI
+  # argument mismatches — that only show up when the pieces run together.
+  test-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test -p blog-tests -- --test-threads=1
