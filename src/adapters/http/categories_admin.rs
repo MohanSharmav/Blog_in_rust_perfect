@@ -3,15 +3,14 @@ use crate::adapters::http::flash::render_flash_messages;
 use crate::adapters::http::pagination_view::{self, admin_categories};
 use crate::adapters::http::state::AppState;
 use crate::adapters::http::validated_form::validate_or_redirect;
-use crate::application::categories_service;
-use crate::application::ports::CategoryRepository;
-use crate::domain::category::NewCategory;
 use actix_http::header::LOCATION;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
-use actix_web::web::Redirect;
 use actix_web::{web, HttpResponse};
 use actix_web_flash_messages::IncomingFlashMessages;
+use blog_core::categories_service;
+use blog_storage::domain::category::NewCategory;
+use blog_storage::ports::CategoryRepository;
 use handlebars::Handlebars;
 use serde_json::json;
 
@@ -82,7 +81,11 @@ pub async fn new_category(
 pub async fn create_category(
     form: web::Form<NewCategory>,
     state: web::Data<AppState>,
+    user: Option<Identity>,
 ) -> Result<HttpResponse, actix_web::Error> {
+    if let Some(redirect) = require_login(&user) {
+        return Ok(redirect);
+    }
     if let Some(redirect) = validate_or_redirect(&*form, "/admin/categories/page/1") {
         return Ok(redirect);
     }
@@ -100,7 +103,11 @@ pub async fn create_category(
 pub async fn destroy_category(
     id: web::Path<String>,
     state: web::Data<AppState>,
-) -> Result<Redirect, actix_web::Error> {
+    user: Option<Identity>,
+) -> Result<HttpResponse, actix_web::Error> {
+    if let Some(redirect) = require_login(&user) {
+        return Ok(redirect);
+    }
     let category_id: i32 = id
         .parse()
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -108,7 +115,9 @@ pub async fn destroy_category(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    Ok(Redirect::to("/admin/categories/page/1"))
+    Ok(HttpResponse::SeeOther()
+        .insert_header((LOCATION, "/admin/categories/page/1"))
+        .finish())
 }
 
 pub async fn edit_category(
@@ -144,7 +153,11 @@ pub async fn update_category(
     form: web::Form<NewCategory>,
     current_category_name: web::Path<String>,
     state: web::Data<AppState>,
+    user: Option<Identity>,
 ) -> Result<HttpResponse, actix_web::Error> {
+    if let Some(redirect) = require_login(&user) {
+        return Ok(redirect);
+    }
     let _current_post_name = &current_category_name.into_inner();
     let category_id = id.into_inner();
 

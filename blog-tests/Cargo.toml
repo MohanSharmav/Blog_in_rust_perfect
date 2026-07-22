@@ -1,0 +1,22 @@
+[package]
+name = "blog-tests"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+# Black-box tests only: spawns the real `blog-server` binary against a
+# scratch SQLite database and drives it over HTTP via `blog-client`/
+# `blog-cli`, the same way a real caller would. No code here is exercised by
+# any other crate — `blog-core`/`blog-storage`'s own integration tests cover
+# the repository layer directly; this crate covers the wire contract.
+
+[dependencies]
+blog-client = { path = "../blog-client" }
+reqwest = { version = "0.11", default-features = false, features = ["json", "rustls-tls", "cookies"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "time"] }
+tempfile = "3"
+escargot = "0.5"
+
+[dev-dependencies]
+assert_cmd = "2"
+predicates = "3"

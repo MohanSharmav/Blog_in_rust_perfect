@@ -3,15 +3,14 @@ use crate::adapters::http::flash::render_flash_messages;
 use crate::adapters::http::pagination_view::{self, admin_category_posts, admin_main_page};
 use crate::adapters::http::state::AppState;
 use crate::adapters::http::validated_form::validate_or_redirect;
-use crate::application::ports::CategoryRepository;
-use crate::application::posts_service;
-use crate::domain::post::NewPost;
 use actix_http::header::LOCATION;
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
-use actix_web::web::Redirect;
 use actix_web::{http, web, HttpResponse};
 use actix_web_flash_messages::IncomingFlashMessages;
+use blog_core::posts_service;
+use blog_storage::domain::post::NewPost;
+use blog_storage::ports::CategoryRepository;
 use handlebars::Handlebars;
 use serde_json::json;
 
@@ -44,7 +43,11 @@ pub async fn get_new_post(
 pub async fn new_post(
     form: web::Form<NewPost>,
     state: web::Data<AppState>,
+    user: Option<Identity>,
 ) -> Result<HttpResponse, actix_web::Error> {
+    if let Some(redirect) = require_login(&user) {
+        return Ok(redirect);
+    }
     if let Some(redirect) = validate_or_redirect(&*form, "/admin/posts/page/1") {
         return Ok(redirect);
     }
@@ -61,7 +64,11 @@ pub async fn new_post(
 pub async fn destroy_post(
     to_delete: web::Path<String>,
     state: web::Data<AppState>,
-) -> Result<Redirect, actix_web::Error> {
+    user: Option<Identity>,
+) -> Result<HttpResponse, actix_web::Error> {
+    if let Some(redirect) = require_login(&user) {
+        return Ok(redirect);
+    }
     let id: i32 = to_delete
         .parse()
         .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -69,7 +76,9 @@ pub async fn destroy_post(
         .await
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    Ok(Redirect::to("/admin/posts/page/1"))
+    Ok(HttpResponse::SeeOther()
+        .insert_header((LOCATION, "/admin/posts/page/1"))
+        .finish())
 }
 
 pub async fn edit_post(
@@ -77,7 +86,11 @@ pub async fn edit_post(
     state: web::Data<AppState>,
     to_be_updated_post: web::Path<String>,
     handlebars: web::Data<Handlebars<'_>>,
+    user: Option<Identity>,
 ) -> Result<HttpResponse, actix_web::Error> {
+    if let Some(redirect) = require_login(&user) {
+        return Ok(redirect);
+    }
     let to_be_updated_post = to_be_updated_post.into_inner();
     let post_id = id.into_inner();
 
@@ -102,7 +115,11 @@ pub async fn update_post(
     form: web::Form<NewPost>,
     _current_post_name: web::Path<String>,
     state: web::Data<AppState>,
+    user: Option<Identity>,
 ) -> Result<HttpResponse, actix_web::Error> {
+    if let Some(redirect) = require_login(&user) {
+        return Ok(redirect);
+    }
     let id = id.into_inner();
 
     if let Some(redirect) = validate_or_redirect(&*form, "/admin/posts/page/1") {
@@ -168,7 +185,11 @@ pub async fn show_post(
     path: web::Path<String>,
     state: web::Data<AppState>,
     handlebars: web::Data<Handlebars<'_>>,
+    user: Option<Identity>,
 ) -> Result<HttpResponse, actix_web::Error> {
+    if let Some(redirect) = require_login(&user) {
+        return Ok(redirect);
+    }
     let post_id = path.parse::<i32>().unwrap_or_default();
 
     let all_category = state
