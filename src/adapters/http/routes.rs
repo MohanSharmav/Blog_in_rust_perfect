@@ -63,5 +63,5 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         .service(
             web::resource("/posts/page/{page_number}").route(web::get().to(posts_guest::index)),
         )
-        .service(Files::new("/", "./templates").show_files_listing());
+        .service(Files::new("/", blog_views::root()).show_files_listing());
 }

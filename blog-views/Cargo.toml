@@ -1,0 +1,8 @@
+[package]
+name = "blog-views"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+handlebars = { version = "4.3.7", features = ["dir_source"] }
+thiserror = "1.0"

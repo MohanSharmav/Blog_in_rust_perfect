@@ -1,13 +1,23 @@
+[workspace]
+members = ["blog-client", "blog-cli", "blog-core", "blog-storage", "blog-tests", "blog-views"]
+
 [package]
-name = "blog"
+name = "blog-server"
 version = "0.1.0"
 edition = "2021"
 
 [features]
+default = ["postgres"]
 cors_for_local_development = []
+# Exactly one of these must be enabled — see the compile_error! guard in
+# main.rs. Each just forwards to the matching blog-storage backend.
+postgres = ["blog-storage/postgres"]
+sqlite = ["blog-storage/sqlite"]
 
 [dependencies]
-sqlx = { version = "0.6", features = [ "runtime-tokio-rustls", "postgres", "macros" ] }
+blog-core = { path = "blog-core" }
+blog-storage = { path = "blog-storage", default-features = false }
+blog-views = { path = "blog-views" }
 dotenv = "0.15.0"
 actix-web = "4"
 actix-files = "0.6.2"
@@ -22,3 +32,5 @@ magic-crypt ="3.1.9"
 env_logger = "0.10.0"
 actix-web-flash-messages = {version="0.4.2",features=["cookies","sessions"]}
 validator = { version = "0.16", features = ["derive"] }
+utoipa = "4"
+utoipa-swagger-ui = { version = "6", features = ["actix-web"] }

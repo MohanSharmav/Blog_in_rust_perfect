@@ -1,7 +1,5 @@
 use crate::adapters::http::flash::render_flash_messages;
 use crate::adapters::http::state::AppState;
-use crate::application::auth_service;
-use crate::domain::credentials::Credentials;
 use actix_http::header::LOCATION;
 use actix_identity::Identity;
 use actix_web::cookie::Key;
@@ -10,6 +8,8 @@ use actix_web::{http, web, HttpResponse};
 use actix_web::{HttpMessage as _, HttpRequest, Responder};
 use actix_web_flash_messages::storage::CookieMessageStore;
 use actix_web_flash_messages::{FlashMessage, FlashMessagesFramework, IncomingFlashMessages};
+use blog_core::auth_service;
+use blog_core::credentials::Credentials;
 use handlebars::Handlebars;
 use serde_json::json;
 

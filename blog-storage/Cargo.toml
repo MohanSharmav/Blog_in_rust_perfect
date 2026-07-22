@@ -1,0 +1,22 @@
+[package]
+name = "blog-storage"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+# Exactly one of these must be enabled by the final binary that depends on
+# this crate — see the compile_error! guard in blog-server's main.rs. Kept
+# independently selectable here (rather than mutually exclusive) so this
+# crate's own test suite can exercise both backends in one `cargo test
+# --all-features` pass.
+postgres = ["sqlx/postgres"]
+sqlite = ["sqlx/sqlite"]
+
+[dependencies]
+sqlx = { version = "0.6", default-features = false, features = ["runtime-tokio-rustls", "macros", "migrate"] }
+serde = { version = "1.0", features = ["derive"] }
+thiserror = "1.0"
+validator = { version = "0.16", features = ["derive"] }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }

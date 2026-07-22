@@ -1,10 +1,16 @@
-//! Ports: the contracts the application core depends on. Adapters (Postgres,
-//! magic-crypt, ...) implement these traits; the core never depends on the
-//! adapters themselves.
+//! Ports: the storage contracts the application core depends on. The
+//! `postgres`/`sqlite` modules provide the only implementations — callers
+//! should depend on these traits, never on a concrete backend.
+//!
+//! `async fn` in these traits is intentional: nothing in this workspace uses
+//! `dyn PostRepository` etc., only the concrete `Pg*`/`Sqlite*` types, so the
+//! missing auto-trait bounds the `async_fn_in_trait` lint warns about don't
+//! apply here.
+#![allow(async_fn_in_trait)]
 
 use crate::domain::category::Category;
 use crate::domain::post::{NewPost, Post, PostWithCategory};
-use anyhow::Result;
+use crate::error::Result;
 
 pub trait PostRepository {
     async fn count(&self) -> Result<i64>;
@@ -40,8 +46,4 @@ pub trait CategoryRepository {
 pub trait UserRepository {
     async fn register(&self, username: &str, password_hash: String) -> Result<()>;
     async fn credentials_match(&self, username: &str, password_hash: String) -> Result<bool>;
-}
-
-pub trait PasswordCipher {
-    fn encrypt(&self, plain: &str) -> String;
 }

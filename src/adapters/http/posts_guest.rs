@@ -1,9 +1,9 @@
 use crate::adapters::http::pagination_view::{self, general_category, index_pagination};
 use crate::adapters::http::state::AppState;
-use crate::application::ports::CategoryRepository;
-use crate::application::posts_service;
 use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse, Responder};
+use blog_core::posts_service;
+use blog_storage::ports::CategoryRepository;
 use handlebars::Handlebars;
 use serde_json::json;
 

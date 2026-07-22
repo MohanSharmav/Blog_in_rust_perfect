@@ -1,3 +1,4 @@
+pub mod api;
 pub mod auth;
 pub mod auth_guard;
 pub mod categories_admin;

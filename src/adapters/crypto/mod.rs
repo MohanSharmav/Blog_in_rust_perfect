@@ -1,4 +1,4 @@
-use crate::application::ports::PasswordCipher;
+use blog_core::ports::PasswordCipher;
 use magic_crypt::{new_magic_crypt, MagicCrypt256, MagicCryptTrait};
 
 /// `magic-crypt`-backed adapter implementing the [`PasswordCipher`] port.
