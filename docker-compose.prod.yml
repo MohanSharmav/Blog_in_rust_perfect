@@ -1,0 +1,48 @@
+# Production overrides — a standalone compose file, not a merge with
+# docker-compose.yml, so the two never accidentally interact:
+#
+#   - No baked-in secrets. Every credential comes from the environment (see
+#     .env.prod.example) via docker compose's `${VAR:?message}` syntax, which
+#     refuses to start at all if a required variable is missing, rather than
+#     silently falling back to a dev placeholder.
+#   - The Postgres port isn't published to the host at all — `web` reaches
+#     `db` over the internal Docker network only.
+#   - Both services restart automatically on failure/host reboot.
+#
+# Usage: scripts/run.sh prod   (or directly: docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build)
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env.prod}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env.prod}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env.prod}
+    volumes:
+      - blog-db-data-prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      args:
+        DB_BACKEND: postgres
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      MAGIC_KEY: ${MAGIC_KEY:?set MAGIC_KEY in .env.prod}
+      RUST_LOG: ${RUST_LOG:-info}
+      BIND_ADDR: 0.0.0.0:8080
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  blog-db-data-prod:
