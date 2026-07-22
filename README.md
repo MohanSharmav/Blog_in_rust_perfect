@@ -1,90 +1,102 @@
-# Blog Application Refactoring Plan
+# Blog
 
-This document outlines the architectural improvements and task breakdown for modernizing and modularizing the blog application. 
+A small blog engine in Rust: an Actix-web server rendering server-side HTML *and* exposing a
+JSON API, a typed async client for that API, and a CLI built on top of the client. The storage
+backend (Postgres or SQLite) is a compile-time choice via Cargo features, not a runtime one.
 
-## 1. Modularization: Cargo Workspace (MVC Separation)
-Currently, the application is a single monolithic binary. The goal is to break it down into a **Cargo Workspace** to separate the Model, View, and Controller into distinct packages.
+This file used to be a forward-looking refactor plan. All of it has since been built; this
+version describes what's actually here.
 
-### Proposed Workspace Structure
+See [ARCHITECTURE.md](ARCHITECTURE.md) for how the pieces fit together — the hexagonal
+architecture / ports-and-adapters design, the port pattern used throughout, and a full
+request-flow walkthrough. See [RUNNING.md](RUNNING.md) for how to actually run it — locally, in
+Docker, and how to run the test suite. See [API.md](API.md) for every HTTP endpoint the server
+exposes — the JSON API and the server-rendered HTML routes, request/response shapes, and auth
+requirements. See [DATA_MODEL.md](DATA_MODEL.md) for UML class diagrams of the structs, enums, and
+traits and how they relate — domain types and repository ports, the error-type hierarchy, and the
+client-side wire types.
+
+## Workspace layout
+
 ```
-blog_workspace/
-├── Cargo.toml               # Workspace root (defines members)
-├── blog-core/               # The "Model" - Database schemas, business logic, traits
-├── blog-server/             # The "Controller" - Actix-web server, routing, HTTP handlers
-├── blog-views/              # The "View" - Handlebars templates and static assets
-├── blog-client/             # The Client library
-└── blog-cli/                # The CLI application
+.
+├── Cargo.toml            # workspace root + the `blog-server` package
+├── src/                  # blog-server: HTTP delivery (Controller)
+│   └── adapters/
+│       ├── http/          #   Actix handlers: HTML admin pages, guest pages, and the /api/v1 JSON API
+│       └── crypto/        #   magic-crypt implementation of the PasswordCipher port
+├── blog-core/            # use-case services (Model, business-logic half): posts/categories/auth,
+│   │                      # pagination rules, Credentials, the PasswordCipher port — no HTTP/SQL deps
+├── blog-storage/         # use-case services' other half (Model, data): domain types (Post,
+│   │                      # Category, ...), repository ports, Postgres/SQLite implementations
+│   ├── src/postgres/     #   `postgres` feature
+│   ├── src/sqlite/       #   `sqlite` feature
+│   ├── migrations/postgres/
+│   ├── migrations/sqlite/
+│   └── tests/            #   integration tests against a real database per backend
+├── blog-views/           # View: bundles templates/ (Handlebars + static assets) and exposes
+│   │                      # a `register()` helper — blog-server never hardcodes their location
+│   └── templates/
+├── blog-client/          # reqwest-based typed async client for the /api/v1 JSON API
+├── blog-cli/             # clap CLI on top of blog-client, with persisted login sessions
+└── blog-tests/           # black-box tests: spawns real blog-server/blog-cli binaries and
+    └── tests/            #   drives them over HTTP/subprocess, the way a real caller would
 ```
 
-- **blog-core**: Contains all `sqlx` database queries and domain models. It will expose traits (e.g., `PostRepository`, `UserRepository`) so the backend can interact with the data layer without worrying about the underlying DB.
-- **blog-server**: Depends on `blog-core` and `blog-views`. It handles HTTP requests, authentication, and session management.
-- **blog-views**: Bundles the HTML templates and assets. 
+Dependency direction is one-way: `blog-server` depends on `blog-core`, `blog-storage`, and
+`blog-views`; `blog-core` depends on `blog-storage` (for its domain types and repository port
+traits, never a concrete backend); `blog-storage` and `blog-views` depend on neither of the
+others. `blog-client`/`blog-cli` only ever talk to `blog-server` over HTTP — they don't depend
+on any of the above.
 
-## 2. Client Library & CLI
-To interact with the blog without a web browser, we will build a dedicated client library and a command-line interface.
+## Choosing a database backend
 
-- **blog-client**: A Rust crate utilizing `reqwest` to wrap the HTTP API provided by `blog-server`. 
-  - Will handle authentication tokens/cookies.
-  - Exposes typed asynchronous methods like `client.create_post(...)` or `client.get_posts(...)`.
-- **blog-cli**: A command-line tool built with `clap` that depends on `blog-client`.
-  - Commands: `blog-cli login`, `blog-cli post create --title "Hello"`, `blog-cli category list`.
-  - Improves administrative workflows and scriptability.
+`blog-storage` implements its repository ports (`PostRepository`, `CategoryRepository`,
+`UserRepository`) twice — once per backend — gated behind Cargo features:
 
-## 3. Integration Testing
-With the client library in place, we can write robust, black-box integration tests.
+```toml
+# blog-storage/Cargo.toml
+[features]
+postgres = ["sqlx/postgres"]
+sqlite   = ["sqlx/sqlite"]
+```
 
-- A dedicated `tests/` directory (or a `blog-tests` crate) will spin up the `blog-server` in a background thread or as a subprocess.
-- The tests will use `blog-client` to simulate real API traffic.
-- CLI tests can also be added using `assert_cmd` to verify the CLI outputs the correct text when executing commands against the test server.
+`blog-server`'s own `postgres`/`sqlite` features just forward to these. Exactly one must be
+enabled in the final binary — `main.rs` has a `compile_error!` guard that fails the build if both
+or neither are selected. `postgres` is the default, matching the existing deployment.
 
-## 4. Multi-Database Support: SQLite (Testing) & PostgreSQL (Prod)
-Currently, the application relies heavily on PostgreSQL. To speed up local development and testing, we will abstract the database layer to support both SQLite and PostgreSQL.
+**This is deliberately not a runtime `DbPool` enum** (`enum DbPool { Postgres(..), Sqlite(..) }`).
+An enum would mean every call site pattern-matches or forwards through a wrapper, both backends
+ship in every binary whether you need them or not, and "which database" becomes a value your
+code branches on instead of a build you produce. With features, `AppState` in
+`adapters::http::state` resolves to one concrete, monomorphic repository type per backend —
+swapping databases means rebuilding with a different `--features` flag, not adding a branch. See
+[ARCHITECTURE.md § Key design decisions](ARCHITECTURE.md#key-design-decisions) for the trade-off.
 
-### Implementation Strategy
-1. **Repository Pattern**: Instead of passing a `PgPool` directly to controllers, we will pass a dynamic trait object or a generic wrapper, e.g., `Arc<dyn Repository>`.
-2. **Conditional Compilation / Generic Pools**: 
-   - `blog-core` will include both SQLite and Postgres drivers (`sqlx` features: `sqlite`, `postgres`).
-   - We can implement a `DbPool` wrapper enum:
-     ```rust
-     pub enum DbPool {
-         Postgres(sqlx::PgPool),
-         Sqlite(sqlx::SqlitePool),
-     }
-     ```
-   - Queries will be standardized where possible, or specific trait implementations will handle SQL dialect differences.
-3. **Environment Switch**: The app will check a `DATABASE_URL` at runtime. If it starts with `sqlite://`, it uses the in-memory/local SQLite database (perfect for quick tests). If it starts with `postgres://`, it connects to the production DB.
+For how to actually set up, run, test, and containerize the project, see **[RUNNING.md](RUNNING.md)**.
 
-## 5. Dockerization
-To ensure consistent deployments and easy local setups, the application will be Dockerized.
+## blog-client / blog-cli
 
-- **Dockerfile**: A multi-stage build file. 
-  - *Stage 1 (Builder)*: Uses `rust:latest` to compile the `blog-server` release binary.
-  - *Stage 2 (Runtime)*: Uses a minimal image (like `debian:bullseye-slim` or `alpine`), copies the compiled binary and the `blog-views` templates, and exposes the HTTP port (e.g., 8080).
-- **docker-compose.yml**: 
-  - Defines the `web` service (our blog server).
-  - Defines a `db` service (PostgreSQL instance).
-  - Handles environment variables so developers can type `docker-compose up -d` and instantly have the entire stack (DB + Web) running locally without installing Rust or PostgreSQL on their host machine.
+`blog-client` is a typed async `reqwest` client for the `/api/v1` JSON API; `blog-cli` is a `clap`
+CLI built on top of it, with a persisted login session (the same pattern as `docker login`/`gh auth
+login`). See [RUNNING.md § Using the CLI](RUNNING.md#using-the-cli) for usage.
 
-## Detailed Task Breakdown
+## Testing
 
-| Category | Task ID | Task Title | Detailed Description | Dependencies | Complexity |
-|----------|---------|------------|----------------------|--------------|------------|
-| Modularization | MOD-1 | Setup Cargo Workspace | Convert the monolithic structure into a Cargo workspace. Create a root Cargo.toml and define members (blog-core, blog-server, blog-views). | None | Low |
-| Modularization | MOD-2 | Extract Core (Model) | Create the `blog-core` crate. Move all database structs, queries, and business logic from `src/model` to this crate. Remove web framework dependencies from here. | MOD-1 | High |
-| Modularization | MOD-3 | Extract Views | Create the `blog-views` crate. Move the `templates` directory and static assets here. Expose a way to load these into the handlebars registry. | MOD-1 | Low |
-| Modularization | MOD-4 | Extract Server (Controller) | Create the `blog-server` crate. Move routing, Actix-web handlers, and authentication here. Configure it to depend on `blog-core` and `blog-views`. | MOD-2, MOD-3 | High |
-| Client & CLI | CLI-1 | Create Client Library | Create a new crate `blog-client`. Implement a struct `BlogClient` that uses `reqwest` to make HTTP calls to the server. | MOD-4 | Medium |
-| Client & CLI | CLI-2 | Implement Auth in Client | Add login methods to `blog-client` and configure the `reqwest` client to store and send session cookies automatically. | CLI-1 | Medium |
-| Client & CLI | CLI-3 | Implement API Wrappers | Add typed methods for fetching posts, creating posts, deleting posts, and managing categories. | CLI-2 | Medium |
-| Client & CLI | CLI-4 | Create CLI Application | Create a new crate `blog-cli` using `clap`. Define commands like `login`, `post create`, `post list`. | CLI-1 | Low |
-| Client & CLI | CLI-5 | Wire CLI to Client | Implement the execution of the CLI commands by calling the corresponding methods in `blog-client`. Handle output formatting. | CLI-3, CLI-4 | Medium |
-| Integration Testing | TST-1 | Test Server Setup | Create a `tests` directory. Write a helper function that spins up the Actix-web server on a random port in a background thread for testing. | MOD-4 | Medium |
-| Integration Testing | TST-2 | API Integration Tests | Write tests that instantiate `BlogClient` and test the running server (e.g., successful login, post creation flow). | TST-1, CLI-3 | Medium |
-| Integration Testing | TST-3 | CLI Integration Tests | Use `assert_cmd` to test the compiled `blog-cli` binary against the test server, asserting standard output and error codes. | TST-1, CLI-5 | Medium |
-| Database Support | DB-1 | Define Repository Trait | In `blog-core`, define a generic `Repository` trait containing async methods for all database operations (e.g., `get_post`, `create_post`). | MOD-2 | Medium |
-| Database Support | DB-2 | Implement PostgreSQL Repo | Implement the `Repository` trait for a struct wrapping `sqlx::PgPool`. Port existing queries to this implementation. | DB-1 | High |
-| Database Support | DB-3 | Implement SQLite Repo | Implement the `Repository` trait for a struct wrapping `sqlx::SqlitePool`. Adjust SQL queries to be SQLite compatible. | DB-1 | High |
-| Database Support | DB-4 | Dynamic DB Initialization | Update the `blog-server` initialization to read the `DATABASE_URL`. If it starts with `sqlite://`, use the SQLite implementation. If `postgres://`, use PostgreSQL. | DB-2, DB-3 | Medium |
-| Dockerization | DCK-1 | Write Dockerfile | Create a multi-stage Dockerfile for `blog-server`. Build the binary in a Rust builder image and copy it to a minimal Debian/Alpine runtime image. | MOD-4 | Medium |
-| Dockerization | DCK-2 | Docker Compose Setup | Write a `docker-compose.yml` that defines a `db` service (PostgreSQL) and a `web` service (the blog app). Set up network and volumes. | DCK-1 | Low |
-| Dockerization | DCK-3 | Configuration for Docker | Provide a `.env.docker` file and update the `docker-compose.yml` to inject the correct `DATABASE_URL` so the app can connect to the postgres container. | DCK-2 | Low |
+Unit tests against in-memory fakes, integration tests against real databases, and black-box tests
+that run the actual compiled binaries — see
+[ARCHITECTURE.md § Testing strategy](ARCHITECTURE.md#testing-strategy) for what each layer proves,
+and [RUNNING.md § Testing](RUNNING.md#testing) for the commands to run them.
+
+## CI
+
+`.github/workflows/rust.yml` runs on every push/PR to `main`:
+
+- `fmt` — `cargo fmt --check`
+- `clippy` — across every crate (both DB features for `blog-storage`/`blog-server`), denying warnings
+- `test-sqlite` — `blog-storage` and `blog-server` built and tested against SQLite (no external service)
+- `test-postgres` — same, against a real Postgres service container
+- `test-core-and-views` — `blog-core`/`blog-views` unit + integration tests
+- `test-client-cli` — `blog-client`/`blog-cli` unit tests
+- `test-e2e` — `blog-tests`' black-box suite (spawns real `blog-server`/`blog-cli` binaries, no
+  external services needed)
