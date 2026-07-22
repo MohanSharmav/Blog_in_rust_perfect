@@ -1,18 +1,25 @@
 //! Composition root: reads configuration, builds the concrete adapters for
 //! each port, wires them into `AppState`, and starts the Actix HTTP server.
-//! No business logic lives here — see `domain`, `application`, `adapters`.
+//! No business logic lives here — see `blog-core` (use-case services),
+//! `blog-storage` (persistence), `blog-views` (templates/assets), and this
+//! crate's own `adapters` (HTTP delivery + crypto).
+//!
+//! The storage backend is a compile-time choice, not a runtime one: enable
+//! exactly one of the `postgres`/`sqlite` Cargo features, which in turn
+//! determines the concrete repository types `adapters::http::state::AppState`
+//! resolves to. There is deliberately no `DbPool` enum here.
+
+#[cfg(all(feature = "postgres", feature = "sqlite"))]
+compile_error!("enable exactly one of the `postgres` or `sqlite` features, not both");
+#[cfg(not(any(feature = "postgres", feature = "sqlite")))]
+compile_error!("enable one of the `postgres` or `sqlite` features (`postgres` is the default)");
 
 mod adapters;
-mod application;
-mod domain;
 
-use crate::adapters::crypto::MagicCryptCipher;
+use crate::adapters::http::api::openapi::ApiDoc;
 use crate::adapters::http::auth::build_message_framework;
 use crate::adapters::http::routes;
 use crate::adapters::http::state::AppState;
-use crate::adapters::postgres::category_repository::PgCategoryRepository;
-use crate::adapters::postgres::post_repository::PgPostRepository;
-use crate::adapters::postgres::user_repository::PgUserRepository;
 use actix_identity::IdentityMiddleware;
 use actix_session::config::PersistentSession;
 use actix_session::storage::CookieSessionStore;
@@ -20,7 +27,8 @@ use actix_session::SessionMiddleware;
 use actix_web::cookie::Key;
 use actix_web::{web, App, HttpServer, Result};
 use handlebars::Handlebars;
-use sqlx::postgres::PgPoolOptions;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 pub(crate) const COOKIE_DURATION: actix_web::cookie::time::Duration =
     actix_web::cookie::time::Duration::minutes(30);
@@ -35,26 +43,23 @@ async fn main() -> Result<(), anyhow::Error> {
     #[cfg(not(feature = "cors_for_local_development"))]
     let cookie_secure = true;
     let mut handlebars = Handlebars::new();
-    handlebars.register_templates_directory(".html", "./templates/html/")?;
-    handlebars.register_templates_directory(".hbs", "./templates/html/")?;
-    dotenv::dotenv()?;
+    blog_views::register(&mut handlebars)?;
+    // Best-effort: a `.env` file is a local-dev convenience. Its absence
+    // (e.g. in a container, where the environment is set directly) isn't an
+    // error — only actually-missing required variables are, below.
+    let _ = dotenv::dotenv();
     let magic_key = std::env::var("MAGIC_KEY")?;
     let db_url = std::env::var("DATABASE_URL")?;
-    let pool = PgPoolOptions::new()
-        .max_connections(100)
-        .connect(&db_url)
-        .await?;
 
-    let state = AppState {
-        posts: PgPostRepository::new(pool.clone()),
-        categories: PgCategoryRepository::new(pool.clone()),
-        users: PgUserRepository::new(pool.clone()),
-        cipher: MagicCryptCipher::new(&magic_key),
-    };
+    let state = AppState::connect(&db_url, &magic_key).await?;
     let state = web::Data::new(state);
 
     let signing_key = Key::generate();
     let message_framework = build_message_framework(signing_key);
+
+    // Defaults to loopback-only for local dev; a container needs 0.0.0.0 to
+    // be reachable through Docker's port mapping, so this is runtime-overridable.
+    let bind_addr = std::env::var("BIND_ADDR").unwrap_or_else(|_| "127.0.0.1:8080".to_owned());
 
     HttpServer::new(move || {
         App::new()
@@ -69,9 +74,14 @@ async fn main() -> Result<(), anyhow::Error> {
                     .session_lifecycle(PersistentSession::default().session_ttl(COOKIE_DURATION))
                     .build(),
             )
+            .configure(crate::adapters::http::api::configure)
+            .service(
+                SwaggerUi::new("/swagger-ui/{_:.*}")
+                    .url("/api-docs/openapi.json", ApiDoc::openapi()),
+            )
             .configure(routes::configure)
     })
-    .bind("127.0.0.1:8080")?
+    .bind(bind_addr)?
     .run()
     .await?;
 
