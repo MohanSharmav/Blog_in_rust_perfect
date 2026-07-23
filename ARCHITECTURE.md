@@ -222,6 +222,38 @@ check (`require_login`) and the same form/body validation, then call the identic
 function. `blog-cli`'s `post create` subcommand is one more hop upstream of the JSON path — it
 goes through `blog-client`, which just wraps the `/api/v1/posts` HTTP call.
 
+Written out as two separate traces, end to end:
+
+**HTTP → DB** (a browser or any JSON API caller, hitting `blog-server` directly):
+
+```
+HTTP request
+  → blog-server (adapter: checks login, validates)
+    → blog-core (business logic: e.g. "does this post have a category?")
+      → a PostRepository trait call (blog-core doesn't know which backend)
+        → whichever concrete repo got compiled in: PgPostRepository OR SqlitePostRepository
+          → the actual database
+```
+
+**CLI → DB** (`blog-cli`, which never talks to `blog-core` or the database directly — it's just
+another HTTP caller, one hop further out):
+
+```
+blog-cli command (e.g. `post create`)
+  → blog-client (builds the HTTP request, attaches the session cookie)
+    → HTTP request to blog-server's /api/v1/... (the exact same entry point any HTTP caller uses)
+      → blog-server (adapter: checks login, validates)
+        → blog-core (business logic: e.g. "does this post have a category?")
+          → a PostRepository trait call (blog-core doesn't know which backend)
+            → whichever concrete repo got compiled in: PgPostRepository OR SqlitePostRepository
+              → the actual database
+```
+
+Everything below `blog-server` in both traces is identical — `blog-cli` only adds two hops
+(`blog-client`, then a real HTTP request) *before* reaching the same adapter layer every other
+caller goes through. There is no `blog-cli`-specific code path inside `blog-core`/`blog-storage`
+at all.
+
 `create_post` itself is the only place the "does this post have a category" branch lives:
 
 ```rust

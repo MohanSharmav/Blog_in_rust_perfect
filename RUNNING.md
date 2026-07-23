@@ -129,6 +129,39 @@ cargo run --no-default-features --features sqlite,cors_for_local_development
 The app is then at `http://127.0.0.1:8080` — the HTML admin/guest pages at `/`, `/posts/...`,
 `/admin/...`, and the JSON API at `/api/v1/...`, sharing the same cookie session.
 
+### Keeping both backends available without editing `.env`
+
+`.env` only holds *one* `DATABASE_URL` at a time, which is awkward if you switch between Postgres
+and SQLite often — you'd otherwise have to edit it back and forth (and it's easy to forget,
+producing exactly the confusing `unable to open database file` error you get from running the
+`sqlite` feature against a leftover `postgres://...` URL, or the reverse).
+
+Environment variables set on the command line always win over `.env`: the `dotenv` crate
+([`src/main.rs`](src/main.rs)'s `dotenv::dotenv()` call) only fills in variables that aren't
+already set — it never overrides one that's already present in the process environment. So you
+can pass `DATABASE_URL`/`MAGIC_KEY` inline and leave `.env` alone entirely (confirmed directly: an
+inline `DATABASE_URL=postgres://...` reliably takes effect over `.env`'s SQLite value once
+`--features postgres` is also passed):
+
+```bash
+# Postgres
+DATABASE_URL="postgres://user:password@localhost:5432/dbname" MAGIC_KEY="your-key" \
+  cargo run --features postgres
+
+# SQLite
+DATABASE_URL="sqlite://blog.db" MAGIC_KEY="your-key" \
+  cargo run --no-default-features --features sqlite
+```
+
+`.env` can stay set to whichever backend you use most often as a fallback default; the inline vars
+always take precedence for that one invocation. To avoid retyping these, add shell aliases (e.g.
+in `~/.zshrc`):
+
+```bash
+alias blog-pg='DATABASE_URL="postgres://user:password@localhost:5432/dbname" MAGIC_KEY="your-key" cargo run --features postgres'
+alias blog-sqlite='DATABASE_URL="sqlite://blog.db" MAGIC_KEY="your-key" cargo run --no-default-features --features sqlite'
+```
+
 ## Environment variables reference
 
 | Variable | Required | Default | Purpose |
@@ -331,6 +364,7 @@ scripts/run.sh prod logs    # follow the app's logs
 | Symptom | Cause | Fix |
 |---|---|---|
 | `enable exactly one of the postgres or sqlite features` (compile error) | Built with both or neither DB feature | `cargo run` (postgres, the default) or `cargo run --no-default-features --features sqlite` |
+| `database error: ... unable to open database file` (code 14) at startup | `.env`'s `DATABASE_URL` is a `postgres://...` URL, but you built with `--features sqlite` (or the reverse) | Fix `.env` to match the feature you built with, or override `DATABASE_URL` inline for that one run — see [Keeping both backends available without editing .env](#keeping-both-backends-available-without-editing-env) |
 | Login succeeds but the next request looks logged-out (local `cargo run`, not Docker) | Session cookie has `Secure` set, but you're on plain `http://` | Add `cors_for_local_development` to your feature flags (see [Running locally § step 4](#4-run-it)) |
 | `docker compose up` fails to bind port 5432 or 8080 | Something else on your machine already using that port | Stop the other process, or remap the port on the left side of `ports:` in `docker-compose.yml` |
 | Container starts but `curl` to `127.0.0.1:8080` fails/connection-reset | `BIND_ADDR` not set to `0.0.0.0:...` | Confirm the `web` service's `environment.BIND_ADDR` in `docker-compose.yml` — this is set by default, only relevant if you copied the Dockerfile elsewhere without it |
