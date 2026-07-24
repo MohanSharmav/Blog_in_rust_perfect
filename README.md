@@ -20,9 +20,9 @@ client-side wire types.
 
 ```
 .
-├── Cargo.toml            # workspace root + the `blog-server` package
-├── src/                  # blog-server: HTTP delivery (Controller)
-│   └── adapters/
+├── Cargo.toml            # workspace manifest (members list only)
+├── blog-server/          # Controller: HTTP delivery
+│   └── src/adapters/
 │       ├── http/          #   Actix handlers: HTML admin pages, guest pages, and the /api/v1 JSON API
 │       └── crypto/        #   magic-crypt implementation of the PasswordCipher port
 ├── blog-core/            # use-case services (Model, business-logic half): posts/categories/auth,
