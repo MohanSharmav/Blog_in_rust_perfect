@@ -107,7 +107,7 @@ type — those are wired in only at the composition root.
 
 | Crate | Role | Depends on |
 |---|---|---|
-| `blog-server` (workspace root, `src/`) | Composition root + HTTP delivery. Wires concrete adapters to ports, starts Actix, hosts every HTTP handler. | `blog-core`, `blog-storage`, `blog-views` |
+| `blog-server` | Composition root + HTTP delivery. Wires concrete adapters to ports, starts Actix, hosts every HTTP handler. | `blog-core`, `blog-storage`, `blog-views` |
 | `blog-core` | Use-case logic: post/category/auth workflows, pagination rules. Mechanism-agnostic — no HTTP, no SQL. | `blog-storage` (domain types + ports only) |
 | `blog-storage` | Domain types, repository ports, and the only two implementations of them (Postgres, SQLite), gated by Cargo features. Owns migrations. | *(leaf crate)* |
 | `blog-views` | Bundles Handlebars templates and static assets; exposes `register()` and a runtime-overridable root path. | *(leaf crate)* |
@@ -157,12 +157,12 @@ milliseconds — see [Testing strategy](#testing-strategy).
 
 ## Composition root
 
-`src/main.rs` (the `blog-server` binary) is the one place the abstraction is resolved: it reads
+`blog-server/src/main.rs` (the `blog-server` binary) is the one place the abstraction is resolved: it reads
 configuration, connects to whichever backend was compiled in, and constructs the concrete
 `AppState`:
 
 ```rust
-// src/adapters/http/state.rs (abridged)
+// blog-server/src/adapters/http/state.rs (abridged)
 #[cfg(feature = "postgres")]
 use blog_storage::postgres::{PgCategoryRepository as Categories, PgPostRepository as Posts, ...};
 #[cfg(feature = "sqlite")]
@@ -216,8 +216,8 @@ sequenceDiagram
     Core-->>API: Result<()>
 ```
 
-Both the HTML form handler ([`posts_admin.rs::new_post`](src/adapters/http/posts_admin.rs)) and the
-JSON API handler ([`api/posts.rs::create`](src/adapters/http/api/posts.rs)) perform the same login
+Both the HTML form handler ([`posts_admin.rs::new_post`](blog-server/src/adapters/http/posts_admin.rs)) and the
+JSON API handler ([`api/posts.rs::create`](blog-server/src/adapters/http/api/posts.rs)) perform the same login
 check (`require_login`) and the same form/body validation, then call the identical `blog-core`
 function. `blog-cli`'s `post create` subcommand is one more hop upstream of the JSON path — it
 goes through `blog-client`, which just wraps the `/api/v1/posts` HTTP call.
@@ -302,21 +302,21 @@ unconditionally on every process start, including every container restart.
 
 Sessions are cookie-based via `actix-identity` + `actix-session`, with an in-memory-signed cookie
 store (`CookieSessionStore`) — no server-side session table. `Identity::login(...)` on successful
-authentication ([`auth.rs::login`](src/adapters/http/auth.rs)) sets the cookie; every subsequent
+authentication ([`auth.rs::login`](blog-server/src/adapters/http/auth.rs)) sets the cookie; every subsequent
 request extracts an `Option<Identity>` to determine whether a caller is authenticated.
 
 Both the HTML admin surface and the JSON API enforce login the same way — a guard function checked
 at the top of every mutating or admin-only handler:
 
 ```rust
-// src/adapters/http/auth_guard.rs
+// blog-server/src/adapters/http/auth_guard.rs
 pub fn require_login(user: &Option<Identity>) -> Option<HttpResponse> {
     if user.is_some() { return None; }
     Some(HttpResponse::SeeOther().insert_header((LOCATION, "/")).body(""))
 }
 ```
 
-The JSON API's equivalent ([`api/mod.rs::require_login`](src/adapters/http/api/mod.rs)) returns a
+The JSON API's equivalent ([`api/mod.rs::require_login`](blog-server/src/adapters/http/api/mod.rs)) returns a
 `401` JSON body instead of a redirect — same guarantee, shaped for its caller.
 
 The session cookie's `Secure` flag is on by default and only disabled under the
@@ -342,7 +342,7 @@ Each library crate defines its own error type via `thiserror` instead of returni
 | `blog-views` | `ViewsError` | `Box<handlebars::TemplateError>` (boxed — `clippy::result_large_err`) |
 | `blog-client` | `ClientError` | Distinguishes `NotAuthenticated` / `InvalidCredentials` / `NotFound` / network / generic API errors — see [`blog-client/src/error.rs`](blog-client/src/error.rs) |
 
-`anyhow` is kept only at the two composition roots — `blog-server`'s [`src/main.rs`](src/main.rs)
+`anyhow` is kept only at the two composition roots — `blog-server`'s [`src/main.rs`](blog-server/src/main.rs)
 and `blog-cli`'s [`blog-cli/src/main.rs`](blog-cli/src/main.rs). This follows the conventional
 Rust split: `thiserror` for libraries whose callers might want to match on *why* something failed,
 `anyhow` for binaries whose `main` just needs to print an error and exit. It works without any
@@ -352,7 +352,7 @@ glue code because `anyhow::Error` has a blanket `impl<E: std::error::Error> From
 The HTTP adapter layer required **no changes** to support this design:
 `actix_web::error::ErrorInternalServerError` is generic over any `Debug + Display` error, not
 `anyhow` specifically, so `.map_err(actix_web::error::ErrorInternalServerError)?` continued to
-compile unchanged across every one of the ~60 call sites in `src/adapters/http/`.
+compile unchanged across every one of the ~60 call sites in `blog-server/src/adapters/http/`.
 
 ## Testing strategy
 
@@ -434,12 +434,12 @@ sufficient to get a fully migrated, running stack.
 Documented deliberately rather than silently — these are known trade-offs or gaps, not hidden
 surprises:
 
-- **Passwords are encrypted, not hashed.** `MagicCryptCipher` ([`adapters/crypto/mod.rs`](src/adapters/crypto/mod.rs))
+- **Passwords are encrypted, not hashed.** `MagicCryptCipher` ([`adapters/crypto/mod.rs`](blog-server/src/adapters/crypto/mod.rs))
   uses `magic-crypt`, which is *reversible* symmetric encryption, not a one-way password hash. If
   `MAGIC_KEY` is ever exposed, every stored password is trivially recoverable in plaintext, and the
   scheme lacks the deliberate slowness (bcrypt/argon2) that defends a stolen database against
   brute-forcing. This is the most significant open item in the system.
-- **`RUST_LOG` is hardcoded** in [`src/main.rs`](src/main.rs) via `std::env::set_var("RUST_LOG",
+- **`RUST_LOG` is hardcoded** in [`src/main.rs`](blog-server/src/main.rs) via `std::env::set_var("RUST_LOG",
   "debug")`, unconditionally overriding whatever the operator sets — `docker-compose.yml`'s
   `RUST_LOG: info` is currently inert as a result.
 - **`0` as a sentinel for "no category"** is threaded through `NewPost.category_id`, the wire

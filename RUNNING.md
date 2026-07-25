@@ -137,7 +137,7 @@ producing exactly the confusing `unable to open database file` error you get fro
 `sqlite` feature against a leftover `postgres://...` URL, or the reverse).
 
 Environment variables set on the command line always win over `.env`: the `dotenv` crate
-([`src/main.rs`](src/main.rs)'s `dotenv::dotenv()` call) only fills in variables that aren't
+([`src/main.rs`](blog-server/src/main.rs)'s `dotenv::dotenv()` call) only fills in variables that aren't
 already set — it never overrides one that's already present in the process environment. So you
 can pass `DATABASE_URL`/`MAGIC_KEY` inline and leave `.env` alone entirely (confirmed directly: an
 inline `DATABASE_URL=postgres://...` reliably takes effect over `.env`'s SQLite value once

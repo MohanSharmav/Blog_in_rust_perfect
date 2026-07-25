@@ -136,7 +136,7 @@ classDiagram
 `InMemoryPostRepository`/`InMemoryCategoryRepository`/`InMemoryUserRepository`
 ([`blog-core/src/test_fakes.rs`](blog-core/src/test_fakes.rs)) are a third implementation of the
 same three traits, `#[cfg(test)]`-gated — they never exist in a release build. `AppState`
-([`src/adapters/http/state.rs`](src/adapters/http/state.rs)) is where the abstraction actually
+([`src/adapters/http/state.rs`](blog-server/src/adapters/http/state.rs)) is where the abstraction actually
 resolves: `Posts`/`Categories`/`Users` are type aliases pointing at either the `Pg*` or `Sqlite*`
 struct depending on which Cargo feature was compiled in, never an enum over both.
 
@@ -177,7 +177,7 @@ classDiagram
 
 `StorageError`, `ViewsError`, and `ClientError` are otherwise independent — they belong to crates
 that don't depend on each other (`blog-storage`, `blog-views`, `blog-client`). `anyhow::Error`, used
-only in `src/main.rs` and `blog-cli/src/main.rs`, isn't pictured here — it's a catch-all at the two
+only in `blog-server/src/main.rs` and `blog-cli/src/main.rs`, isn't pictured here — it's a catch-all at the two
 binaries' entry points, not a type any of these four ever construct or match on.
 
 ## Client-side wire types

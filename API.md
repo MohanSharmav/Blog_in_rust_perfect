@@ -30,9 +30,9 @@ and callable at:
 - **Raw OpenAPI 3.0 document**: `http://127.0.0.1:8080/api-docs/openapi.json`
 
 The spec is generated from the same `#[utoipa::path(...)]` annotations on the actual handler
-functions in [src/adapters/http/api/](src/adapters/http/api/) — it can't drift out of sync with
+functions in [src/adapters/http/api/](blog-server/src/adapters/http/api/) — it can't drift out of sync with
 the code the way a hand-maintained spec can. The schema types themselves live in
-[src/adapters/http/api/openapi.rs](src/adapters/http/api/openapi.rs), defined independently of
+[src/adapters/http/api/openapi.rs](blog-server/src/adapters/http/api/openapi.rs), defined independently of
 `blog-storage`'s domain types for the same reason `blog-client`'s wire types are (see
 [ARCHITECTURE.md § The port pattern](ARCHITECTURE.md#the-port-pattern)) — this also keeps
 `utoipa` out of `blog-core`/`blog-storage` entirely.
@@ -170,7 +170,7 @@ struct Page<T> {
 ```
 
 These are defined independently in [`blog-client/src/types.rs`](blog-client/src/types.rs) (the
-client's view) and `blog-storage`/`src/adapters/http/api` (the server's) — the JSON payload is the
+client's view) and `blog-server`/[`src/adapters/http/api`](blog-server/src/adapters/http/api) (the server's) — the JSON payload is the
 actual contract, not a shared Rust type. See
 [ARCHITECTURE.md § Known limitations](ARCHITECTURE.md#known-limitations--technical-debt) re: this
 being one of three near-duplicate pagination type definitions in the codebase.
